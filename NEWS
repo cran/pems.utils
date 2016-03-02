@@ -1,0 +1,202 @@
+Changes in pems.utils 0.2.17 [2016-02-02]
+========================================
+
+*       redrafted title and description 
+        (tidy re pems.utils2CRAN)
+*       changed calcEmHoribaPitot formals 
+        (catch check note; re pems.utils2CRAN)
+*       documentation tidy re pems.utils2CRAN
+*       pemsPlot zlab tidy re pems.utils2CRAN
+*       added up-front code (in calcEm, to 
+        catch check note on data object object
+        names; re pems.utils2CRAN 
+
+
+Changes in pems.utils 0.2.16 [2015-12-28]
+========================================
+
+*       added plyr to imports
+*       added align and tAlign functions 
+*       updated cAlign function
+*       removed bindPEMS (superceded by 
+        align and new cAlign)
+*       update to WatsonPlot, revised 
+        argument order in formals
+*       added and documented 
+        panel.WatsonSmoothContourPlot
+
+
+Changes in pems.utils 0.2.15 [2015-09-18]
+========================================
+
+*       moved latticeExtra to imports
+*       added with.pems method 
+*       updated makePEMS, now accepts 
+        vector, pems.element, etc
+*       update to pemsPlot, grid now added 
+        by default 
+*       added pems[[]]<- as quick reset 
+        for object structure
+*       added subset.pems method
+*       update to print.pems
+*       added is.pems, pems, pems.element; 
+        these replace isPEMS, makePEMS, 
+        makePEMSElement (retained as wrappers)
+*       added as.pems methods (default, 
+        data.frame)
+
+
+Changes in pems.utils 0.2.14 [2015-08-18]
+========================================
+
+*       added importCAGE2PEMS function, 
+        loads 3DATX CAGE data as pems 
+        object
+*       updated importParSYNC2PEMS, now 
+        defaults to local time zone 
+*       updated print.pems.element and 
+        plot.pems.element, labelling now 
+        ignores "" units 
+*       added fortify.pems method to 
+        simplfy use ggplot2 functions 
+        with pems objects; also added
+        ggplot2:fortify.defaults to 
+        imports
+*       moved utils, grid, RColorBrewer 
+        from depends to imports
+*       added dim.pems ncol.pms and 
+        nrow.pems method
+*       added pems[[]] as quick access 
+        to object structure
+
+
+Changes in pems.utils 0.2.13 [2015-08-06]
+========================================
+
+*       updated checkInput, improved 
+        handling of POSIXct class 
+        pems.elements 
+        
+
+Changes in pems.utils 0.2.12 [2015-07-29]
+========================================
+
+*       modified importParSYNC2PEMS 
+        function. The more general arg
+        reset.signals replaces previous 
+        reset.opacity
+
+
+Changes in pems.utils 0.2.11 [2015-04-13]
+========================================
+
+*       added summary.pems.element method
+
+
+Changes in pems.utils 0.2.10 [2015-03-14]
+========================================
+
+*       added importParSYNC2PEMS function
+*       updated cutBy error message
+ 
+
+Changes in pems.utils 0.2.9 [2015-01-23]
+========================================
+
+*       updated citation, now uses meta$ 
+        (thanks to Achim Zeileis of JSS) 
+*       refined head.pems and tail.pems
+*       changed print.pems defaults (thanks to 
+        Stephen Hanley of ITS)
+*       refined pems[], now allows more forcing 
+        options
+*       simplified pems$name and pems$name <- 
+        further, so they now behave more like 
+        data.frame$name 
+*       refined pems[]<-, extended forcing options 
+*       added units(pems)<-  and names(pems) <- 
+        methods
+*       added units(pems.element)<- method 
+         
+
+Changes in pems.utils 0.2.8 [2014-04-30]
+========================================
+
+*       simplified pems[,n] and pems$n code
+*       added [n], units pems.element methods
+*       added utils to depends (for head.default 
+        and tail.default access)
+*       added head and tail pems methods
+*       added makePEMSElement (makePEMS
+        equivalent)
+*       added the WatsonPlot functions used in 
+        CRC and PEMS 2014 work 
+*       updated pems default col scheme to match scheme 
+        used in CRC and PEMS 2014 work
+*       calcChecks code update 
+
+
+Changes in pems.utils 0.2.7 [2014-02-17]
+========================================
+
+*       added pems.scheme, default pems 
+        plotting scheme
+*       convertUnits update, force now 
+        forces to from unit conversion 
+        if input units are either not 
+        set or do not match from
+*       added pemsPlot function to package
+        (preprocess, panel and plot 
+        using loa)
+        
+
+Changes in pems.utils 0.2.6 [2013-09-26]
+========================================
+
+*       added as.data.frame.pems 
+
+
+Changes in pems.utils 0.2.5 [2013-08-11]
+========================================
+
+*       updated ref.unit.conversions 
+*       added correction functions
+        (correctInput, zeroNegatives)
+*       added importOB12PEMS function
+        (imports OB1 format files)
+
+
+Changes in pems.utils 0.2.4 [2013-08-08]
+========================================
+
+*       refined history tracking for 
+        functions in functions
+
+
+Changes in pems.utils 0.2.3 [2013-06-20]
+========================================
+
+*       refined pems object case
+*       added pems.element object case  
+*       added pems... shortcut functions
+*       reintroduced calcEm
+
+
+Changes in pems.utils 0.2.2 [2013-01-10]
+========================================
+
+*       added pems object case  
+
+
+Changes in pems.utils 0.2.1 [2012-06-15]
+========================================
+
+*       refined pems structure
+        (to simiplify batch processing)  
+
+
+Changes in pems.utils 0.1.12 [2012-01-10]
+========================================
+
+*       pems => pems.utils update
+        [earlier versions documented elsewhere]
