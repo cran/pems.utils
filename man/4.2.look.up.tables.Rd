@@ -1,5 +1,5 @@
-\name{3.2.look-up.tables}
-\alias{3.2.look-up.tables}
+\name{4.2.look-up.tables}
+\alias{4.2.look-up.tables}
 \alias{look-up.tables}
 \alias{ref.unit.conversions}
 \alias{ref.chem}
@@ -61,9 +61,9 @@
   \code{\link{addUnitConversion}}, etc.
 }
 
-\source{
-  TO BE COMPLETED
-}
+%\source{
+%  TO BE COMPLETED
+%}
 
 %\references{
 %%  ~~ possibly secondary sources and usages ~~

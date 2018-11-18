@@ -1,5 +1,5 @@
-\name{2.4.pems.plots}
-\alias{2.4.pems.plots}
+\name{3.3.pems.plots}
+\alias{3.3.pems.plots}
 \alias{pems.plots}
 \alias{latticePlot}
 \alias{panel.PEMSXYPlot}
@@ -13,6 +13,9 @@
 \alias{panel.WatsonBinPlot}
 \alias{panel.WatsonContourPlot}
 \alias{panel.WatsonSmoothContourPlot}
+
+\alias{fortify.pems}
+\alias{fortify}
 
 
 \title{
@@ -36,8 +39,7 @@ pemsPlot(x, y = NULL, z = NULL, ..., data = NULL, cond = NULL,
 #pemsPlot elements
 
 pemsXYZCondUnitsHandler(x, y = NULL, z = NULL, cond = NULL, 
-         data = NULL, units = TRUE, ..., fun.name = "pemsXYZCondHandler", 
-         hijack= FALSE)
+         data = NULL, units = TRUE, ..., fun.name = "pemsXYZCondHandler")
 
 preprocess.pemsPlot(lattice.like = lattice.like, units = units, ...)
 
@@ -45,8 +47,9 @@ panel.pemsPlot(..., loa.settings = FALSE)
 
 #WatsonPlot
 
-WatsonPlot(speed, accel = NULL, z = NULL, cond = NULL, ..., data = NULL, 
-         plot.type=2, fun.name = "WatsonPlot", scheme = pems.scheme)
+WatsonPlot(speed, accel = NULL, z = NULL, ..., data = NULL, 
+         cond = NULL, units = TRUE, plot.type = 2, fun.name="WatsonPlot",
+         scheme = pems.scheme)
 
 #WatsonPlot elements
 
@@ -61,20 +64,24 @@ panel.WatsonContourPlot(..., plot.panel=panel.kernelDensity, process = TRUE,
 
 panel.WatsonSmoothContourPlot(..., plot.panel=panel.surfaceSmooth,          
          process = TRUE, plot = TRUE, loa.settings = FALSE)
+ 
+
+#ggplot2 (tidyverse)
+
+\method{fortify}{pems}(model, data, ...)
 
 
 
 #old plots
 
 latticePlot(x = NULL, data = NULL, plot = xyplot, panel = NULL, 
-          ..., greyscale = FALSE, fun.name = "latticePlot", 
-          hijack = FALSE)
+          ..., greyscale = FALSE, fun.name = "latticePlot")
 
 panel.PEMSXYPlot(..., grid=NULL)
 
 XYZPlot(x = NULL, ..., data = NULL, statistic = NULL, 
           x.res = 10, y.res = 20, plot = levelplot,
-          fun.name = "XYZPlot", hijack = FALSE)
+          fun.name = "XYZPlot")
 
 }
 
@@ -90,11 +97,10 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
   for a surface plot. \code{cond} is a conditioning terms that can be used to 
   subset the supplied data and generate multiple plot panels. See Note Below.
 
-  For new plots, these can be supplied either individually or as a formula, e.g. 
+  For new plots, these should be supplied individually, e.g. 
   for \code{pemsPlot}:
 
-  \code{pemsPlot(x, y, z, cond)} or \cr
-  \code{pemsPlot(z~x*y|cond)}
+  \code{pemsPlot(x, y, z, cond)} 
 
   For old plots, these must be formulae.         
 
@@ -108,8 +114,9 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
 } 
 
   \item{data}{
-  (Optional \code{data.frame} or \code{pems} object) The data source elements in \code{x} 
-  if not the current environment or a parent.
+  (Optional \code{data.frame} or \code{pems} object) For most plots, the data source 
+  for plot elements, e.g \code{x}, \code{y}, \code{z}, etc, if not the current environment 
+  or a parent.
 } 
 
   \item{units}{
@@ -126,8 +133,8 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
   (Optional) Other arguments, typically passed on.
   }
 
-  \item{fun.name, hijack}{
-  (Various) \code{pems.utils} management settings, can typically be ignored by most users.
+  \item{fun.name}{
+  (Function management argument) \code{pems.utils} management settings, can typically be ignored by most users.
   }
 
   \item{panel, plot.panel, process.panel}{
@@ -149,8 +156,7 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
 
   \item{speed, accel}{
   (Various) For \code{WatsonPlot}. The \code{x} and \code{y} terms, speed and acceleration, 
-  respectively, for a Watson plot. As with \code{x} above, the first term can be either the 
-  \code{x} data-series, or a plot formula in form \code{z~x*y|cond}.
+  respectively, for a Watson plot. 
   }
 
   \item{ref.line}{
@@ -175,7 +181,7 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
   (Logical) For older plots. Should the plot be greyscale by default? This option resets 
   the \code{lattice} color themes to greyscale while the plot is beging generated. So: (1) 
   This only effects the plot itself, not subsequent plots; and, (2) any user resets overwrite 
-  this, e.g. \code{latticePlot(..., greyscale=TRUE, col="red"} will place red symbols on an 
+  this, e.g. \code{latticePlot(..., greyscale=TRUE, col="red")} will place red symbols on an 
   overwise greyscale plot. Newer plots use the alternative \code{plot(..., scheme = "greyscale")}.
 }
 
@@ -189,6 +195,11 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
    evaluating the elements of each data bin. By default, \code{length} is used if \code{z} is 
    not supplied to generate a frequency plot and \code{mean} is used if \code{z} is supplied to 
    generate a bin average plot. 
+}
+
+  \item{model}{
+  (pems.object) The pems object to be used as a data source when plotting using ggplot2 code. See 
+  below.
 }
 
   \item{x.res, y.res}{
@@ -229,6 +240,12 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
   plotting framework.    
 
   See Notes and Examples. 
+
+  The \code{fortify} method was developed by Hadley Wickham to simplify the integration 
+  of \code{ggplot2} functions and special object classes. It is a really nice idea for 
+  multiple reasons, the main one being that package users will probably never have to 
+  worry about it. However, having it means you can use a \code{pems} object directly 
+  as the data argument with \code{ggplot2} code.  
  
 }
 
@@ -244,6 +261,9 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
    
   \code{latticePlot} and \code{XYZPlot} are general purpose 'xy' and 'xyz' data 
   plotting functions.  
+
+  \code{fortify} is intended for used with ggplot2 code when both pems.utils and 
+  ggplot2 are loaded.
 
 }
 
@@ -264,6 +284,13 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
   Others, like \code{ggplot2} and \code{iplot}, help you to very 
   quickly explore your data. But, for me the trellis framework of \code{\link{lattice}} 
   has always been the most flexible.
+
+  ggplot2:
+
+  H. Wickham. ggplot2: elegant graphics for data analysis. Springer New
+  York, 2009. 
+
+  (See Chapter 9, section 9.3, pages 169-175, for discussion of fortify.)
 
 }
 \author{
@@ -325,6 +352,9 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
 
   \code{XYZPlot} is a short-term replace for previous function \code{quickPlot}. It will most likely 
   be replaced when \code{pems.utils.0.3} is released.
+
+
+  \code{pemsPlot} and \code{WatsonPlot} no longer accept formula \code{x}, \code{y}, \code{z} inputs. 
   
   With all these functions I have tried to make the default plotting options as robust as possible. 
   However, it is not always possible to test all the plot combines that users might try. So, please 
@@ -342,26 +372,27 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
 ##example 1
 ###########
 
+\dontrun{
 #plotting pems with other packages
 
 #base 
-##plot(pems.1)
-##plot(pems.1$velocity)
+plot(pems.1)
+plot(pems.1$velocity)
 
-##in lattice, xyplot(velocity~local.time, data = pemsData(pems.1), type = "l")
-#Note: to use lattice functions directly with pems objects
-#      just pass data component with data = pemsData(pems) 
-#      (NOT data = pems)
-#Note: See also latticePlot as an alternative to data = pemsData(pems) 
+#lattice 
+xyplot(velocity~local.time, data = pems.1, type = "l")
 
 #in ggplot2
 
 #Note: Suggests only so you need to load this...
-##require(ggplot2)
-##qplot(time.stamp, velocity, data=pems.1)
-##ggplot(pems.1, aes(x = time.stamp, y = velocity)) + geom_line() 
+#Note: this uses fortify.pems
+
+require(ggplot2)
+qplot(time.stamp, velocity, data=pems.1)
+ggplot(pems.1, aes(x = time.stamp, y = velocity)) + geom_line() 
 #etc
 
+}
 
 ###########
 ##example 2 
@@ -374,7 +405,6 @@ latticePlot(velocity~local.time, data = pems.1, type = "l")
 latticePlot(velocity~local.time, data = pems.1, col = "red", 
             pch = 20, panel = panel.PEMSXYPlot, 
             grid = list(col ="black", lty=2))
-
 
 ###########
 ##example 3 
@@ -395,13 +425,7 @@ XYZPlot(~accel*velocity, data=a, plot = wireframe, shade=TRUE)
 
 #basic usage of pemsPlot
 
-#like latticePlot example above 
-pemsPlot(~local.time*velocity, data=pems.1, type="l")
-
-#note formula format z~x*y, with z ignored for standard scatter plot
-
-#or in conventional plot(x, y, ...) format
-#pemsPlot(local.time, velocity, data=pems.1, type="l")
+pemsPlot(local.time, velocity, data=pems.1, type="l")
 
 
 ###########
@@ -410,19 +434,20 @@ pemsPlot(~local.time*velocity, data=pems.1, type="l")
 
 #basic usage of WatsonPlot
 
-#use object generated in example 3 
+#Note: using 'a' generated in example 3 
 WatsonPlot(velocity, accel, data=a)
 
+\dontrun{
 #omit.stopped for different handling of idling data
-##WatsonPlot(velocity, accel, data=a, omit.stopped="points")
-##WatsonPlot(velocity, accel, data=a, omit.stopped="cells")
+WatsonPlot(velocity, accel, data=a, omit.stopped="points")
+WatsonPlot(velocity, accel, data=a, omit.stopped="cells")
 
 #plot.type for different plot methods
-##WatsonPlot(velocity, accel, data=a, plot.type=1)
-##WatsonPlot(velocity, accel, data=a, plot.type=2)
-##WatsonPlot(velocity, accel, data=a, plot.type=3)
-##WatsonPlot(velocity, accel, data=a, plot.type=4)
-
+WatsonPlot(velocity, accel, data=a, plot.type=1)
+WatsonPlot(velocity, accel, data=a, plot.type=2)
+WatsonPlot(velocity, accel, data=a, plot.type=3)
+WatsonPlot(velocity, accel, data=a, plot.type=4)
+}
 
 }
 

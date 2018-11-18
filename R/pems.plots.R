@@ -4,6 +4,8 @@
 ##########################
 ##########################
 
+#this uses checkInput
+
 #kr
 
 #description
@@ -17,7 +19,7 @@
 #(plot, preprocess, panel)
 #WatsonPlot
 #(plot, preprocess, panels for different plot.types)
-#fortify.pems to work with ggplot2
+
 #
 
 #old plots
@@ -63,7 +65,8 @@ pemsPlot <- function(x, y = NULL, z = NULL, ..., data = NULL,
     #standardise formula or x,y,z,cond input as formula
     #and grab units
     extra.args$units <- listLoad(listUpdate(extra.args, list(load="units")))
-    extra.args <- pemsXYZCondUnitsHandler(x, y, z, cond, data = data,
+    extra.args <- pemsXYZCondUnitsHandler(!!enquo(x), !!enquo(y), !!enquo(z), 
+                              !!enquo(cond), data = data,
                               units = units, settings = settings, ...)
 
     extra.args <- listUpdate(extra.args, list(panel = panel, scheme = scheme, 
@@ -79,7 +82,7 @@ pemsPlot <- function(x, y = NULL, z = NULL, ..., data = NULL,
 ##############################
 
 pemsXYZCondUnitsHandler <- function(x, y = NULL, z = NULL, cond = NULL, data = NULL, units = TRUE, 
-         ..., fun.name = "pemsXYZCondHandler", hijack= FALSE){
+         ..., fun.name = "pemsXYZCondHandler"){
 
 #think about error messaging and 
 #visible message sources
@@ -101,9 +104,15 @@ pemsXYZCondUnitsHandler <- function(x, y = NULL, z = NULL, cond = NULL, data = N
     extra.args$units <- listUpdate(list(add.to.labels=TRUE), extra.args$units)
     extra.args$units$units <- if(isGood4LOA(units)) TRUE else FALSE
 
-    temp <- if(hijack) x else 
-                checkInput(x, data=data, if.missing="return")
-    if(as.character(temp)[1]=="~"){
+###########################
+#rlang update
+#    temp <- if(hijack) x else 
+#                checkInput(x, data=data, if.missing="return")
+############################
+    temp <- getPEMSElement(!!enquo(x), data, fun.name=fun.name,
+                            if.missing = "return")
+
+    if(!is.na(as.character(temp[1])) && as.character(temp)[1]=="~"){
         #this is a formula
         is.formula <- TRUE
     } else {
@@ -129,14 +138,23 @@ pemsXYZCondUnitsHandler <- function(x, y = NULL, z = NULL, cond = NULL, data = N
     #if formula you cant get to here
     #so this is none formula handling
 
-    if(!hijack){   
-        y <- checkInput(y, data=data, if.missing="return")
-        z <- checkInput(z, data=data, if.missing="return")
-        cond <- checkInput(cond, data=data, if.missing="return")
-    }
+    y <- getPEMSElement(!!enquo(y), data, fun.name=fun.name,
+                        if.missing = "return")
+    z <- getPEMSElement(!!enquo(z), data, fun.name=fun.name,
+                        if.missing = "return")
+    cond <- getPEMSElement(!!enquo(cond), data, fun.name=fun.name,
+                           if.missing = "return")
+################################
+#as of pemsGetElement update
+#    if(!hijack){   
+#        y <- checkInput(y, data=data, if.missing="return")
+#        z <- checkInput(z, data=data, if.missing="return")
+#        cond <- checkInput(cond, data=data, if.missing="return")
+#    }
+################################
 
     #this bit is for index case, like plot(x)
-        if(is.null(y)){
+    if(is.null(y)){
         y <- x
         x <- 1:length(x)
         attr(x, "name") <- "Index"
@@ -147,12 +165,12 @@ pemsXYZCondUnitsHandler <- function(x, y = NULL, z = NULL, cond = NULL, data = N
 
     if(is.null(x))
         checkIfMissing(settings$if.missing, reply = "argument 'x' not supplied or null")
-    extra.args$units$x.units <- getUnits(x, if.missing="return", unit.conversions = settings$unit.conversions, hijack = TRUE)
+    extra.args$units$x.units <- getUnits(x, if.missing="return", unit.conversions = settings$unit.conversions)
     if(is.null(y))
         checkIfMissing(settings$if.missing, reply = "argument 'y' not supplied or null")
-    extra.args$units$y.units <- getUnits(y, if.missing="return", unit.conversions = settings$unit.conversions, hijack = TRUE)
+    extra.args$units$y.units <- getUnits(y, if.missing="return", unit.conversions = settings$unit.conversions)
     if(!is.null(z))
-        extra.args$units$z.units <- getUnits(z, if.missing="return", unit.conversions = settings$unit.conversions, hijack = TRUE)
+        extra.args$units$z.units <- getUnits(z, if.missing="return", unit.conversions = settings$unit.conversions)
 
     if(is.null(z) & is.null(cond)) extra.args$x <- ~x*y
     if(is.null(z) & !is.null(cond)) extra.args$x <- ~x*y|cond
@@ -214,21 +232,21 @@ preprocess.pemsPlot <- function(lattice.like=lattice.like, units=units,...){
                 from <- if("x.from" %in% names(extra.args)) extra.args$x.from else units$x.units     
                 lattice.like$x <- convertUnits(lattice.like$x, to=extra.args$x.to, from=from, 
                                                unit.conversions = settings$unit.conversions, 
-                                               hijack=TRUE, force=TRUE)
+                                               force=TRUE)
                 units$x.units <- extra.args$x.to
             }
             if("y.to" %in% names(extra.args)){
                 from <- if("y.from" %in% names(extra.args)) extra.args$y.from else units$y.units     
                 lattice.like$y <- convertUnits(lattice.like$y, to=extra.args$y.to, from=from, 
                                                unit.conversions = settings$unit.conversions,
-                                               hijack=TRUE, force=TRUE)
+                                               force=TRUE)
                 units$y.units <- extra.args$y.to
             }
             if("z.to" %in% names(extra.args)){
                 from <- if("z.from" %in% names(extra.args)) extra.args$z.from else units$z.units     
                 lattice.like$z <- convertUnits(lattice.like$z, to=extra.args$z.to, from=from, 
                                                unit.conversions = settings$unit.conversions,
-                                               hijack=TRUE, force=TRUE)
+                                               force=TRUE)
                 units$z.units <- extra.args$z.to
             }
 
@@ -322,17 +340,22 @@ panel.pemsPlot <- function(..., loa.settings = FALSE){
 #maybe use bin then surfacesmooth for contour plot version
 
 
-WatsonPlot <- function (speed, accel = NULL, z = NULL, cond = NULL, ..., data = NULL, 
-    plot.type=2, fun.name = "WatsonPlot", scheme = pems.scheme) 
-{
-    extra.args <- listUpdate(list(units = TRUE), 
-                             list(...))
-    settings <- calcChecks(fun.name, ..., data = data)
-    #extra.args <- listLoad(listUpdate(extra.args, list(load = "units")))
-    extra.args <- pemsXYZCondUnitsHandler(speed, accel, z, cond, data = data, 
-        settings = settings, ...)
+WatsonPlot <- function(speed, accel = NULL, z = NULL, ..., data = NULL, 
+         cond = NULL, units = TRUE, plot.type = 2, fun.name="WatsonPlot",
+         scheme = pems.scheme){
 
-    #panel reset
+    #passes settings on to convert units
+
+    #setup
+    extra.args <- list(...)
+    settings <- calcChecks(fun.name, ..., data = data)
+
+    #standardise formula or x,y,z,cond input as formula
+    #and grab units
+    extra.args$units <- listLoad(listUpdate(extra.args, list(load="units")))
+    extra.args <- pemsXYZCondUnitsHandler(!!enquo(speed), !!enquo(accel), !!enquo(z), 
+                              !!enquo(cond), data = data,
+                              units = units, settings = settings, ...)
     if(!"panel" %in% names(extra.args)){
         if(plot.type==1) extra.args$panel <- panel.pemsPlot
         if(plot.type==2) extra.args$panel <- panel.WatsonBinPlot
@@ -344,12 +367,12 @@ WatsonPlot <- function (speed, accel = NULL, z = NULL, cond = NULL, ..., data = 
                 call.=FALSE)
         extra.args$panel <- panel.pemsPlot
     }
+    extra.args <- listUpdate(extra.args, list(scheme = scheme, 
+                                              data = data))
 
-    extra.args <- listUpdate(extra.args, list(data = data, scheme =scheme))
     do.call(loaPlot, extra.args)
+
 }
-
-
 
 
 
@@ -590,7 +613,7 @@ panel.WatsonSmoothContourPlot <- function(..., plot.panel=panel.surfaceSmooth,
     if(loa.settings){
         temp <- loaHandler(panel.WatsonBinPlot)
         temp$default.settings <- listUpdate(temp$default.settings, 
-                                            list(#key.fun=draw.loaColorRegionsKey, 
+                                            list(key.raster = TRUE,  
                                                  contour = TRUE, regions = TRUE,
                                                  alpha.regions = 0.5))
         return(temp)
@@ -663,36 +686,6 @@ panel.WatsonSmoothContourPlot <- function(..., plot.panel=panel.surfaceSmooth,
 
 
 
-###########################
-###########################
-##fortify.pems
-###########################
-###########################
-
-####################
-#fortify.pems
-####################
-
-#kr 13/08/2015
-#version 0.0.1
-
-#what it does
-###########################################
-#allows users to work directly with ggplot2
-
-
-#to do
-############################
-#decide if we are keeping it
-
-#if keeping it 
-
-#like to
-#########################################
-#would like to pass pems units to ggplot2 
-#via fortify
-
-fortify.pems <- function (model, data, ...) as.data.frame(model)
 
 
 
@@ -743,7 +736,7 @@ fortify.pems <- function (model, data, ...) as.data.frame(model)
 
 
 latticePlot <- function(x = NULL, data = NULL, plot = xyplot, panel = NULL, ..., 
-                   greyscale = FALSE, fun.name = "latticePlot", hijack = FALSE){
+                   greyscale = FALSE, fun.name = "latticePlot"){
 
     this.call <- match.call()
     extra.args <- list(...)
@@ -884,7 +877,7 @@ panel.PEMSXYPlot <- function(..., grid=NULL){
 
 XYZPlot <- function(x = NULL, ..., data = NULL, statistic = NULL, 
                     x.res = 10, y.res = 20, plot = levelplot,
-                    fun.name = "XYZPlot", hijack = FALSE){
+                    fun.name = "XYZPlot"){
 
 
     ####################

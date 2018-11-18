@@ -70,9 +70,16 @@ importParSYNC2PEMS <- function(file.name = file.choose(), reset.signals = TRUE,
     extra.args <- extra.args[!names(extra.args) %in% "to.lower"]
 
     #set up import
-    extra.args <- listUpdate(list(header=TRUE), extra.args)
-    extra.args$file <- file.name
-    ans <- do.call(read.csv, extra.args)
+
+    if(is.data.frame(file.name)){
+        #if data.frame treat as already imported data
+        ans <- file.name
+    } else {
+        #read file in
+        extra.args <- listUpdate(list(header=TRUE), extra.args)
+        extra.args$file <- file.name
+        ans <- do.call(read.csv, extra.args)
+    }
 
     #reset time stamps
     temp <- ans[c("Timestamp", "Date", "Time")]
@@ -118,17 +125,30 @@ importParSYNC2PEMS <- function(file.name = file.choose(), reset.signals = TRUE,
 
     #create units
     units <- rep("", length(names(ans)))
-    units[grep("..V.", names(ans))] <- "V"
-    units[grep("..deg.C.", names(ans))] <- "degC"
+    units[grep("[.][.]V[.]", names(ans))] <- "V"
+    units[grep("[.][.]deg[.]C[.]", names(ans))] <- "degC"
+    units[grep("[.][.][.][.]", names(ans))] <- "%"
+    units[grep("[.][.]ppm[.]", names(ans))] <- "ppm"
     #old line
     #   units[1] <- "Y-M-D H:M:S GMT"
     units[1] <- "Y-M-D H:M:S"
     units[2] <- "s"
 
     #tidy names
-    names(ans) <- gsub("..V.", "", names(ans))
-    names(ans) <- gsub("..deg.C.", "", names(ans))
-    names(ans) <- gsub("Bag.", "Bag", names(ans))
+
+    #these currently need to go first
+    names(ans) <- gsub("NO2[.][.]V[.]", "NO2.raw", names(ans))
+    names(ans) <- gsub("NO2[.][.]ppm[.]", "NO2", names(ans))
+    names(ans) <- gsub("NO[.][.]V[.]", "NO.raw", names(ans))
+    names(ans) <- gsub("NO[.][.]ppm[.]", "NO", names(ans))
+    names(ans) <- gsub("CO2[.][.]V[.]", "CO2.raw", names(ans))
+    names(ans) <- gsub("CO2[.][.][.][.]", "CO2", names(ans))
+
+    names(ans) <- gsub("[.][.]V[.]", "", names(ans))
+    names(ans) <- gsub("[.][.]deg[.]C[.]", "", names(ans))
+    names(ans) <- gsub("Bag[.]", "Bag", names(ans))
+
+
 
 ###########################
 #special handling
@@ -156,10 +176,12 @@ importParSYNC2PEMS <- function(file.name = file.choose(), reset.signals = TRUE,
 
     #make pems
     output <- makePEMS(x = ans, units = units, constants = constants, history = history, pm.analyzer=pm.analyzer, ...)
- 
-    class(output) <- "not.pems"
-    output$history[length(output$history)] <- this.call 
-    class(output) <- "pems"
+
+#################
+#rediscarding history 
+#    class(output) <- "not.pems"
+#    output$history[length(output$history)] <- this.call 
+#    class(output) <- "pems"
    
     #return output
     return(output)

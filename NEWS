@@ -1,3 +1,152 @@
+Changes in pems.utils 0.2.26 [2018-11-18]
+========================================
+
+*       added repairLocalTime
+*       added regularize 
+*       added calcVSP_JimenezPalacios, 
+        as new calcVSP default 
+*       updated findLinearOffset, following 
+        cAlign update
+*       updated cAlign, now uses C_ylagxCOR  
+*       added C_ylagxCOR cpp code; for new 
+        cAlign function
+*       added Rccp as import; to handle cpp 
+        code
+
+
+Changes in pems.utils 0.2.25 [2018-08-15]
+========================================
+
+*       added na.omit.pems
+*       update to print.pems; halts print if 
+        units look suspect...
+*       added stackPEMS  
+*       removed checkInput, checkInput2, pemsElement, 
+        pemsin, pemsin2 and pemsin.old
+*       removed hijack argument from all 
+        functions
+*       added as.pems.pems.element 
+*       updated binVSP, added binVSP_NCSU.14 
+        and binVSP_MOVES.23 
+*       getPEMSConstants replaces pemsConstants,
+        getPEMSData replaces pemsData, 
+        getPEMSElement replaces pemsElement, now 
+        also all rlang/dplyr methods 
+*       removed test functions calc.accel, 
+        calc.dist, calc.new
+*       added (not exported) calcTemplate, 
+        pemsOutput  
+*       simplified calcDistance, calcSpeed, 
+        calcAccel, calcJerk
+*       pemsXYZCondUnitsHandler update, catch 
+        x[1]=NA mistmatch
+*       added MOVES.2004 model to binVSP 
+*       added calc.accel as in-testing 
+        alternative to calcAccel
+*       added binVSP function
+*	added pems method for pull 
+*       updated help, now uses \dontrun{} 
+*       updated print.pems.element, now 
+        foreshortens longer outputs
+*       rewrote import2PEMS
+*       update to local getUnits... code, 
+        user pre/suffix assignment 
+*       update to import2PEMS, added option 
+        to get units from row 2         
+*       removed history tracking from 
+        importSEMTECH2PEMS
+*       transferred pemsin from 
+        sleeper.service package
+*       transferred correctBaseline from
+        sleeper.service package; added 
+        basline package to imports
+*       cAlign update, now fitting from
+        align(data1, data2, middle)
+
+
+Changes in pems.utils 0.2.24 [2017-12-30]
+========================================
+
+*       exportPEMS2CSV update, suffix 
+        (units) not _units
+*       importParSYNC2PEMS now accepts 
+        data.frame as well as file path
+*       temp update of old structuring 
+        functions, pemsData, etc...
+*       rolled back pems generics for new 
+        pems structure
+*       started phasing out pems history 
+        tracking
+*       added rebuildPEMS to provide 
+        catch any old pems structures
+*       reset pems dplyr function outputs 
+        to new pems structure
+*       updated print.pems 
+*       reinstated pems.elements methods
+*       added ...join methods for pems objects
+        (left_join,)
+
+
+Changes in pems.utils 0.2.23 [2017-11-09]
+========================================
+
+*       replaced plyr with dplyr in imports 
+*       added select methods: .pems, _.pems 
+*       updated fortify.pems (simplifies 
+        object for ggplot2 use)
+*       added rename methods: .pems, _.pems
+*       added filter methods: .pems, _.pems 
+*       added arrange methods: .pems, _.pems
+*       added slice methods: .pems, _.pems 
+*       added mutate methods: .pems, _.pems 
+*       added rebuildPEMS (for version 0.3)
+*       added group_by methods: .pems, _.pems
+*       added summarise methods: .pems, _.pems
+
+
+Changes in pems.utils 0.2.22 [2017-07-21]
+========================================
+
+*       updated plot.pems.element re attr.name
+*       updated [.pems.element re attr.names 
+*       updated plot.pems.element
+*       updated to rforge
+*       rebuilt pems.1 example data (previous 
+        version not tracking new units)
+
+
+Changes in pems.utils 0.2.21 [2017-02-28]
+========================================
+
+*       added importSEMTECH2PEMS 
+*       updates pems[] 
+        (handle logical like data.frame) 
+
+
+Changes in pems.utils 0.2.20 [2016-11-18]
+========================================
+
+*       updated importParSYNC2PEMS 
+        (added gasMod channels)
+*       updated pems[i,j]<- object
+        (allows direct addition of POSIX*)
+*       added exportPEMS2CSV 
+
+
+Changes in pems.utils 0.2.19 [2016-04-03]
+========================================
+
+*       added 0pts scripts for globals and 
+        development code 
+
+
+Changes in pems.utils 0.2.18 [2016-03-07]
+========================================
+
+*       added importKML2PEMS  
+
+
+
 Changes in pems.utils 0.2.17 [2016-02-02]
 ========================================
 

@@ -4,6 +4,8 @@
 ##########################
 ##########################
 
+#this uses checkInput
+
 #kr
 
 #description
@@ -79,7 +81,7 @@
 summaryReport <- function(speed = NULL, time = NULL, accel = NULL,  
                     distance = NULL, data = NULL, ..., 
                     lod.speed = 0.1, lod.accel = 0.1,
-                    fun.name = "summaryReport", hijack= FALSE){
+                    fun.name = "summaryReport"){
   
     #setup
     this.call <- match.call()
@@ -90,12 +92,24 @@ summaryReport <- function(speed = NULL, time = NULL, accel = NULL,
 
     #get what there is 
 
-    if(!hijack){   
-        speed <- checkInput(speed, data=data, if.missing = "return")  
-        accel <- checkInput(accel, data=data, if.missing = "return")
-        time <- checkInput(time, data=data, if.missing = "return")
-        distance <- checkInput(distance, data=data, if.missing = "return")
-    }
+    speed <- getPEMSElement(!!enquo(speed), data, fun.name=fun.name,
+                        if.missing = "return", ref.name="speed")
+    accel <- getPEMSElement(!!enquo(accel), data, fun.name=fun.name,
+                        if.missing = "return", ref.name="accel")
+    time <- getPEMSElement(!!enquo(time), data, fun.name=fun.name,
+                        if.missing = "return", ref.name="time")
+    distance <- getPEMSElement(!!enquo(distance), data, fun.name=fun.name,
+                        if.missing = "return", ref.name="distance")
+
+###########################
+#as of pemsGetElement
+#    if(!hijack){   
+#        speed <- checkInput(speed, data=data, if.missing = "return")  
+#        accel <- checkInput(accel, data=data, if.missing = "return")
+#        time <- checkInput(time, data=data, if.missing = "return")
+#        distance <- checkInput(distance, data=data, if.missing = "return")
+#    }
+###########################
 
 #######################
 #suggestion 
@@ -141,7 +155,7 @@ summaryReport <- function(speed = NULL, time = NULL, accel = NULL,
                            fun.name = fun.name)
         } else {
             distance <- calcDistance(speed = speed, time = time, if.missing = settings$if.missing, 
-                                     unit.convesions = settings$unit.conversions, hijack = TRUE)
+                                     unit.convesions = settings$unit.conversions)
         }
     }        
 
@@ -153,7 +167,7 @@ summaryReport <- function(speed = NULL, time = NULL, accel = NULL,
                            fun.name = fun.name)
         } else {
             speed <- calcSpeed(distance = distance, time = time, if.missing = settings$if.missing, 
-                               unit.convesions = settings$unit.conversions, hijack = TRUE)
+                               unit.convesions = settings$unit.conversions)
         }
     }
 
@@ -165,7 +179,7 @@ summaryReport <- function(speed = NULL, time = NULL, accel = NULL,
                            fun.name = fun.name)
         } else {
             accel <- calcAccel(speed = speed, time = time, if.missing = settings$if.missing, 
-                               unit.convesions = settings$unit.conversions, hijack = TRUE)
+                               unit.convesions = settings$unit.conversions)
         }
     }
 
@@ -179,9 +193,9 @@ summaryReport <- function(speed = NULL, time = NULL, accel = NULL,
     #note: 
     #need this to be separate to bit before
 
-    speed <- convertUnits(speed, to = "km/h", hijack = TRUE, if.missing = settings$if.missing, unit.convesions = settings$unit.conversions)
-    distance <- convertUnits(distance, to = "km", hijack = TRUE, if.missing = settings$if.missing, unit.convesions = settings$unit.conversions)
-    accel <- convertUnits(accel, to = "m/s/s", hijack = TRUE, if.missing = settings$if.missing, unit.convesions = settings$unit.conversions)
+    speed <- convertUnits(speed, to = "km/h", if.missing = settings$if.missing, unit.convesions = settings$unit.conversions)
+    distance <- convertUnits(distance, to = "km", if.missing = settings$if.missing, unit.convesions = settings$unit.conversions)
+    accel <- convertUnits(accel, to = "m/s/s", if.missing = settings$if.missing, unit.convesions = settings$unit.conversions)
 
     #calculate time interval
 

@@ -6,17 +6,26 @@
 
 #kr
 
+#testing 
+
+cAlign_ylagxCOR <- function(x, y) {
+  .Call('C_ylagxCOR', PACKAGE = 'pems.utils', x, y)
+}
+
+
 #description
 ##########################
 #functions for merging data and pems
-
 
 #includes 
 ##########################
 #align
 #cAlign
+#cAlign.old (not exported)
+#C_ylagxCOR (c code)
 #tAlign
 #findLinearOffset
+#stackPEMS
 
 #removed
 ############################
@@ -24,13 +33,11 @@
 
 #to do
 ##########################
-#decide on bindPEMS status
 #check vector issue with align
 #
 
 #comments
 ##########################
-#think about bindPEMS
 #
 
 
@@ -50,7 +57,7 @@
 
 #aligns data in two objects
 ##uses 
-##join in plyr
+##full_join in dplyr
 ##pems.utils structure
 
 
@@ -73,8 +80,8 @@ align <- function(data1, data2, n=0, ...){
    this.call <- if("this.call" %in% names(extra.args))
                      extra.args$this.call else match.call()
 
-   data1 <- makePEMS(data1)
-   data2 <- makePEMS(data2)
+   data1 <- rebuildPEMS(makePEMS(data1), "old")
+   data2 <- rebuildPEMS(makePEMS(data2), "old")
 
    new.names <- make.names(c(names(data1), names(data2)), unique=TRUE)
    names(data1) <- new.names[1:ncol(data1)]
@@ -85,7 +92,7 @@ align <- function(data1, data2, n=0, ...){
    data2$align.temp.ref <- (1:nrow(data2)) + n
 
    #merge data 
-   new.data <- join(pemsData(data1), pemsData(data2), by="align.temp.ref", type="full")
+   new.data <- full_join(pemsData(data1), pemsData(data2), by="align.temp.ref")
    new.data <- new.data[order(new.data$align.temp.ref),]
    row.names(new.data) <- 1:nrow(new.data)
 
@@ -110,7 +117,7 @@ align <- function(data1, data2, n=0, ...){
    data1$history <- this.call
    class(data1) <- "pems" 
 
-   return(data1)
+   return(rebuildPEMS(data1))
 }
 
 
@@ -123,11 +130,18 @@ align <- function(data1, data2, n=0, ...){
 ######################################
 ######################################
 
-#kr 26/12/2015 v 0.1.0
-#version update from sleeper.service
+#currently not exported
+
+#kr 06/01/2018 v 0.2.0
+#version update from SGS L&L
+
+#replaced previous cAlign  
+#add a method option
+
+#this needs tidying
 
 
-cAlign <- function(form, data1=NULL, data2 = NULL, ...){
+cAlign.old <- function(form, data1=NULL, data2 = NULL, ...){
 
 #function for the time alignment of data in two datasets
 #using a common time-series or similar time-series.
@@ -139,6 +153,11 @@ cAlign <- function(form, data1=NULL, data2 = NULL, ...){
 #uses 
 #ccf in  base package?
 #align in sleeper.service
+
+#changes relative to previous
+#added lag.start = "middle"
+#added default for lag.max
+#added min.overlap
 
 #to do
 #tidy error messages
@@ -153,6 +172,8 @@ cAlign <- function(form, data1=NULL, data2 = NULL, ...){
 
 #tidy the next bit later
 #but don't want it as formal
+#output = all needed...
+
     extra.args <- list(...)
     output <- if(is.null(extra.args$output)) c("plot", "pems") else extra.args$output
     if("plot" %in% names(extra.args))
@@ -199,6 +220,36 @@ cAlign <- function(form, data1=NULL, data2 = NULL, ...){
     x <- x[,1]
     y <- y[,1]
 
+#to think about
+#################################################
+#would add mask here
+#could use something like mask.1=1:30 to hide first 30 points of x, etc...
+
+    #######################
+    #for lag.start
+    len.x <- length(x)
+    len.y <- length(y)
+    lag.tidy <- FALSE
+    if(!"lag.start" %in% names(extra.args) || extra.args$lag.start=="middle"){
+           lag.tidy <- TRUE
+           extra.args$lag.start <- floor((0.5* len.x)-(0.5*len.y))
+    }
+
+    if(extra.args$lag.start>0) y <- c(rep(NA,extra.args$lag.start), y)
+    if(extra.args$lag.start<0) x <- c(rep(NA,-extra.args$lag.start), x)
+
+#lag.tidy<-TRUE 
+
+#print(length(x))
+#print(length(y))
+    if(lag.tidy){
+       if(length(x)>length(y)) y <- c(y, rep(NA, length(x)-length(y)))
+       if(length(y)>length(x)) x <- c(x, rep(NA, length(y)-length(x)))
+    }
+
+##################################
+
+
 #might rethink error messages
 #so only message if both args are missing
 
@@ -206,8 +257,38 @@ cAlign <- function(form, data1=NULL, data2 = NULL, ...){
 #might still need to do more work on what we pass
 #and make it more robust? ccf formals only???
 
+
+###################################
+#new bits
+
+#need to sort out min.overlap
+#        lag.max
+#        min.overlap
+#        method control
+
+#need to think about best 10, etc...
+
+    if(!"min.overlap" %in% names(extra.args))
+         extra.args$min.overlap <- 0
+
+#think about limiting
+#    if(extra.args$min.overlap>min(c(len.x, len.y))) extra.args$min.overlap <- min(c(len.x, len.y))
+
+    if(!"lag.max" %in% names(extra.args)) 
+        extra.args$lag.max <- if(lag.tidy) ceiling((0.5*len.x)+(0.5*len.y)- extra.args$min.overlap) else 
+                                           min(c(length(x), length(y))) 
+
+    if(length(x) < extra.args$lag.max) x <- c(x, rep(NA, extra.args$lag.max -length(x)))
+    if(length(y) < extra.args$lag.max) y <- c(y, rep(NA, extra.args$lag.max -length(y)))
+
+#default lag.max to 30 for old case...
+
     ans <- do.call(ccf, listUpdate(list(x=x, y=y, na.action=na.pass, plot=FALSE), 
                                    extra.args))
+    ans$lag <- ans$lag + extra.args$lag.start
+
+##########################
+
     ##ans <- ccf(x, y, na.action=na.pass, plot=FALSE, ...)
     fit <- ans$lag[which(ans$acf==max(ans$acf, na.rm=T))]
 
@@ -232,6 +313,154 @@ cAlign <- function(form, data1=NULL, data2 = NULL, ...){
 }
 
 
+#kr 15/11/2018 v 0.5.0
+#version update from RDE work...
+
+cAlign <- function(form, data1=NULL, data2 = NULL, ...){
+
+#function for the time alignment of data in two datasets
+#using a common time-series or similar time-series.
+
+#form formula 
+#data1 first data source
+#data2 optional second data source
+  
+#uses
+#align 
+#C_ylagxCORR
+
+#changes relative to previous
+#removed lag.start
+#removed lag.max
+#reinstated min.overlap
+
+#to do
+#######################
+#tidy error messages
+#input handling 
+  
+#need to get this working with no data
+#cAlign(x~y)
+#need to sort out replacement for find offset command
+#     maybe just cAlign(x, y, output="offset", ...)
+  
+#to think about 
+#######################
+##would add mask here
+#could use something like mask.1=1:30 to hide first 30 points of x, etc...
+
+
+  ######################
+  #set up
+  ######################
+  data1 <- makePEMS(data1)
+  vars <- as.character(form)[-1]  #vars[1] is the "~"
+#tidy the next bit later
+#but don't want it as formal
+  extra.args <- list(...)
+  output <- if(is.null(extra.args$output)) 
+    c("plot", "pems") else extra.args$output
+  if("all" %in% output) output <- c("pems", "plot", "offset")
+  if("plot" %in% names(extra.args))
+     output <- if(extra.args$plot) 
+                  unique(c(output, "plot")) else output[output != "plot"] 
+  if("pems" %in% names(extra.args))
+    output <- if(extra.args$pems) 
+                unique(c(output, "pems")) else output[output != "pems"]
+  if("offset" %in% names(extra.args)) 
+    output <- if(extra.args$offset) 
+                unique(c(output, "offset")) else output[output != "offset"] 
+  extra.args <- extra.args[!names(extra.args) %in% 
+                  c("plot", "pems", "offset", "output")]
+  if(is.null(data2)){
+    if(length(vars)<2) 
+      stop("need two elements if only one data set provided")
+    if(nrow(data1)<1){
+      data2 <- data1
+    } else {
+      data2 <- makePEMS(data1[all.vars(form)[2]])
+      data1 <- data1[names(data1)[names(data1) != all.vars(form)[2]]]
+    }
+  }
+  #this first variable with be vars[1]
+  #note: x and y remain data.frames here
+  #(see below about making this work with no data)
+  #(backward compat...)
+  x <- try(model.frame(as.formula(paste("~", vars[1], sep="")), 
+              data1, na.action = na.pass), silent = TRUE)
+  if(class(x)[1]=="try-error") 
+    stop("cAlign() conflict, '", vars[1], "' not found where expected", 
+         call. = FALSE)
+  #get next term
+  temp <- if(length(vars)>1)  vars[2] else vars[1]    
+  y <- try(model.frame(as.formula(paste("~", temp, sep="")), data2, 
+         na.action = na.pass), silent = TRUE)
+  if(class(y)[1]=="try-error") 
+    stop("cAlign() conflict, '", temp, "' not found where expected", 
+         call. = FALSE)
+  #to make above work with data sources
+  if(nrow(data1)<1) data1 <- makePEMS(x)
+  if(nrow(data2)<1) data2 <- makePEMS(y)
+  x <- x[,1]
+  y <- y[,1]
+
+  #############################
+  #main routine
+  #############################
+  #this is faster than version 3 but
+  #this is still slower than older cAlign (1-2) that 
+  #used stat ccf function
+  
+  #fit smallest to biggest
+  if(length(y)>length(x)){
+    temp <- y
+    y <- x
+    x <- temp
+    reversed=TRUE
+  } else {
+    reversed=FALSE
+  }
+  #set min.overlap if not in call
+  if(!"min.overlap" %in% names(extra.args))
+    extra.args$min.overlap <- min(c(floor(min(length(x), 
+                                              length(y))*0.2), 2000))
+  pad <- length(x) - extra.args$min.overlap
+  y <- c(rep(NA, pad), y, rep(NA, pad))
+  #use C_ylagxCOR to solve this
+  ans <- .Call("_pems_utils_C_ylagxCOR", x, y)
+  index <- (1:length(ans)) - length(x) + extra.args$min.overlap - 1
+  if(!reversed) index <- -index
+  ans2 <- index[which(ans==max(ans, na.rm=TRUE))[1]]   #[1] in case tie!!
+
+##########################
+#plot input tidy
+##########################
+  
+  #this is before offset check 
+  if("plot" %in% output){
+    plot(index, ans, main="cAlign ACF", type="h")
+    abline(v=0, col="pink", lty=3)
+    abline(v=ans2, col="red", lty=3)
+    if(ans2!=0)
+      arrows(0, max(ans, na.rm=T) ,ans2, max(ans, na.rm=T), 
+             col="red", 0.1)
+  }
+
+  #####################
+  #offset to sort out
+  ####################
+#this should be better handled
+  if("offset" %in% output)
+     if(!"pems" %in% output) return(ans2) else 
+         print(paste("offset = ", ans2, sep=""))
+
+  return(align(data1, data2, ans2))
+
+}
+
+
+
+
 
 
 
@@ -242,8 +471,8 @@ cAlign <- function(form, data1=NULL, data2 = NULL, ...){
 ##########################
 ##########################
 
-#kr 26/12/2015 v 0.1.0
-#update using sleeper.service revision
+#kr 15/11/2018 v 0.3.0
+#update based on cAlign 15/11/2018 update
 
 #what it does
 ##########################
@@ -257,18 +486,10 @@ cAlign <- function(form, data1=NULL, data2 = NULL, ...){
 
 #comments
 ##########################
+#
 #might not be keeping this 
 
-findLinearOffset <- function(x = NULL, y = NULL, offset.range = NULL){
-
-    if(is.null(offset.range)){
-        offset.range <- ceiling(max(c(length(x), length(y))))
-    }
-
-    ans <- ccf(x, y, lag.max=offset.range, plot=FALSE)
-    ans$lag[which(ans$acf == max(ans$acf))[1]]
-
-}
+findLinearOffset <- function(x = NULL, y = NULL, ...) cAlign(x~y, output="offset", ...)
 
 
 
@@ -301,7 +522,7 @@ tAlign <- function(form, data1, data2 = NULL, order = TRUE, ...){
 #not sure this makes sense
 
 #uses 
-#join in plyr
+#full_join in dplyr
 
 #urgent to do
 #order does not seem to be working
@@ -343,7 +564,7 @@ tAlign <- function(form, data1, data2 = NULL, order = TRUE, ...){
 #pass data to join
     temp1 <- pemsData(data1)
     temp2 <- pemsData(data2)
-    temp <- join(temp1, temp2, by=t1, type="full")
+    temp <- full_join(temp1, temp2, by=t1)
 
     #names in new case
     temp.names <- names(temp)
@@ -377,3 +598,99 @@ tAlign <- function(form, data1, data2 = NULL, order = TRUE, ...){
 
 
 
+
+
+
+
+####################################
+####################################
+##stackPEMS
+####################################
+####################################
+
+#kr v.0.2.1 2018/07/04
+
+stackPEMS <- stack <- function(..., key=key, ordered=TRUE){
+  
+  #####################
+  #notes
+  #####################
+  #exporting from rlang: get_expr, exprs
+  #####################
+  #key = source identifier 
+  #  where source is the name used for the column 
+  #     indicating what is stacked....
+  #     so stackPEMS(pems.1, d2=pems.2) 
+  #     should identify sources as pems.1 and d2
+
+  #####################
+  #to do
+  #####################
+  #sort name
+
+  #####################
+  #to think about
+  #####################
+  #think about specifying rlang for exprs, etc?
+  #think about stripping list(...) of not-pems..?
+  #think about order of elements 
+  #     should the key always be last
+  #think about key handling 
+  #     should it overwrite an existing case
+  # 
+  
+  temp <- exprs(...)
+  refs <- names(temp)
+  refs[refs==""] <- as.character(temp[refs==""])
+  #added make.unique() refs below in case same pems sent twice...
+  #   (have to do this to refs after temp/ref update)
+  #   (not sure why anyone doing this...)
+  refs <- make.unique(refs)
+  key <- as.character(get_expr(enquo(key)))
+  
+  dots <- list(...) #rlang this later?
+  d1 <- rebuildPEMS(pems(dots[[1]]))
+  d1[, key, force=c("na.pad.target", "fill.insert")] <- refs[1]
+  
+  for(i in 2:length(dots)){
+    
+    #need to get this here but not d1     
+    d2 <- rebuildPEMS(pems(dots[[i]]))
+    d2[, key, force=c("na.pad.target", "fill.insert")] <- refs[i]
+     
+    #compare names 
+    ref <- intersect(names(d1), names(d2))
+    for(i in ref){
+      test <- units(d1[i])==units(d2[i])
+      if(!is.na(test) && !test){
+        d2[i] <- convertUnits(d2[i], to=units(d1[i]))
+      }
+    }
+    d1[["data"]] <- bind_rows(fortify(d1), fortify(d2))
+
+    ##################################
+    #fix for names with spaces in    
+    #temp <- as.data.frame(listUpdate(as.list(units(d1)), 
+    #                                 as.list(units(d2))),
+    #                      stringsAsFactors=FALSE)
+    ##################################
+    temp <- listUpdate(as.list(units(d1)), 
+                       as.list(units(d2)))
+    test <- names(temp)
+    temp <- as.data.frame(temp, stringsAsFactors=FALSE)
+    names(temp) <- test
+    ##################################
+    #better way?	
+    ##################################
+
+    d1[["units"]] <- temp[names(d1[["data"]])]  
+    att.1 <- attributes(d1)$pems.tags
+    att.2 <- attributes(d2)$pems.tags
+    attributes(d1)$pems.tags <- listUpdate(att.1, att.2)
+  }
+  d1[key] <- factor(d1[key], levels=refs, ordered=ordered)
+  #make the vectors pems.elements
+  for(i in names(d1))
+       d1[["data"]][, i] <- d1[, i]
+  d1
+}

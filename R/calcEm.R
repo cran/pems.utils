@@ -1,19 +1,3 @@
-##########################
-##########################
-##above all else code 
-##(hidden here because 
-## first .r code file 
-## alphabetically)
-##########################
-##########################
-
-#example
-#utils::globalVariables(c("a", "othervar"))
-
-globalVariables(c("pems.scheme", "ref.unit.conversions", "ref.chem", "ref.diesel", "ref.petrol",
-                  "panel.surfaceSmooth"))
-
-#panel.surfaceSmooth only needed until new version of loa gets on CRAN...
 
 
 ##########################
@@ -96,25 +80,19 @@ globalVariables(c("pems.scheme", "ref.unit.conversions", "ref.chem", "ref.diesel
 ################################
 ################################
 
-calcEm <- function(conc = NULL, time = NULL, 
-                    calc.method = calcEmHoribaPitot, analyte = NULL,
+calcEm <- function(conc = NULL,  
+                    calc.method = calcEm_HoribaPitot, analyte = NULL,
                     ..., data = NULL, fun.name = "calcEm", force = FALSE, 
-                    this.call = NULL, hijack= FALSE){
+                    this.call = NULL){
   
     #setup
-#temp fix
-#think about using listUpdate in loa
+    dots <- quos(...)
     if(is.null(this.call)) 
         this.call <- match.call() 
-    
-    #run checks
     settings <- calcChecks(fun.name, ..., data = data)
 
     #get what there is 
-    if(!hijack){   
-        conc <- checkInput(conc, data=data, if.missing = "stop", fun.name = fun.name)  
-        time <- checkInput(time, data=data, if.missing = "return", fun.name = fun.name)
-    }
+    conc <- getPEMSElement(!!enquo(conc), data, ref.name="conc")
 
     temp <- attr(conc, "name")
     if(!force){
@@ -135,10 +113,19 @@ calcEm <- function(conc = NULL, time = NULL,
                            fun.name = fun.name)
     }
 
+#this is based on current calcVSP approach
+#but need to send it data and analyte...
 
-    if(is.function(calc.method))
-        return(calc.method(conc = conc, data = data, analyte = analyte,
-                    ..., this.call = this.call, force = force, hijack= TRUE))
+    if(is.function(calc.method)){
+
+        #strip output because calcVSP packing this...
+        if("output" %in% names(dots))
+             dots[[which(names(dots)=="output")]]<-NULL
+        em <- eval_tidy(quo(calc.method(conc=conc, data=data, fun.name=fun.name,
+                                        analyte=analyte, this.call=this.call, !!!dots)))
+        return(pemsOutput(em, output = settings$output, data = data,  
+                          fun.name = fun.name, this.call = this.call))
+    }
 
     checkIfMissing(if.missing = settings$if.missing, 
                    reply = "could not run calc.method!", 
@@ -153,7 +140,7 @@ calcEm <- function(conc = NULL, time = NULL,
 
 ##################################
 ##################################
-##calcEmHoribaPitot
+##calcEm_HoribaPitot
 ##################################
 ##################################
 
@@ -162,30 +149,20 @@ calcEm <- function(conc = NULL, time = NULL,
 #various error catchers needed
 
 
-calcEmHoribaPitot <- function(conc = NULL, time = "local.time",
-                    exflow = "exh.flow.rate", extemp = "exh.temp", 
-                    express = "exh.press", analyte = NULL, delay = NULL, mm = NULL,  
-                    ..., force = force, data = NULL, fun.name = "calcEmHoribaPitot", 
-                    this.call = NULL, hijack= FALSE){
+calcEm_HoribaPitot <- function(conc = NULL, time = local.time,
+                    exflow = exh.flow.rate, extemp = exh.temp, 
+                    express = exh.press, analyte = NULL, delay = NULL, mm = NULL,  
+                    ..., force = force, data = NULL, fun.name = "calcEm_HoribaPitot", 
+                    this.call = NULL){
   
     #setup
-#temp fix
-#think about using listUpdate in loa
-    if(is.null(this.call)) 
-        this.call <- match.call() 
-    
-    #run checks
     settings <- calcChecks(fun.name, ..., data = data)
 
-    #get what there is 
-    if(!hijack){   
-        conc <- checkInput(conc, data=data, if.missing = "return")  
-    }
-
-    time <- checkInput(time, data=data, if.missing = "return")
-    exflow <- checkInput(exflow, data=data, if.missing = "return") 
-    extemp <- checkInput(extemp, data=data, if.missing = "return") 
-    express <- checkInput(express, data=data, if.missing = "return")
+    #get all but conc - handled by calcEM...
+        time <- getPEMSElement(!!enquo(time), data, if.missing="return")
+        exflow <- getPEMSElement(!!enquo(exflow), data, if.missing="return")
+        extemp <- getPEMSElement(!!enquo(extemp), data, if.missing="return")
+        express <- getPEMSElement(!!enquo(express), data, if.missing="return")
 
 #    if(!force & !is.null(time)){
         #check that time is equidistant
@@ -203,8 +180,8 @@ tempGet <- function(..., id=NULL, data=NULL, default=NULL){
            if(id %in% names(extra.args)) return(extra.args[[id]])
            if(!is.null(data)){
               if(isPEMS(data))  
-                  if(id %in% names(pemsConstants(data)))
-                      return(pemsConstants(data)[[id]])
+                  if(id %in% names(getPEMSConstants(data)))
+                      return(getPEMSConstants(data)[[id]])
               if(id %in% names(data)) return(data[[id]])
            }
            if(!is.null(default)){
@@ -241,10 +218,10 @@ tempGet <- function(..., id=NULL, data=NULL, default=NULL){
 ###################################
 
     #units of all inputs
-    conc <- convertUnits(conc, to = "vol%", hijack = TRUE, 
+    conc <- convertUnits(conc, to = "vol%",  
                          if.missing = settings$if.missing, 
                          unit.convesions = settings$unit.conversions)
-    exflow <- convertUnits(exflow, to = "L/min", hijack = TRUE, 
+    exflow <- convertUnits(exflow, to = "L/min",  
                            if.missing = settings$if.missing, 
                            unit.convesions = settings$unit.conversions)
 
@@ -253,18 +230,7 @@ tempGet <- function(..., id=NULL, data=NULL, default=NULL){
     }
 
     em <- conc * mm * exflow * (1/60) * (1/100) * (1/22.415)  * (273.15/293.15)
-
-    #my structure
-    em <- makePEMSElement(em, name=paste("em.", analyte[1], sep=""), units="g/s")
-
-    
-########################
-#temp fix
-########################
-    #class(data) <- old.class
-
-    #make output
-    calcPack(output = em, data = data, settings = settings, 
-             fun.name = fun.name, this.call = this.call) 
-
+    em <- pems.element(em, name=paste("em.", analyte[1], sep=""), units="g/s")
+    pemsOutput(em, output = settings$output, data = data,  
+               fun.name = fun.name, this.call = this.call)
 }

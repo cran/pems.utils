@@ -1,10 +1,14 @@
-\name{1.2.pems.structure}
-\alias{1.2.pems.structure}
+\name{2.2.pems.structure}
+\alias{2.2.pems.structure}
 \alias{pems.structure}
-\alias{pemsElement}
+\alias{getPEMSElement}
+\alias{getPEMSData}
+\alias{getPEMSConstants}
 \alias{pemsData}
 \alias{pemsConstants}
 \alias{pemsHistory}
+\alias{pemsin}
+\alias{pemsin2}
 
 
 
@@ -19,9 +23,15 @@
 
 \usage{
 
-pemsElement(element, pems=NULL, ..., 
-          fun.name = "pemsElement", if.missing = "stop",
-          element.name = deparse(substitute(element)))
+getPEMSElement(x, pems = NULL, units = NULL, ..., 
+            fun.name="getPEMSElement", if.missing = "stop",
+            .x = enquo(x))
+
+getPEMSData(pems=NULL, ..., fun.name = "getPEMSData", 
+            if.missing = "stop", .pems = enquo(pems))
+
+getPEMSConstants(pems=NULL, ..., fun.name = "getPEMSConstants", 
+            if.missing = "stop", .pems = enquo(pems))
 
 pemsData(pems=NULL, ..., 
           fun.name = "pemsData", if.missing = "stop",
@@ -34,28 +44,31 @@ pemsConstants(pems=NULL, ...,
 pemsHistory(pems=NULL, ..., 
          fun.name = "pemsHistory", if.missing = "stop",
          pems.name = deparse(substitute(pems)))
-
 }
 
 
 
 \arguments{
 
-  \item{element}{
-  (A required pems element) For \code{pemsElement}, the required data element (data series 
-  in data).
+  \item{x}{
+  (Required vector, typically pems.element) For \code{getPEMSElement}, the required 
+  data element.
 }
 
   \item{pems}{
-  (pems object) If supplied, the \code{pems} object to search for \code{element} before 
+  (pems object) If supplied, the \code{pems} object to search for \code{x} before 
   checking the parent environments and R workspace.
 }
 
+  \item{units}{
+   (Optional) The units that \code{x} should be supplied in (handled by 
+   \code{\link{convertUnits}}). 
+}
   \item{\dots}{
   (Optional) Other Arguments, currently ignored.
 }
 
-  \item{fun.name, if.missing, element.name, pems.name}{
+  \item{fun.name, if.missing, pems.name, .x, .pems}{
   (Various) Other options using for \code{pems.utils} house-keeping. See \code{\link{check...}} for 
   definitions, although generally these can be ignored by users. See Note below.  
 } 
@@ -74,33 +87,46 @@ pemsHistory(pems=NULL, ...,
   \code{pems.utils} package.) \code{history} is a log of \code{pems} object modifications. \code{tags} are 
   any other components that the user wishes to add to a \code{pems} object as identifiers.
 
-  \code{pemsElement} gets a requested data element. 
+  \code{getPEMSElement} gets a requested \code{pem.element} from \code{pems} if suppied or locally. 
 
-  \code{pemsData} gets the data component of a supplied \code{pems} object.
+  \code{pemsData} and \code{getPEMSData} get the data component of a supplied \code{pems} object.
 
-  \code{pemsConstants} gets all constants locally defined for the the supplied \code{pems} object. 
+  \code{pemsConstants} and \code{getPEMSConstants} get all constants locally defined for the supplied 
+  \code{pems} object. 
 
   \code{pemsHistory} gets the history of supplied \code{pems} object.
-
 }
 
 
 \value{
 
-  \code{pemsElement} returns the requested element of a supplied \code{pems} object as a managed vector or 
-  \code{pems.element}, if available. (If missing, error handling is managed by \code{if.missing}. See 
+  \code{getPEMSElement} returns the requested element of a supplied \code{pems} object as a managed vector or 
+  \code{pems.element}, if available. If missing, error handling is by \code{checkIfMissing}. See 
   \code{\link{check...}} for more details.) 
 
   \code{pemsData} returns the data component of a supplied \code{pems} object as a \code{data.frame}. 
 
+  \code{getPEMSData} returns the data component of a supplied \code{pems} object as a \code{data.frame}. 
+
   \code{pemsConstants} returns the constants component of a supplied \code{pems} object as a \code{list}. 
+
+  \code{getPEMSConstants} returns the constants component of a supplied \code{pems} object as a \code{list}. 
 
   \code{pemsHistory} returns the history component of a supplied \code{pems} object as a \code{list}.
 
 }
 
 \references{
-  References in preparation.
+  \code{rlang} and \code{dplyr} package functions now do all the heavy lifting for \code{getPEMSElement}.
+
+   Lionel Henry and Hadley Wickham (2018). rlang: Functions for Base
+   Types and Core R and 'Tidyverse' Features. R package version 0.2.0.
+   https://CRAN.R-project.org/package=rlang
+
+   Hadley Wickham, Romain Francois, Lionel Henry and Kirill Muller
+   (2017). dplyr: A Grammar of Data Manipulation. R package version
+   0.7.4. https://CRAN.R-project.org/package=dplyr
+
 }
 \author{
   Karl Ropkins
@@ -114,6 +140,11 @@ pemsHistory(pems=NULL, ...,
   future-proof third party functions should also consider \code{check...} functions when developing 
   their code. See \code{\link{common.calculations}} for some Examples.      
  
+  \code{getPEMS...} functions are a revision of earlier \code{pems...} \code{pems} object handlers. 
+  They are intended for convenient 'front of house' use.       
+
+  \code{rlang} and \code{dplyr} functions now do all the heavy lifting for \code{getPEMSElement}.
+
 }
 
 \seealso{
@@ -130,21 +161,19 @@ pemsHistory(pems=NULL, ...,
 #basic usage
 
 #using example data pems.1
-#(supplied as part of pems.utils pacakage)
+#(supplied as part of pems.utils package)
 
 #pems structure
 pems.1
 
-#the pems.1 element velocity
-pemsElement(velocity, pems.1)
+# extracting the pems.1 element velocity
+getPEMSElement(velocity, pems.1)
 
-#check... equivalent
-#checkInput(velocity, pems.1)
-
-#generic equivalents
-#pems.1$velocity
-#pems.1["velocity"]
-#etc
+\dontrun{
+#generic (SE) equivalents
+pems.1$velocity
+pems.1["velocity"] 
+}
 
 }
 \keyword{ methods }

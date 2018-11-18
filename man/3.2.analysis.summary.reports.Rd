@@ -1,5 +1,5 @@
-\name{2.5.analysis.summary.reports}
-\alias{2.5.analysis.summary.reports}
+\name{3.2.analysis.summary.reports}
+\alias{3.2.analysis.summary.reports}
 \alias{summary.reports}
 \alias{summaryReport}
 
@@ -17,7 +17,7 @@
 summaryReport(speed = NULL, time = NULL, accel = NULL, 
           distance = NULL, data = NULL, ..., 
           lod.speed = 0.1, lod.accel = 0.1,
-          fun.name = "summaryReport", hijack= FALSE)
+          fun.name = "summaryReport")
 
 }
 
@@ -52,10 +52,6 @@ summaryReport(speed = NULL, time = NULL, accel = NULL,
   (Optional character) The name of the parent function, to be used in error messaging.
 }
 
-  \item{hijack}{
-  (Logical) Is this function being locally 'hijacked' by a user/function developer? See Note on 
-  \code{hijack} below.
-}
     
 }
 
@@ -117,15 +113,7 @@ summaryReport(speed = NULL, time = NULL, accel = NULL,
   \code{\link{setUnits}} and \code{\link{convertUnits}}. Allowed unit conversion methods have 
   to be defined in \code{\link{ref.unit.conversions}} or a locally defined alternative supplied 
   by the user. See \code{\link{convertUnits}} for an example of how to locally work with unit 
-  conversions.
-
-  \code{hijack} is an in-development argument, supplied to allow code developers to run multiple 
-  functions in different function environments. When developers 'mix and match' code from 
-  several sources it can become unstable, especially if functions are run within functions within 
-  functions, etc. \code{hijack = TRUE} and associated code makes a function local to 'side-step' 
-  this issue. This work by assuming/expecting all inputs to be local, i.e. supplied directly by 
-  the code user.         
- 
+  conversions. 
 }
 
 \section{Warning }{
@@ -135,7 +123,7 @@ summaryReport(speed = NULL, time = NULL, accel = NULL,
 
 \seealso{
  
-  \code{\link{checkInput}}, \code{\link{checkUnits}} and \code{\link{convertUnits}} for data management.
+  \code{\link{checkUnits}} and \code{\link{convertUnits}} for data management.
 }
 \examples{
 
@@ -147,12 +135,12 @@ summaryReport(speed = NULL, time = NULL, accel = NULL,
 
 summaryReport(velocity, local.time, data=pems.1)
 
-##  distance.travelled.km time.total.s avg.speed.km.h avg.running.speed.km.h
-##1              6.186056         1000        22.2698               28.78538
-##  time.idle.s time.idle.pc avg.accel.m.s.s time.accel.s time.accel.pc
-##1          40            4       0.7921279          271          27.1
-##  avg.decel.m.s.s time.decel.s time.decel.pc
-##1      -0.9039449          238          23.8
+#   distance.travelled.km time.total.s avg.speed.km.h avg.running.speed.km.h
+# 1              6.186056         1000        22.2698               28.78538
+#   time.idle.s time.idle.pc avg.accel.m.s.s time.accel.s time.accel.pc
+# 1          40            4       0.7921279          271          27.1
+#   avg.decel.m.s.s time.decel.s time.decel.pc
+# 1      -0.9039449          238          23.8
 
 #apply to multiple cases
 

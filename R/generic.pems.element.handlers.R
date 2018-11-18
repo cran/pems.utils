@@ -6,23 +6,51 @@
 
 #kr 01/02/2012 v 0.3.1
 
+#kr rebuild 11/2017 
+##print.pems.element reactivated
+
+
 #includes 
 #(functions/code below) 
 ##########################
 #as.data.frame.pems.element
+#as.pems.pems.element
 #print.pems.element
 #plot.pems.element
 #units.pems.element
-#summary.pems.element
 #<-.units.pems.element
+#summary.pems.element
+#round.pems.element
 #[.pems.element
 #[<-.pems.element
 
 
-
+###############################
 #to do
-#########################
+#############
+#############
 #export [<-.pems.element
+#############
+#need to look at plot and print etc.
+#Warning message:
+#In class(ans) <- class(ans)[class(ans) != "pems.element"] :
+#  NAs introduced by coercion
+#compare with other pems.element[] and pems.element[]<-
+#############
+#
+
+
+###############################
+#to think about
+################
+#print.pems could have earlier classes
+#so don't dump attributes when
+#pems.utils not installed
+################
+#cat or message???
+################
+#
+
 
 
 
@@ -46,8 +74,120 @@ as.data.frame.pems.element <- function(x, ...){
 }
 
 
-print.pems.element <- function (x, ...){
+as.pems.pems.element <- function(x, ...) pems(x, ...)
 
+
+print.pems.element <- function (x, ..., n = NULL, rows = NULL, width = NULL){
+
+#to do
+###################
+#tidy code
+#
+
+#to think about
+###################
+#do print and cat statements need to be merged
+#as single output?
+###################
+#include width?
+
+    # 'pems (n=n)'
+    out.0 <- paste(class(x)[1], " [n=", length(x), "]", sep="")
+
+    out.2 <- ""
+
+    if(!is.null(n)){
+        #this assumes n is null or numeric
+        if(n<0) n <- length(x) #this assume any minus value means show all
+        if(n<length(x)) out.2 <- paste(" not showing: ", length(x)-n, " (of ", length(x), ") elements", sep="")
+        x <- x[1:n]
+    }
+    if(is.null(width)) width <- getOption("width") * 0.9
+
+    #data 
+    #print with default method and attributes stripped
+    ans <- x
+
+    if(length(class(ans))>1) class(ans) <- class(ans)[-1] else
+         class(ans)[1] <- if("levels" %in% names(attributes(ans)))
+                                "factor" else mode(ans)
+    attributes(ans) <- attributes(ans)[!names(attributes(ans))%in% c("name", "units")]
+
+    out.3 <- ""
+
+    if(length(class(ans))>0) 
+          out.3 <- paste(out.3, " <", paste(class(ans), collapse=","), ">", sep="")
+    if("name" %in% names(attributes(x)))
+          out.3 <- paste(out.3, " ", attributes(x)$name, sep="")
+    if("units" %in% names(attributes(x)))
+         if(!is.na(attributes(x)$units) && attributes(x)$units != "")
+             out.3 <- paste(out.3, " [", attributes(x)$units, "]", sep="")
+
+    out.1 <- capture.output(print(ans, ...))
+#testing this to strip old factor labels
+    if("factor" %in% names(attributes(ans)))
+        out.1 <- out.1[1:(length(out.1)-1)]
+
+#this one makes nice ...
+    temp <- out.1[1] #all have same spacing
+    indent <- gregexpr("[]]", temp)[[1]]-3
+    indent <- if(indent>0) paste(rep(" ", indent), collapse="") else ""
+    indent <- paste(indent, "...", sep="")
+
+    if(is.null(n) & is.null(rows)){
+         rows <- 3
+    }
+    if(!is.null(rows)){
+         if(rows<0) rows <- length(out.1) #assumes any minus means show all
+         if(rows<length(out.1)){
+######################
+#this one gets next row name
+#              temp <- out.1[rows+1]
+#              temp <- substr(temp, gregexpr("[[]", temp)[[1]]+1,
+#                                   gregexpr("[]]", temp)[[1]]-1)
+######################              
+              out.2 <- paste(" not showing: ", length(out.1)-rows, " rows", sep="")
+              out.1 <- if(rows==0) "" else out.1[1:rows]
+         }
+    }
+    
+    if(!is.null(n) && n==0) out.1=""
+
+    if(length(out.1)>1 || out.1!="") out.1 <- paste(out.1, collapse="\n")
+    out.1 <- if(out.1 != "" & out.2 !="") paste(out.1, "\n", indent, out.2, "\n", sep="") else 
+                 if(out.1 != "") paste(out.1, "\n", sep="") else  paste(indent, out.2, "\n", sep="")
+
+    out.1 <- paste(out.0, "\n", out.1, sep="")
+    out.1 <- paste(out.1, indent, out.3, "\n", sep="")
+
+
+#######################################
+#need to update this to handling 
+#long level lists...
+#testing
+# strwrap(paste(levels, collapse=""), width=width)
+#######################################
+
+    if("levels" %in% names(attributes(ans))){
+        temp <- paste(indent, " levels: ", sep="")
+        out.2 <- paste(temp,
+                       strwrap(paste(levels(ans), collapse="; ", sep=""),
+                         width=width*0.85), sep="")
+        if(length(out.2)>1){
+                 out.2[2:length(out.2)] <- gsub(temp, 
+                               paste("\n", paste(rep(" ", nchar(temp)), collapse="", sep=""),
+                               sep=""), out.2[2:length(out.2)])
+                 out.2 <- paste(out.2, collapse="")
+        }
+        out.1 <- paste(paste(out.1, out.2, sep=""), "\n", sep="")
+    }
+
+    #output 
+    cat(out.1)
+}
+
+
+print.pems.element.old <- function (x, ...){
 
 #to do
 ###################
@@ -133,6 +273,13 @@ plot.pems.element <- function (x, y = NULL, xlab = NULL, ylab = NULL, ...){
 #previous
 #    class(x) <- "default"
 #############
+#recent added 
+#lx0 as early creation of deparse(substitute(x))
+#limited deparse(substitute(x)) and deparse(substitute(y)) to ...[1]
+#may need to go to 
+#############
+
+    lx0 <- deparse(substitute(x))[1]
     if(length(class(x))>1) class(x) <- class(x)[-1] else
         class(x)[1] <- if("levels" %in% names(attributes(x)))
                              "factor" else mode(x)
@@ -146,9 +293,9 @@ plot.pems.element <- function (x, y = NULL, xlab = NULL, ylab = NULL, ...){
     #get x name
     if(is.null(y)){ 
         if(is.null(ylab)){
-            ylab <- if(is.null(attributes(x)$name))
-                        deparse(substitute(x)) else 
-                            attributes(x)$name
+            ylab <- if ("name" %in% names(attributes(x))) 
+                attributes(x)$name else lx0
+        
             if(!is.null(attributes(x)$units)){
                 temp <- paste(" [", attributes(x)$units, "]", sep="")
                 if(!temp %in% c(" []", " [NA]")) ylab <- paste(ylab, temp, sep = "")
@@ -156,22 +303,26 @@ plot.pems.element <- function (x, y = NULL, xlab = NULL, ylab = NULL, ...){
         }
     } else {
         if(is.null(xlab)){
-            xlab <- if(is.null(attributes(x)$name))
-                        deparse(substitute(x)) else 
-                            attributes(x)$name
+            xlab <- if ("name" %in% names(attributes(x))) 
+                attributes(x)$name else lx0
+        
             if(!is.null(attributes(x)$units)){
                 temp <- paste(" [", attributes(x)$units, "]", sep="")
                 if(!temp %in% c(" []", " [NA]"))xlab <- paste(xlab, temp, sep = "")
             }
         }
         if(is.null(ylab)){
-            ylab <- if(is.null(attributes(y)$name))
-                        deparse(substitute(y)) else 
-                            attributes(y)$name
+            ylab <- if ("name" %in% names(attributes(y))) 
+                attributes(y)$name else deparse(substitute(y))[1]
+
             if(!is.null(attributes(y)$units)){
                 temp <- paste(" [", attributes(y)$units, "]", sep="")
                 if(!temp %in% c(" []", " [NA]")) ylab <- paste(ylab, temp, sep = "")
             }
+        }
+    if(!is.null(y)){
+            #might also need to strip units from attributes?
+            class(y) <- class(y)[class(y) != "pems.element"]
         }
     }
 
@@ -214,8 +365,18 @@ summary.pems.element <- function(object, ...){
 }
 
 
+###################
+#round.pems.element
+###################
 
+#round 
+#needed because time.stamp rounding is specially handled
 
+round.pems.element <- function(x,...){
+   att <- attributes(x)
+   class(x) <- class(x)[class(x) != "pems.element"]
+   pems.element(round(x,...), units=att$units, name=att$name)
+}
 
 
 
@@ -271,6 +432,18 @@ summary.pems.element <- function(object, ...){
     if(is(x)[1] == "try-error") 
       stop("In pems.element[i] 'i' unknown/unfound", 
           call. = FALSE)
+
+#################
+#new 
+#this handles pems.element if attribute()$names have been added
+#happens in summary(lm())
+
+    if("names" %in% names(att))
+          att$names <- att$names[i]
+
+#might need to refine this
+#################
+
     attributes(x) <- att
 ################
 #new
@@ -367,17 +540,6 @@ summary.pems.element <- function(object, ...){
 
 
 
-
-#############################
-#working
-#############################
-
-
-#need to look at plot and print etc.
-#Warning message:
-#In class(ans) <- class(ans)[class(ans) != "pems.element"] :
-#  NAs introduced by coercion
-#compare with other pems.element[] and pems.element[]<-
 
 
 

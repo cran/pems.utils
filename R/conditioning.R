@@ -4,6 +4,9 @@
 ##########################
 ##########################
 
+
+#this uses checkInput
+
 #kr
 
 #description
@@ -55,7 +58,7 @@
 
 cutBy <- function(ref = NULL, ..., data = NULL, cut.method = NULL, 
                   labels = NULL,
-                  fun.name = "cutBy", hijack= FALSE){
+                  fun.name = "cutBy"){
   
     #setup
     this.call <- match.call()
@@ -64,10 +67,9 @@ cutBy <- function(ref = NULL, ..., data = NULL, cut.method = NULL,
     settings <- calcChecks(fun.name, ..., data = data)
 
     #get what there is 
-    if(!hijack)   
-        ref <- checkInput(ref, data=data, fun.name = fun.name,   
+    ref <- getPEMSElement(!!enquo(ref), data, fun.name=fun.name,
                             if.missing = settings$if.missing,
-                            unit.conversions = settings$unit.conversions)  
+                            unit.conversions = settings$unit.conversions)
 
     if(is.null(cut.method)){
         #select suitable cut.method
@@ -87,7 +89,7 @@ cutBy <- function(ref = NULL, ..., data = NULL, cut.method = NULL,
     if(is.function(cut.method)){
 
         cut <- cut.method(ref = ref, data = data, output = "input",
-                          ..., fun.name = "cutBy", hijack= TRUE)
+                          ..., fun.name = "cutBy")
 
         #check for attributes 
         #if not give it some
@@ -121,7 +123,7 @@ cutBy <- function(ref = NULL, ..., data = NULL, cut.method = NULL,
 
 
 cutByRow <- function(ref = NULL, n = 4, rows = NULL, ..., data = NULL,  
-                    fun.name = "cutByRow", hijack= FALSE){
+                    fun.name = "cutByRow"){
   
     #setup
     this.call <- match.call()
@@ -130,10 +132,9 @@ cutByRow <- function(ref = NULL, n = 4, rows = NULL, ..., data = NULL,
     settings <- calcChecks(fun.name, ..., data = data)
 
     #get what there is 
-    if(!hijack)   
-        ref <- checkInput(ref, data=data, fun.name = fun.name,   
+    ref <- getPEMSElement(!!enquo(ref), data, fun.name=fun.name,
                             if.missing = settings$if.missing,
-                            unit.conversions = settings$unit.conversions)  
+                            unit.conversions = settings$unit.conversions)
 
     #both n and row should 
     if(!is.numeric(n) & !is.numeric(rows)){

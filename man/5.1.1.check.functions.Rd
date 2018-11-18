@@ -1,7 +1,6 @@
-\name{4.1.common.check.functions}
-\alias{4.1.common.check.functions}
+\name{5.1.1.common.check.functions}
+\alias{5.1.1.common.check.functions}
 \alias{check...}
-\alias{checkInput}
 \alias{checkOption}
 \alias{checkPEMS}
 \alias{checkUnits}
@@ -17,10 +16,6 @@ Various pems.utils workhorse functions for input checking and routine data handl
 }
 
 \usage{
-checkInput(input = NULL, data = NULL, input.name = NULL, 
-           fun.name = NULL, if.missing = c("stop", "warning", "return"),
-           output = c("input", "test.result"), ...)
-
 checkOption(option=NULL, allowed.options=NULL,
            option.name = "option", allowed.options.name = "allowed.options",
            partial.match=TRUE, fun.name = "checkOption", 
@@ -132,11 +127,6 @@ checkIfMissing(..., if.missing = c("stop", "warning", "return"),
   objects and/or \code{pems.utils} code. This means third-party function developed using these 
   functions should be highly stable.
 
-  \code{checkInput} checks/gets a supplied input. It is intended for use with standard 
-  function arguments, e.g. the \code{speed} time-series a user supplies for acceleration 
-  calculation in \code{calcAccel}, and supplied the input and any associated information, e.g. 
-  a source name and units, if available. 
-
   \code{checkOption} checks a supplied option against a set of allowed options, and then if present or 
   matchable returns the assigned option. It is intended as a workhorse for handling optional function 
   arguments.  
@@ -166,9 +156,6 @@ checkIfMissing(..., if.missing = c("stop", "warning", "return"),
   if the \code{input}, \code{option}, etc., is suitable for use in that fashion or \code{FALSE} if not.      
 
   Otherwise,
-
-  \code{checkInput} returns the \code{input} argument if valid with any associated information added as 
-  attributes or an error, warning and/or \code{NULL} (on the basis of \code{if.missing}) if not.
 
   \code{checkOption} return the \code{option} argument if valid (on the basis of \code{if.missing}) or an 
   error, warning and/or \code{NULL} (on the basis of \code{if.missing}) if not. If \code{partial.match = TRUE} 
@@ -202,62 +189,23 @@ checkIfMissing(..., if.missing = c("stop", "warning", "return"),
   If a parent function is identified as \code{fun.name} and the check case (code{input}, 
   \code{option}, etc.) is identified with the associated \code{...name} argument these are 
   used in any associated error messaging.
-
-  For example, if \code{checkInput} is used to get the \code{x} values for a standard plot, 
-  and \code{input.name = "x"} and \code{fun.name = "standard.plot"} and \code{x} is not 
-  found, the associated error message is \code{"Error: In standard.plot(...) input 'x' not 
-  found"} rather than \code{"Error: In checkInput(...) input 'input' not found"}, although 
-  it is \code{checkInput} that terminates the parent function.
  
 }
 
-\section{Warning }{
-  None currently
-}
+%\section{Warning }{
+%  None currently
+%}
 
 \seealso{
   See \code{\link{ref.unit.conversions}} and \code{\link{convertUnits}} for general unit handling. 
 }
-\examples{
-
-###########
-##example 1 
-###########
-
-#some different data
-
-a <- 1
-b <- data.frame(v=10, c=1)
-
-#using checkInput
-
-checkInput(a)           # 1  (attr name = "a")
-checkInput(v, data = b) # 10 (attr name = "v")
-
-#checkInput(v)
-#Error:   In checkInput(...) input 'v' not found
-
-###########
-##example 2
-###########
-
-#using checkInput to plot with user labels
-
-standard.plot <- function(x, y, data = NULL){
-
-    #getting x and y
-    my.x <- checkInput(x, data = data, input.name = "x", 
-                       fun.name = "standard.plot")
-    my.y <- checkInput(y, data = data, input.name = "y", 
-                       fun.name = "standard.plot")
-
-    #plotting (and labelling it)
-    plot(my.x, my.y, xlab = attributes(my.x)$name, 
-         ylab = attributes(my.y)$name)
-}
-
-standard.plot(a,v, data=b) #etc
-
-}
+%\examples{
+%
+%###########
+%##example 1 
+%###########
+%
+%#TO DO
+%}
 
 \keyword{ methods }

@@ -4,6 +4,8 @@
 ########################
 ########################
 
+#this uses checkInput
+
 #in place
 #################
 #getUnits
@@ -44,8 +46,7 @@
 
 
 getUnits <- function(input = NULL, data = NULL, ..., 
-                     if.missing = c("stop", "warning", "return"),
-                     hijack = FALSE){
+                     if.missing = c("stop", "warning", "return")){
 
     #if.missing handling
     if.missing <- checkOption(if.missing[1], formals(setUnits)$if.missing, 
@@ -53,11 +54,14 @@ getUnits <- function(input = NULL, data = NULL, ...,
                               fun.name = "getUnits")
 
     #get input, then units
-    ans <- if(!hijack)
-               checkInput(input = input, data = data, if.missing = if.missing, 
-                          fun.name = "getUnits") else
-               input
-    checkUnits(ans, if.missing = if.missing, fun.name = "getUnits", hijack = hijack)
+    ans <- getPEMSElement(!!enquo(input), data, fun.name="getUnits",
+                        if.missing = "return", ref.name="input")
+#was
+#    ans <- if(!hijack)
+#               checkInput(input = input, data = data, if.missing = if.missing, 
+#                          fun.name = "getUnits") else
+#               input
+    checkUnits(ans, if.missing = if.missing, fun.name = "getUnits")
 
 }
 
@@ -80,7 +84,7 @@ getUnits <- function(input = NULL, data = NULL, ...,
 setUnits <- function(input = NULL, units = NULL, data = NULL, ..., 
                      if.missing = c("stop", "warning", "return"), 
                      output = c("input", "data.frame", "pems", "special"),
-                     force = FALSE, overwrite = FALSE, hijack = FALSE){
+                     force = FALSE, overwrite = FALSE){
 
     fun.name <- "setUnits"
 
@@ -112,10 +116,14 @@ setUnits <- function(input = NULL, units = NULL, data = NULL, ...,
                     call. = FALSE, domain = NA)
     }
 
-    ans <- if(!hijack)
-               checkInput(input = input, data = data, if.missing = if.missing, 
-                          output = "input", fun.name = "setUnits") else
-               input
+
+    ans <- getPEMSElement(!!enquo(input), data, fun.name="setUnits",
+                        if.missing = "return", ref.name="input")
+#was
+#    ans <- if(!hijack)
+#               checkInput(input = input, data = data, if.missing = if.missing, 
+#                          output = "input", fun.name = "setUnits") else
+#               input
 
     if(is.null(units)) units <- ""
     if(is.null(attributes(ans)$units) || force || as.character(attributes(ans)$units) == as.character(units)){
@@ -164,8 +172,7 @@ setUnits <- function(input = NULL, units = NULL, data = NULL, ...,
 convertUnits <- function(input = NULL, to = NULL, from = NULL, data = NULL, ..., 
                          if.missing = c("stop", "warning", "return"), 
                          output = c("input", "data.frame", "pems", "special"),
-                         unit.conversions = NULL, force = FALSE, overwrite = FALSE,
-                         hijack = FALSE){
+                         unit.conversions = NULL, force = FALSE, overwrite = FALSE){
 
     fun.name <- "convertUnits"
 
@@ -184,14 +191,17 @@ convertUnits <- function(input = NULL, to = NULL, from = NULL, data = NULL, ...,
                               "if.missing", "allowed if.missings", 
                               fun.name = fun.name)
 
-    ans <- if(!hijack)
-               checkInput(input = input, data = data, if.missing = if.missing, 
-                          output = "input", fun.name = fun.name) else 
-               input
+    ans <- getPEMSElement(!!enquo(input), data, fun.name=fun.name,
+                        if.missing = "return", ref.name="input")
+#was
+#    ans <- if(!hijack)
+#               checkInput(input = input, data = data, if.missing = if.missing, 
+#                          output = "input", fun.name = fun.name) else 
+#               input
 
     #from handling
     temp <- checkUnits(ans, if.missing = "return", 
-                       output = "units", fun.name = fun.name, hijack = hijack)
+                       output = "units", fun.name = fun.name)
     if(is.null(from)){
 
         from <- temp 
@@ -256,7 +266,7 @@ convertUnits <- function(input = NULL, to = NULL, from = NULL, data = NULL, ...,
 
 
     if(!is.null(to)){
-        ans <- checkUnits(ans, to, unit.conversions = unit.conversions, hijack = hijack, 
+        ans <- checkUnits(ans, to, unit.conversions = unit.conversions,  
                           fun.name = fun.name)
     }
 

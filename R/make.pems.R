@@ -16,11 +16,17 @@
 #pems (nee makePEMS)
 #is.pems (nee isPEMS)
 #pems.element (nee makePEMSElement)
+
+
+#to think about
+##########################
 #as.pems...
 
 
 #to do
 ##########################
+
+
 
 #comments
 ##########################
@@ -49,10 +55,22 @@
 ##########################
 #
 
-#comments
 ##########################
+#comments
+###########
 #widely used. 
 #think carefully before changing name or argument ordering
+###########
+#did it anyway...
+###########
+#
+
+#############################
+#to think about 
+##########
+#currently uses rebuild cheat
+###########
+#
 
 
 pems <- function(x, units = NULL, constants = NULL,  
@@ -65,11 +83,13 @@ pems <- function(x, units = NULL, constants = NULL,
 
 ##################
 #testing
-#supply a pems/return it
-#might want to unpack and repack?
+#if supply a pems/return
+#   unless units supplied 
+#   then unpack/repack
+#think about this 
 #################
 
-                 if(is(x)[1]=="pems") return(x)
+                 if(is(x)[1]=="pems" && is.null(units)) return(rebuildPEMS(x))
 
 ##################
 #testing 
@@ -94,19 +114,20 @@ pems <- function(x, units = NULL, constants = NULL,
             units <- rep(NA, ncol(x))
         if(!is.data.frame(units)){
             units <- as.data.frame(t(units), stringsAsFactors = FALSE)
-            units <- if(ncol(units)<ncol(x))
-                         cbind(units, as.data.frame(t(rep(NA, ncol(x)-ncol(units))), stringsAsFactors = FALSE)) else
-                             units[1:ncol(x)] 
-            names(units) <- c(names(x), names(units), rep(NA, ncol(x)))[1:ncol(x)]
         }
-
+        #after we know units is data.frame 
+        units <- if(ncol(units)<ncol(x))
+                    cbind(units, as.data.frame(t(rep(NA, ncol(x)-ncol(units))), stringsAsFactors = FALSE)) else
+                          units[1:ncol(x)] 
+        names(units) <- c(names(x), names(units), rep(NA, ncol(x)))[1:ncol(x)]
     }
 
 #to do
 ####################
 #update constants
 
-    if(is.null(history)) history <- list()
+#dropping history
+    history <- list()
     extra.args <- list(...)
 
     #update silently?
@@ -128,9 +149,11 @@ pems <- function(x, units = NULL, constants = NULL,
 
     class(output) <- "pems"
 
-#do I want this to be invisible?
+    #restack pems so all columns are pems.elements
+    for(i in names(output))
+         output[["data"]][, i] <- output[, i]
 
-    invisible(output)
+    rebuildPEMS(output)
 }
 
 
@@ -165,6 +188,10 @@ makePEMS <- function(...) pems(...)
 #think carefully before changing name or argument ordering
 
 
+#this needs thinking about
+##############
+#
+
 is.pems <- function(x, full.test = TRUE, ...){
 
    #standard test
@@ -193,10 +220,16 @@ isPEMS <- function(...) is.pems(...)
 pems.element <- function(x, name=NULL, units=NULL, ...){
 
     attr(x, "class") <- unique(c("pems.element", attr(x, "class")))
-    attr(x, "name") <- name
-    attr(x, "units") <- units
 
-    invisible(x)
+#if(is.null(attr(x, "name")) & !is.null(name))
+#caused problems because it can't reset attr in calc... functions
+
+    if(!is.null(name))
+        attr(x, "name") <- name
+    if(!is.null(units))
+        attr(x, "units") <- units
+
+    return(x)
 
 }
 
@@ -230,3 +263,103 @@ as.pems.data.frame <- function(x,...) pems(x,...)
 
 
 
+
+
+
+
+#######################
+#######################
+##rebuildPEMS
+#######################
+#######################
+
+##rebuild old/new pems object
+
+rebuildPEMS <- function(x, ...){ 
+
+#need to think about a robust version check 
+#    or people could be turning olds into olds...
+#    which will do weird things...
+
+#need to tidy this when it catches all bad stuff... 
+
+    #get arg2 in form rebuildPEMS(pems, new) ..."new", etc...
+    #might drop this...
+
+    m.var <- exprs_auto_name(quos(...)) 
+    m.var <- gsub("~", "", as.character(m.var))[1]
+    m.var <- gsub("\"", "", as.character(m.var))[1]
+
+    if(is.na(m.var)) m.var <- "new"
+
+#    grpd <- "grouped_df" %in% class(x)
+#    class(x) <- class(x)[class(x) != "grouped_df"]
+
+    test <- attributes(x)$pems.tags$pems.build
+
+    if (m.var == "new") {
+
+        #quick if new checks
+        if (!is.null(test) && test >= 3) 
+            return(x)
+
+        #assume old rebuild old as new
+        class(x) <- "broken"
+        out <- x$data
+        attributes(out)$units <- x$units
+        attributes(out)$pems.tags <- x[names(x)[!names(x) %in% 
+            c("data", "units")]]
+        attributes(out)$pems.tags$history <- list()
+        attributes(out)$pems.tags$pems.build <- 3
+        class(out) <- c("pems")
+#testing
+#    class(.data) <- unique(c(class(.data)[class(.data)!="pems"], c("tbl_df", "tbl", "data.frame"))) 
+        class(out) <- c("pems", "tbl_df", "tbl", "data.frame")
+
+        #this assumes grouped object never output as old
+        if("grouped_df.tags" %in% names(x)){
+              attributes(out)[names(x$grouped_df.tags)] <- x$grouped_df.tags
+              class(out) <- c("grouped_df", "pems")
+#testing
+# 
+        class(out) <- c("grouped_df", "pems", "tbl_df", "tbl", "data.frame")       
+        }      
+        return(out)
+    }
+    if (m.var == "old") {
+
+        #quick check if is old
+        if (!is.null(test) && test < 3) 
+            return(x)
+        if (is.null(test)) 
+            return(x)
+
+        #assume new and rebuild as old
+        bare.bones <- attributes(x)[names(attributes(x)) %in% 
+            c("units", "pems.tags")]
+        attributes(x)$units <- NULL
+        attributes(x)$pems.tags <- NULL
+        class(x) <- class(x)[class(x) != "pems"]
+        if (length(class(x)) == 0) 
+            class(x) <- "data.frame"
+        if (length(class(x)) == 1 && class(x) == "list") 
+            class(x) <- "data.frame"
+
+        out <- listUpdate(list(data = x, units = bare.bones$units), 
+            bare.bones$pems.tags)
+
+        #handling if grouped_df
+        if ("grouped_df" %in% class(x)){
+             class(out$data)[class(x) == "grouped_df"] <- "data.frame"
+             out$grouped_df.tags <- attributes(x)
+        }
+
+#test
+        class(out$data) <- "data.frame"
+
+        out$pems.build <- 2
+        class(out) <- c("pems")
+        return(out)
+    }
+
+}

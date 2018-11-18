@@ -5,6 +5,7 @@
 \alias{isPEMS}
 \alias{pems}
 \alias{makePEMS}
+\alias{rebuildPEMS}
 \alias{pems.element}
 \alias{as.pems}
 \alias{as.pems.default}
@@ -18,6 +19,8 @@
 \alias{importParSYNC2PEMS}
 \alias{importCAGE2PEMS}
 \alias{importRoyalTek2PEMS}
+\alias{importKML2PEMS}
+\alias{importSEMTECH2PEMS}
 
 
 
@@ -46,6 +49,7 @@ pems.element(x, name = NULL, units = NULL,
 isPEMS(...)
 makePEMS(...)
 makePEMSElement(...)
+rebuildPEMS(x, ...)
 
 \method{as.pems}{data.frame}(x, ...)
 
@@ -54,9 +58,8 @@ makePEMSElement(...)
 
 #general
 
-import2PEMS(file.name = file.choose(), time.stamp = NULL, local.time = NULL,
-          time.format = NULL, units = NULL, constants = NULL, history = NULL, 
-          ..., file.type = NULL, file.reader = read.delim)
+import2PEMS(file.name = file.choose(), ..., file.reader = read.delim, 
+          output="pems")
 
 importTAB2PEMS(..., file.reader = read.delim)
 
@@ -82,9 +85,14 @@ importParSYNC2PEMS(file.name = file.choose(), reset.signals = TRUE,
          history = NULL, constants = NULL, pm.analyzer = "parSYNC",
          ... )
 
-
 #3DATX CAGE
 importCAGE2PEMS(..., calibrator = "CAGE")
+
+
+#Sensors Inc SEMTECH
+
+importSEMTECH2PEMS(file.name = file.choose(), history = NULL, 
+          constants = NULL, pems = "SEMTECH", ...)
 
 
 #RoyalTek GPS
@@ -92,6 +100,14 @@ importCAGE2PEMS(..., calibrator = "CAGE")
 importRoyalTek2PEMS(file.name = file.choose(), 
           file.type = c("special", "txt", "nmea"),
           vbox = "RoyalTEk", history = NULL, constants = NULL, ...) 
+
+
+#KML files
+
+
+importKML2PEMS(file.name = file.choose(), history = NULL, 
+    constants = NULL, source = "Unknown", ...) 
+
 
 }
 
@@ -101,7 +117,9 @@ importRoyalTek2PEMS(file.name = file.choose(),
   \item{x}{
   (A required object) For \code{is.pems}, any object to be tested as a \code{pems} object. 
   For \code{pems}, an object to be used as the starting point to make a \code{pems} 
-  object, so typically a \code{data.frame} or another \code{pems} object. 
+  object, so typically a \code{data.frame} or another \code{pems} object. For 
+  \code{pems.element}, an object to be used as the starting point to make a 
+  \code{pems.element}. For \code{rebuildPEMS}, a \code{pems} object to be rebuilt.
 } 
 
   \item{full.test}{
@@ -129,21 +147,19 @@ importRoyalTek2PEMS(file.name = file.choose(),
   generated for \code{pems.element} objects.    
 }
 
-
-
   \item{file.name}{
   (file connection, etc.) For \code{import...} functions, the file/source to be imported. Note: the 
   default, \code{file.name = file.choose()}, automatically opens a file browser if this argument is 
   not supplied.   
 }
 
-  \item{time.stamp, local.time, time.format}{
-   Relatively crude \code{import...} functions are useful for importing data from the clipboard or simple 
-   file types. However, these sometimes need careful handling of time data. If supplied, \code{time.stamp} 
-   and \code{local.time} are used as indices or ids (column numbers or names) for data series that the 
-   user would like to use as the data time stamp and local time records, respectively. If supplied, 
-   \code{time.format} sets the format in which the \code{time.stamp} should be imported if present/idenified.    
-}
+%  \item{time.stamp, local.time, time.format}{
+%   Relatively crude \code{import...} functions are useful for importing data from the clipboard or simple 
+%   file types. However, these sometimes need careful handling of time data. If supplied, \code{time.stamp} 
+%   and \code{local.time} are used as indices or ids (column numbers or names) for data series that the 
+%   user would like to use as the data time stamp and local time records, respectively. If supplied, 
+%   \code{time.format} sets the format in which the \code{time.stamp} should be imported if present/idenified.    
+%}
 
   \item{file.type, file.reader}{
   Data reader parameters for some \code{import...} functions. \code{file.type} is the type of file 
@@ -158,7 +174,11 @@ importRoyalTek2PEMS(file.name = file.choose(),
   respectively.   
 }
 
-  \item{pems, vbox, pm.analyzer, calibrator}{
+  \item{output}{
+  Where included in formal arguments, an option to control function output.
+}
+
+  \item{pems, vbox, pm.analyzer, calibrator, source}{
   (Character vectors) For some \code{import...} functions, data source descriptions may be automatically 
   added to the \code{pems} object. \code{pems} and \code{vbox} are two examples, but others, such as 
   vehicle and fuel descritpions can also be added in a similar fashion. Note: These are for user-reference, 
@@ -200,6 +220,8 @@ importRoyalTek2PEMS(file.name = file.choose(),
   \code{isPEMS}, \code{makePEMS} and \code{makePEMSElement} are historical code, retained for 
   backward compatibility.
 
+  \code{rebuildPEMS} rebuilds \code{pems} object as a different build version. 
+
   Crude \code{import...} functions import simple file structures, and are useful for getting 
   data quickly into \code{R:pems.utils}. \code{importTAB2PEMS} imports tab delimited files and 
   clipboard content. \code{importCSV2PEMS} imports comma delimited files. Both assume a simple 
@@ -220,7 +242,13 @@ importRoyalTek2PEMS(file.name = file.choose(),
   \code{importCAGE2PEMS} imports standard CAGE files and converts them to \code{pems} objects. 
   See \code{importParSYNC2PEMS} Notes below.
 
+  \code{importSEMTECH2PEMS} imports Sensors Inc. SEMTECH ECOSTAR files and converts them to \code{pems} 
+  objects. See Notes below. 
+
   \code{importRoyalTek2PEMS} imports \code{.txt} and \code{.nmea} format Royal Tek GPS files and 
+  converts them to \code{pems} objects. See Notes below. 
+
+  \code{importKML2PEMS} imports \code{.kml} format KML files and 
   converts them to \code{pems} objects. See Notes below. 
  
 }
@@ -235,6 +263,9 @@ importRoyalTek2PEMS(file.name = file.choose(),
   \code{pems} and \code{pems.element} functions return \code{pems} and \code{pems.element} 
   objects, respectively, made using the supplied file and any additional information also 
   supplied in the same call.
+
+  \code{rebuildPEMS} rebuilts the supplied \code{pems} object. The default rebuilds as the lastest 
+  build structure.
 
   \code{import...} functions return a \code{pems} object, made using the supplied file and any 
   additional information also supplied in the same call. 
@@ -282,7 +313,17 @@ importRoyalTek2PEMS(file.name = file.choose(),
 
   With \code{importCAGE2PEMS}, handling is similar to that with \code{importParSYNC2PEMS}. 
 
-  With \code{importRoyalTek2PEMS}, the Royal Tek data modifications are currently being documented.   
+  With \code{importSEMTECH2PEMS}, SEMTECH data is imported and modified as follows: data series names are simplified and 
+  converted to lower case to simplify use in R; the data series \code{time.stamp} and \code{local.time} 
+  are added (generated using the file time stamp). Defaults constants are assigned according to \code{fuel} (default 
+  \code{'petrol'}). This function in in-development and has so far only been used with files from two 
+  sources, so handle with care, and \code{time.format} has varied so may need resetting for some files.
+
+  With \code{importRoyalTek2PEMS}, the Royal Tek data modifications are currently being documented.  
+
+  With \code{importKML2PEMS}, the function attempts to import and time.stamp, latitude, longtiude and altitude data 
+  in the suppled KML file. This function in in-development and has so far only been used with KML files from one 
+  source, so handle with care.  
  
 }
 
@@ -314,7 +355,9 @@ pems$speed                 #the speed pems.element
 #import data file as pems using import... functions
 
 #For example, to import CSV file as pems object 
-#pems <- importCSV2PEMS() 
+\dontrun{
+pems <- importCSV2PEMS() 
+}
 
 }
 

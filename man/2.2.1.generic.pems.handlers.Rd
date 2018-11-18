@@ -1,30 +1,47 @@
-\name{2.1.1.generic.pems.handlers}
-\alias{2.1.1.generic.pems.handlers}
+\name{2.2.1.generic.pems.handlers}
+\alias{2.2.1.generic.pems.handlers}
 \alias{generic.pems.handlers}
 \alias{pems.generics}
 \alias{as.data.frame.pems}
+\alias{as.data.frame}
 \alias{dim.pems}
+\alias{dim}
 %\alias{nrow.pems}
 %\alias{ncol.pems}
 \alias{$.pems}
+\alias{$}
 \alias{$<-.pems}
+\alias{$<-}
 \alias{[.pems}
+\alias{[}
 \alias{[<-.pems}
+\alias{[<-}
 \alias{[[.pems}
+\alias{[[}
 \alias{[[<-.pems}
+\alias{[[<-}
 \alias{with.pems}
+\alias{with}
 \alias{subset.pems}
+\alias{subset}
 \alias{head.pems}
+\alias{head}
 \alias{tail.pems}
+\alias{tail}
 \alias{names.pems}
+\alias{names}
 \alias{names<-.pems}
+\alias{names<-}
 \alias{print.pems}
+\alias{print}
 \alias{plot.pems}
 \alias{summary.pems}
+\alias{na.omit.pems}
+\alias{na.omit}
 \alias{units.pems}
+\alias{units}
 \alias{units<-.pems}
-\alias{fortify.pems}
-
+\alias{units<-}
 
 \title{ Generic handling of pems objects }
 
@@ -59,7 +76,7 @@
 
 \method{names}{pems}(x, ...) <- value
 
-\method{print}{pems}(x, verbose = FALSE, n = 6, ...)
+\method{print}{pems}(x,..., rows=NULL, cols=NULL, width=NULL)
 
 \method{plot}{pems}(x, id = NULL, ignore = "time.stamp", n = 3, ...)
 
@@ -69,13 +86,11 @@
 
 \method{summary}{pems}(object, ...)
 
+\method{na.omit}{pems}(object, ...)
+
 \method{units}{pems}(x)
 
 \method{units}{pems}(x) <- value
-
-#misc
-
-\method{fortify}{pems}(model, data, ...)
 
 }
 
@@ -93,7 +108,7 @@
 }
 
   \item{i, j}{ 
-  Column (elements) and row indices, which operate in a stricter version of 
+  Row and column (elements) indices, which operate as a stricter version of 
   \code{data.frame} indices. See Note below.
 }
 
@@ -131,28 +146,20 @@
   (Logical) \code{simplify} returns a \code{pems.element} rather than a \code{pems} object 
   if possible. 
 }
-
-  \item{verbose}{ 
-  (Logical, TRUE/FALSE). Should the longer form of the output be returned? By default, most 
-  functions with short and long output versions return the shorter form.
-}
    
   \item{id, ignore}{ 
   (local plot parameters). \code{id} identifies which data series to plot; \code{ignore} identifies 
   which data series to ignore when leaving the choice of \code{id} to the function; and, \code{n} gives 
   the maximum number of data series to plot when leaving the choice of \code{id} to the function.
 }
-
+  \item{rows, cols, width}{
+  (numerics, optional). For \code{print}, if supplied, these reset the number of rows and columns 
+  to table when printing a \code{pems} object, and character width to print across.   
+}
   \item{n}{ 
   (various). For \code{plot}, sets the maximum number of data series to plot when leaving the choice of 
   \code{id} to the function. For \code{head} or \code{tail}, sets the number of rows. 
 }
-
-  \item{model}{
-   (various). With data, \code{fortify} inputs for \code{ggplot2} plots. 
-   See below.
-}
-
 
 }
 
@@ -192,7 +199,7 @@
   \code{subset(data.frame, expression)}.
 
   \code{print(pems.object)} provides a (to console) description of a \code{pems} 
-  object. 
+  object. This forshortens large datasets in a similar fashion to a tibble. 
 
   \code{plot(pems.object)} generates a standard R plot using selected data series in 
   a \code{pems} object.
@@ -201,16 +208,15 @@
   \code{pems} object when used in the form \code{names(pems)} or resets names when 
   used in the form \code{names(pems) <- new.names}. 
 
+  \code{na.omit(pems.object)} returns the supplied \code{pems} object with all rows 
+  including NAs removed. 
+
   \code{summary(pems.object)} generates a summary report for data series held in a 
   \code{pems} object. 
 
   \code{units(pems.object)} extracts the units from a supplied \code{pems} object 
   when used in the form \code{units(pems)} or sets/resets units when used in the form 
   \code{units(pems) <- new.units}. 
-
-  \code{fortify} methods are used by \code{ggplot2} functions to convert specialist 
-   object classes into a form that can be used directly with \code{ggplot2} functions. 
-   See below.   
 
 }
 
@@ -237,10 +243,6 @@
    e.g. \code{pems[["data"]]} extracts the \code{data.frame} component of the \code{pems} 
    object, \code{pems[["units"]]} extracts the \code{units} component, etc. See also 
    \code{\link{pems.structure}}.
-
-  The \code{fortify} method was developed by Hadley Wickham to simplify the integration of 
-  \code{ggplot2} functions and special object classes. It is a really nice idea for multiple 
-  reasons, the main one being that package users will probably never have to worry about it. 
  
 }
 
@@ -252,13 +254,6 @@
   H. Wickham. Advanced R. CRC Press, 2014.
 
   (Not yet fully implemented within this package.)
-
-  ggplot2:
-
-  H. Wickham. ggplot2: elegant graphics for data analysis. Springer New
-  York, 2009.
-
-  (See Chapter 9, section 9.3, pages 169-175, for discussion of fortify)
 
 }
 
@@ -291,9 +286,8 @@ a
 
 #Note: by default pems objects subsetting and inserting is 
 #more rigorous than data.frame subsetting/insertion
-#for example, the following would generate an error 
-#a[1:2, "conc.hc"] <- 8
-#because the target, a[], and insert, value, dimensions do not 
+#for example, a[1:2, "conc.hc"] <- 8 would generate error
+#because the target, a[1:2], and insert, 8, dimensions do not 
 #match exactly: target 2 x 1; insert 1 x 1 
 
 #By default no wrapping is applied.  
@@ -318,8 +312,6 @@ a
 #pems[name, force=c("na.pad.target", "na.pad.insert")]
 a$new <- 1:4
 a
-
-
 
 }
 

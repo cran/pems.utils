@@ -1,10 +1,12 @@
-\name{1.3.merge.data.pems}
-\alias{1.3.merge.data.pems}
+\name{2.3.1.merge.data.pems}
+\alias{2.3.1.merge.data.pems}
 \alias{merge.pems}
 \alias{align}
 \alias{cAlign}
 \alias{tAlign}
 \alias{findLinearOffset}
+\alias{stackPEMS}
+\alias{C_ylagxCOR}
 
 \title{
   Merging data and pems objects
@@ -25,9 +27,14 @@
   #alignment based on time.stamp
   tAlign(form, data1, data2 = NULL, order=TRUE, ...)
 
+  #basic stacking
+  stackPEMS(..., key=key, ordered=TRUE)
 
   #historical
-  findLinearOffset(x = NULL, y = NULL, offset.range = NULL)
+  findLinearOffset(x = NULL, y = NULL, ...)
+
+  #c wrappers
+  C_ylagxCOR(x, y)
 
 }
 
@@ -46,7 +53,8 @@
 }
 
   \item{...}{
-   (An other arguments) May be passed on but are typically ignored. See Notes.
+   (Any other arguments) For \code{stackPEMS} this is typically a series of \code{pems} objects 
+    to be stacked. For other functions, this may be passed on but are typically ignored. See Notes.
 }
 
   \item{form}{
@@ -60,17 +68,21 @@
    (\code{logical}; optional) If \code{TRUE} the function orders the data. 
 }
 
+  \item{key}{
+   (character or NSE) For \code{stackPEMS} the name to \code{key} column that 
+   identifies the data sources of elements in a stack of \code{pems} objects. 
+}
+
+  \item{ordered}{
+   (\code{logical}; default \code{TRUE}) For \code{stackPEMS}, when creating the 
+   source key should the order \code{pems} objects were supplied be retained. 
+}
+
   \item{x, y}{
   (Required objects, various classes) For \code{bindPEMS}, two \code{pems}, 
   \code{data.frame}, \code{pems.elements} or \code{vectors} to be bound together. 
   For \code{findLinearOffset}, two \code{pems.elements} or \code{vectors} to be 
   aligned.
-} 
-
-  \item{offset.range}{
-  (Numeric) For \code{findLinearOffset}, the 'lag window' to compare \code{x} 
-  and \code{x} across. By default, the function applies the widest possible 
-  window.  
 } 
     
 }
@@ -98,6 +110,8 @@
 
    \code{aligned.data <- cAlign(name1~name2, data1, data2)}
 
+   \code{C_ylagxCOR} is a wrapper for C++ code used by \code{cAlign}. 
+
    The \code{tAlign} function accepts a formula and two data sets 
    and returns a single data set (as a \code{pems} object) of the 
    time stamp aligned data. This is this done by matching entries 
@@ -106,6 +120,15 @@
    It is intended to be used in the form:
 
    \code{aligned.data <- tAlign(name1~name2, data1, data2)}
+
+   The \code{stackPEMS} function stacks two or more \code{pems} 
+   objects and returns a single \code{pems} object. \code{stackPEMS} 
+   stacks using \code{dplyr} function \code{bind_rows} so handles 
+   \code{pems} with column names that do not completely intersect. 
+   However it also attempts to units match. It is intended to be 
+   used in the form:
+
+   \code{stacked.data <- stackPEMS(data1, data2)}
 
    Historical functions:
 
@@ -127,11 +150,11 @@
 
 \references{
 
-   \code{align} uses the \code{plyr} function \code{join}.         
+   \code{align} uses the \code{dplyr} function \code{full_join}.         
 
    \code{cAlign} function uses the \code{stats} function \code{ccf}.         
 
-   \code{tAlign} uses the \code{plyr} function \code{join}.         
+   \code{tAlign} uses the \code{dplyr} function \code{full_join}.         
 
 }
 
@@ -151,17 +174,17 @@
   also allows several hidden arguments to refine outputs, the 
   logicals \code{plot}, \code{offset} and \code{pems}, which turn 
   off/on plot, offset and pems reporting individually, and  
-  code{output = c("plot", "offset", "pems")} or combinations thereof 
+  \code{output = c("plot", "offset", "pems")} or combinations thereof 
   also provides a single argument alternative.     
 
   \code{bindPEMS}: The historical function \code{bindPEMS} has 
-  been superceded by \code{align}, \code{cAlign} options. 
+  been superceded by \code{align}. 
 
   \code{findLinearOffset}: \code{findLinearOffset} is currently 
   retained but will most likely be removed from future versions of 
   \code{pems.utils}. 
 
-  The call \code{cAlign(x, y, output = "offset")} is equivalent to 
+  The call \code{cAlign(x~y, output = "offset")} is equivalent to 
   \code{findLinearOffset(x, y)}.
      
 }
@@ -172,7 +195,7 @@
 
 \seealso{
   See also: \code{\link{cbind}} for standard column binding in \code{R}; 
-  \code{\link{plyr}} for \code{\link{join}}. 
+  \code{\link{dplyr}} for \code{\link{full_join}}. 
 }
 \examples{
 
@@ -202,16 +225,18 @@ names(ans) <- c("x", "y")
 plot(ans$x, type="l"); lines(ans$y, col="blue", lty=2)
 
 #shortcut using cAlign
-#plot(x, type="l"); lines(y, col="blue", lty=2)
-#ans <- cAlign(x~y)
-#plot(ans$x, type="l"); lines(ans$y, col="blue", lty=2)
+\dontrun{
+plot(x, type="l"); lines(y, col="blue", lty=2)
+ans <- cAlign(x~y)
+plot(ans$x, type="l"); lines(ans$y, col="blue", lty=2)
+}
 
 
 ###########
 ##example 2 
 ###########
 
-##aligning and merging data sets
+##aligning data sets
 ##(pems object example)
 
 #make some offset data
@@ -224,24 +249,42 @@ ans <- cAlign(~conc.co, p1, p2)
 #this aligns by comparing p1$conc.co and p2$conc.co
 #and aligning at point of best linear regression fit
 
+\dontrun{
+
 #compare:
 
-#cAlign(~conc.co, p2, p1)
-#cAlign(conc.co2~conc.co, p1, p2)
+cAlign(~conc.co, p2, p1)
+cAlign(conc.co2~conc.co, p1, p2)
 #(aligns using p1$conc.co2 and p2$conc.co)
-#cAlign(conc.co2~conc.co, p1)
+cAlign(conc.co2~conc.co, p1)
 #(realigns just conc.co within p1 based on best fit 
-# with conc.co2 and returns as output ans)
- 
-#time stamp alignment using join 
-#tAlign(~time.stamp, p1, p2)
+# with conc.co2 and returns as output ans) 
+
+#time stamp alignment  
+tAlign(~time.stamp, p1, p2)
 
 #this aligns by pairing elements in p1$time.stamp 
 #and p2$time.stamp
-#(NOTE: if time stamps have different names, as in 
+#(if time stamps have different names 
 # tAlign(time1~time2, p1, p2), the time stamp name 
-# from p1, would be retained when merging time1$p1 
-# and time2$p2, generating ans$time1)  
+# from p1 would be retained when merging p1$time1 
+# and p2$time2, generating [output]$time1)  
+
+}
+
+###########
+##example 3 
+###########
+
+##stacking pems
+
+#make some offset data
+p1 <- pems.1[1:2, 1:4]
+p2 <- pems.1[3, 2:4]
+p3 <- pems.1[4:6, 1:3]
+
+#stack  
+stackPEMS(p1, p2, p3, key=source)
 
 }
 

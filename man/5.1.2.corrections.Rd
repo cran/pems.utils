@@ -1,9 +1,10 @@
-\name{2.3.4.corrections}
-\alias{2.3.4.corrections}
+\name{5.1.2.corrections}
+\alias{5.1.2.corrections}
 \alias{corrections}
 \alias{calcPack2}
 \alias{correctInput}
 \alias{zeroNegatives}
+\alias{correctBaseline}
 
 
 \title{
@@ -11,18 +12,19 @@
 }
 
 \description{
-  Corrections are a special subset of calculations which by default 
+  Corrections are a special subset of functions which by default 
   write over the elements that they recalculate.
 }
 
 \usage{
-
 
 correctInput(input = NULL, ..., data = NULL,
          correction = NULL)
 
 zeroNegatives(input = NULL, ..., data = NULL, 
          screen = FALSE)
+
+correctBaseline(x, ..., data = NULL, output = "ans")
 
 #associated
 
@@ -37,6 +39,11 @@ calcPack2(input, ..., settings = NULL, data = NULL)
    (Required data series typically vectors) The input to use when makin a correction. This 
    is typically a vector or element in either a \code{data.frame} or \code{pems} object.
    }
+
+  \item{x}{
+   (For \code{correctBaseline}) (Required data series typically vectors) The input to use when makin a correction. This 
+   is typically a vector or element in either a \code{data.frame} or \code{pems} object.
+  }
 
   \item{\dots}{
    (Optional) Other arguments, typically passed on. 
@@ -57,6 +64,12 @@ calcPack2(input, ..., settings = NULL, data = NULL)
    it, this should be set to \code{TRUE}.  
    }
 
+  \item{output}{
+  (character) Where options exists for the function output, the required output. For 
+  \code{correctBaseline}, current options: \code{'ans'} (the default) and 
+  \code{'diagnostic'}.
+  }
+
   \item{settings}{
    (For \code{calcPack2}, list) Any arguments to be used as settings when handling 
    \code{pems.elements}. Unless developing functions, this can typically be ignored. 
@@ -74,6 +87,10 @@ calcPack2(input, ..., settings = NULL, data = NULL)
   \code{zeroNegatives} resets any negative values in an \code{input} to 
   zero.
 
+   \code{correctBaseline} attempts to correct the baseline of a supplied data 
+   (\code{pems.element} \code{vector}) time-series. Baseline corrections are 
+   carried out using methods from the \code{\link{baseline}} package. See Below.
+
   \code{calcPack2} is an alternative version of \code{\link{calcPack}}. See 
   associated help for details. 
  
@@ -83,10 +100,20 @@ calcPack2(input, ..., settings = NULL, data = NULL)
 \value{
   With the exception of \code{calcPack2}, all the above functions generate 
   input corrections. 
+
+   \code{correctBaseline} returns the supplied data time-series (\code{x}) after applying the 
+   requested baseline correction (see below).
+
 }
 
 \references{
-  References in preparation.
+
+  baseline:
+
+  Kristian Hovde Liland and Bjorn-Helge Mevik (2015). baseline:
+  Baseline Correction of Spectra. R package version 1.2-1.
+  https://CRAN.R-project.org/package=baseline
+
 }
 
 \author{
@@ -113,6 +140,18 @@ calcPack2(input, ..., settings = NULL, data = NULL)
 
   See \code{\link{calcChecks}} documentation for details. 
 
+  \code{correctBaseline} is a recent transfer from \code{sleeper.service}. 
+  It uses \code{\link{baseline}} functions to provide 'best guess' baseline 
+  corrections. 
+
+  By default, it applies: 
+
+  \code{baseline(..., method="rollingBall", wm=50, ws=50)} 
+
+  Please Note the 'best guess': As baseline corrections are based statistical 
+  estimates of likely baselines rather than actual measures of drift these should 
+  be treated as estimates.
+
   Unit management is by \code{\link{convertUnits}}. See associated help 
   documentation for details.         
  
@@ -124,9 +163,11 @@ calcPack2(input, ..., settings = NULL, data = NULL)
 
 \seealso{
 
+  \code{\link{baseline}} regarding baseline corrections.
+
   \code{\link{common.calculations}}, \code{\link{calcVSP}} or \code{\link{calcEm}} for calculation functions.
  
-  \code{\link{getElement}} (\code{\link{checkInput}} if passing elements as inputs), \code{\link{checkUnits}} 
+  \code{\link{getElement}} (\code{\link{checkUnits}, etc} 
   and \code{\link{convertUnits}} for data management.
 
 }

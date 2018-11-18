@@ -1,5 +1,5 @@
-\name{2.6.conditioning.pems.data}
-\alias{2.6.conditioning.pems.data}
+\name{2.3.2.conditioning.pems.data}
+\alias{2.3.2.conditioning.pems.data}
 \alias{conditioning.pems.data}
 \alias{cutBy}
 \alias{cutByRow}
@@ -16,10 +16,10 @@
 \usage{
 
 cutBy(ref = NULL, ..., data = NULL, cut.method = NULL, 
-        labels = NULL, fun.name = "cutBy", hijack= FALSE)
+        labels = NULL, fun.name = "cutBy")
 
 cutByRow(ref = NULL, n = 4, rows = NULL, ..., data = NULL,  
-        fun.name = "cutByRow", hijack= FALSE)
+        fun.name = "cutByRow")
 
 }
 
@@ -51,10 +51,9 @@ cutByRow(ref = NULL, n = 4, rows = NULL, ..., data = NULL,
   (Character vector) For \code{cutBy} only, a vector of names to be assigned to the cut regions.
 } 
 
-  \item{fun.name, hijack}{
-  (Various managment arguments) \code{fun.name} is the name of the parent function, to be used in 
-  error messaging. \code{hijack} is a logical) that developers can use to locally 'hijack' this 
-  function. See Note on \code{hijack} below.
+  \item{fun.name}{
+  (function managment argument) \code{fun.name} is the name of the parent function, to be used in 
+  error messaging. 
 }
  
   \item{n, rows}{
@@ -98,16 +97,7 @@ cutByRow(ref = NULL, n = 4, rows = NULL, ..., data = NULL,
   Karl Ropkins
 }
 \note{
-
-  \code{hijack} is an in-development argument, supplied to allow code developers to run multiple 
-  functions in different function environments. When developers 'mix and match' code from 
-  several sources it can become unstable, especially if functions are run within functions within 
-  functions, etc. \code{hijack = TRUE} and associated code makes a function local to 'side-step' 
-  this issue. This work by assuming/expecting all inputs to be local, i.e. supplied directly by 
-  the code user.         
-
   Various other \code{cutBy...} options can be very simply encoded. 
- 
 }
 
 \section{Warning }{

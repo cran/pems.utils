@@ -1,5 +1,5 @@
-\name{2.2.unit.handlers}
-\alias{2.2.unit.handlers}
+\name{2.3.4.unit.handlers}
+\alias{2.3.4.unit.handlers}
 \alias{getUnits}
 \alias{setUnits}
 \alias{convertUnits}
@@ -18,19 +18,17 @@ Various pems.utils functions for the management of data units.
 \usage{
 
 getUnits(input = NULL, data = NULL, ..., 
-         if.missing = c("stop", "warning", "return"), 
-         hijack = FALSE)
+         if.missing = c("stop", "warning", "return"))
 
 setUnits(input = NULL, units = NULL, data = NULL, ..., 
          if.missing = c("stop", "warning", "return"), 
          output = c("input", "data.frame", "pems", "special"),
-         force = FALSE, overwrite = FALSE, hijack = FALSE)
+         force = FALSE, overwrite = FALSE)
 
 convertUnits(input = NULL, to = NULL, from = NULL, data = NULL, ..., 
          if.missing = c("stop", "warning", "return"), 
          output = c("input", "data.frame", "pems", "special"), 
-         unit.conversions = NULL, force = FALSE, overwrite = FALSE, 
-         hijack = FALSE)
+         unit.conversions = NULL, force = FALSE, overwrite = FALSE)
 
 #local unit.conversion method handling 
 
@@ -83,11 +81,6 @@ listUnitConversions(unit.conversions = ref.unit.conversions, ...,
   (Character vector) Output mode for function results. Options currently include: \code{special}, 
   \code{input}, \code{data.frame}, and \code{pems}. See \code{force}, \code{overwrite} and Values 
   below for further details. 
-}
-
-  \item{hijack}{
-   (Logical) The argument \code{code} allows functions to run directly. Can be ignored when running 
-   functions directly. See \code{\link{common.calculations}} for details.
 }
 
   \item{force}{
@@ -207,8 +200,7 @@ listUnitConversions(unit.conversions = ref.unit.conversions, ...,
 
 #work with data units
 
-#getting units
-#(where assigned)
+#getting units (where assigned)
 getUnits(velocity, pems.1) #km/h
 
 #setting units

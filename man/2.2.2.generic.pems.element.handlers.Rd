@@ -1,12 +1,17 @@
-\name{2.1.2.generic.pems.element.handlers}
-\alias{2.1.2.generic.pems.element.handlers}
+\name{2.2.2.generic.pems.element.handlers}
+\alias{2.2.2.generic.pems.element.handlers}
 \alias{generic.pems.element.handlers}
 \alias{pems.element.generics}
 \alias{print.pems.element}
 \alias{plot.pems.element}
+\alias{plot}
 \alias{units.pems.element}
 \alias{units<-.pems.element}
 \alias{summary.pems.element}
+\alias{summary}
+\alias{as.pems.pems.element}
+\alias{round.pems.element}
+\alias{round}
 \alias{[.pems.element}
 \alias{[<-.pems.element}
 
@@ -24,7 +29,9 @@
 
 \method{[}{pems.element} (x, i, ..., force = TRUE, wrap = FALSE) <- value
 
-\method{print}{pems.element}(x, ...)
+\method{as.pems}{pems.element}(x, ...)
+
+\method{print}{pems.element}(x, ..., n = NULL, rows = NULL, width = NULL)
 
 \method{plot}{pems.element}(x, y = NULL, xlab = NULL, ylab = NULL, ...)
 
@@ -33,6 +40,8 @@
 \method{units}{pems.element}(x) <- value
 
 \method{summary}{pems.element}(object, ...)
+
+\method{round}{pems.element}(x, ...)
 
 }
 
@@ -48,7 +57,6 @@
   Element indices, which operate in a similar fashion to \code{vector} indices.
 }
 
-
   \item{...}{ 
   Addition options, typically passed to associated default method(s).
 }
@@ -61,6 +69,11 @@
   \item{value}{
    (Vector) For calls in \code{pems.element[1] <- value} or \code{units(pems.element) <- value}, 
    the value to be inserted.
+}
+
+  \item{n, rows, width}{
+   (Numerics) For \code{print(pems)}, number of elements, rows or screen width to foreshorten 
+   print output to. 
 }
 
   \item{y, xlab, ylab}{ 
@@ -81,13 +94,18 @@
   \code{plot(pems.element)} generates a standard R plot of the supplied 
   \code{pems.element}. 
 
-
   \code{units(pems.element)} extracts the units from the supplied 
   \code{pems.element}.  
  
 }
 
 \author{ Karl Ropkins }
+
+\note{
+  Special \code{round(pems.element)} is required to as a wrapper to \code{round.Date} and 
+  \code{round.POSIXt} handling.
+}
+
 
 \examples{
 
