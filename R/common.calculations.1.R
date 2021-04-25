@@ -46,9 +46,13 @@
 ################################
 
 pemsOutput <- function(x, ..., track.name=TRUE){
+  
      args <- list(...)
+     ln <- quo_name(enquo(x))
      if(is.null(args$output)) args$output <- "input"
      if(args$output=="input") return(x) 
+#############
+#next line not tracking fun.name at moment
      if(args$output %in% c("pems", "data.frame") && is.null(args$data))
          stop("no data to pack with")
      if(!"pems" %in% class(args$data))
@@ -57,8 +61,9 @@ pemsOutput <- function(x, ..., track.name=TRUE){
      #change track name when packing x
      #n.x <- quo_name(enquo(x))
      #############
+
      n.x <- if(track.name && "name" %in% names(attributes(x)))
-                  attributes(x)$name else quo_name(enquo(x))
+                  attributes(x)$name else ln
      args$data[n.x, force=c("na.pad.target", "na.pad.insert")] <- x
      if(args$output=="data.frame") args$data <- pemsData(args$data)
      args$data
@@ -258,7 +263,7 @@ calcJerk <- function(accel = NULL, time = NULL, data = NULL,
     #get inputs
     #accel
     accel <- getPEMSElement(!!enquo(accel), data, units="m/s/s")
-    time <- getPEMSElement(!!enquo(time), time, units="s")
+    time <- getPEMSElement(!!enquo(time), data, units="s")
 
     #my assumption
     #first d.accel/d.time is 0
@@ -268,7 +273,7 @@ calcJerk <- function(accel = NULL, time = NULL, data = NULL,
     d.time <- diff(time)
 
     #my calculation
-    jerk <- c(0, d.accel / d.time)
+    jerk <- c(NA, d.accel / d.time)
 
     #my units
     attr(jerk, "name") <- "jerk"

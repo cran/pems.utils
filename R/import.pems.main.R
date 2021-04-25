@@ -137,27 +137,30 @@ import2PEMS <- function(file.name = file.choose(), ...,
 #from this point forward we could have a pems.list  
   
   #if required get time.stamp info from data and fromat time.stamp
-  if(any(c("time.stamp", "date", "time") %in% names(args)))
-     data$time.stamp <- getTimeStampFromData(args$time.stamp, 
-                                             args$date, args$time,
-                                             data)
-  if("time.stamp" %in% names(data)){
-    data <- setDataTimeStamp(data, args$time.format, 
-                             args$tz, output="data")  
-    temp <- if(is.null(args$tz)) "Y-M-D H:M:S UTC" else 
-      paste("Y-M-D H:M:S", args$tz, sep=" ")
-    #check this has worked NOT died..?
-    units[which(names(data)=="time.stamp")] <- temp
+  if(!is.logical(args$time.stamp) || args$time.stamp) {               #don't do if time.stamp=FALSE
+     if(any(c("time.stamp", "date", "time") %in% names(args)))
+        data$time.stamp <- getTimeStampFromData(args$time.stamp, 
+                                                args$date, args$time,
+                                                data)
+     if("time.stamp" %in% names(data)){
+        data <- setDataTimeStamp(data, args$time.format, 
+                                 args$tz, output="data")  
+        temp <- if(is.null(args$tz)) "Y-M-D H:M:S UTC" else 
+        paste("Y-M-D H:M:S", args$tz, sep=" ")
+        #check this has worked NOT died..?
+        units[which(names(data)=="time.stamp")] <- temp
+     }
   }
   args <- stripFormals(getTimeStampFromData, setDataTimeStamp, args=args)
 
   #if required get local.time info from data
-  # data[, local.time], get.from.time.stamp
-  if("local.time" %in% names(args))
-      data$local.time <- getLocalTimeFromData(args$local.time, data)
-  if("local.time" %in% names(data)){
-      #check units handled properly?
-      units[which(names(data)=="local.time")] <- "s"
+  if(!is.logical(args$local.time) || args$local.time) {               #don't do if local.time=FALSE
+     if("local.time" %in% names(args))
+        data$local.time <- getLocalTimeFromData(args$local.time, data)
+     if("local.time" %in% names(data)){
+        #check units handled properly?
+        units[which(names(data)=="local.time")] <- "s"
+     }
   }
   args <- stripFormals(getLocalTimeFromData, args=args)  
   
@@ -808,11 +811,20 @@ setDataTimeStamp <- function(data, time.format="%d/%m/%Y %H:%M:%OS",
 
 getTimeStampFromData <- function(time.stamp=NULL, date=NULL, 
                                      time=NULL, data){
+  #allows
+  #time.stamp = TRUE, 
+  #time.stamp = number, 
+  #time.stamp = name, 
+  #time.stamp = vector of values
   if(!is.null(time.stamp)){
     if(length(time.stamp)==1){
       if(is.character(time.stamp) && time.stamp %in% names(data)) 
         time.stamp <- data[, time.stamp]
-    } else if(is.numeric(time.stamp)) time.stamp <- data[, time.stamp]
+      if(is.numeric(time.stamp)) 
+        time.stamp <- data[, time.stamp]
+      if(is.logical(time.stamp) && time.stamp) 
+        time.stamp <- data$time.stamp
+    }  
   }
   if(length(time.stamp)==nrow(data)) return(time.stamp)
   if(!is.null(date)){
@@ -841,7 +853,10 @@ getLocalTimeFromData <- function(local.time, data){
                                                        min(data$time.stamp, 
                                                        na.rm=TRUE))
         } else if(local.time %in% names(data)) data[, local.time]
-      } else if(is.numeric(local.time)) data[, local.time]
+      } else { 
+        if(is.numeric(local.time)) data[, local.time] else 
+         if(is.logical(local.time) && local.time) data$local.time
+      }
   } 
   #warning if null?
   local.time

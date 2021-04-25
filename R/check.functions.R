@@ -296,8 +296,7 @@ checkUnits <- function (input = NULL, units = NULL, data = NULL,
 
     #get input
     ans <- getPEMSElement(!!enquo(input), data, ref.name="input")
-
-
+    
     input.name <- if(is.character(input.name))
                        input.name[1] else attributes(ans)$name[1]
 
@@ -486,8 +485,8 @@ checkOutput <- function (input = NULL, data = NULL,
                        fun.name=fun.name)
 
     #get input
-    ans <- getPEMSElement(!!enquo(input), data, ref.name="input")
-
+    ans <- getPEMSElement(!!enquo(input), data, ref.name="input",
+                          track.name = FALSE)
 
     input.name <- if(is.character(input.name))
                        input.name[1] else attributes(ans)$name[1]

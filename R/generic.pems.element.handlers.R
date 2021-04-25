@@ -60,17 +60,20 @@ as.data.frame.pems.element <- function(x, ...){
 #translation to data.frame changed
 #    temp <- data.frame(as.vector(x))
 #####################
+#not sure why I cannot simplify this!!!
+#####################
     temp <- as.data.frame(as.vector(x), drop=FALSE)
     names(temp) <- if(is.null(attr(x, "name")))
                        "x" else 
                            as.character(attr(x, "name")[1])
     names(temp) <- make.names(names(temp))
+    #class(temp[,1]) <- class(x)
 #################
 #this attribute handling needs to be checked
 #################
-    attributes(temp[,names(temp)]) <- attributes(x)
+    #this replaces attributes(temp[,1]) <- attributes(x)
+    temp[[1]] <- x
     temp    
-
 }
 
 
@@ -124,13 +127,16 @@ print.pems.element <- function (x, ..., n = NULL, rows = NULL, width = NULL){
              out.3 <- paste(out.3, " [", attributes(x)$units, "]", sep="")
 
     out.1 <- capture.output(print(ans, ...))
+    
 #testing this to strip old factor labels
-    if("factor" %in% names(attributes(ans)))
+    if("levels" %in% names(attributes(ans)))
         out.1 <- out.1[1:(length(out.1)-1)]
 
 #this one makes nice ...
     temp <- out.1[1] #all have same spacing
     indent <- gregexpr("[]]", temp)[[1]]-3
+    if(length(indent)>1) indent <- indent[1]
+#print(indent)
     indent <- if(indent>0) paste(rep(" ", indent), collapse="") else ""
     indent <- paste(indent, "...", sep="")
 
@@ -529,10 +535,27 @@ round.pems.element <- function(x,...){
 }
 
 
+##########################
+##########################
+##c.pems.element
+##########################
+##########################
 
+#kr 03/01/2021 v 0.0.2
 
+#what it does
+##########################
+#combines pems.elements 
+#but merge attributes
+#
 
+#to do
+##########################
+#tidy
+#think about force, simplify
 
+#currently using cpm as local c 
+#because code does not work as method...
 
 
 

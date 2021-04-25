@@ -22,14 +22,13 @@
 \alias{importKML2PEMS}
 \alias{importSEMTECH2PEMS}
 
-
-
 \title{
   making and importing data
 }
 
 \description{
-  Various pems.utils functions to make and import data as pems objects.
+  Various pems.utils functions to make and import data as 
+  pems objects.
 }
 
 \usage{
@@ -53,61 +52,61 @@ rebuildPEMS(x, ...)
 
 \method{as.pems}{data.frame}(x, ...)
 
-
 #importing data as pems objects
 
 #general
 
-import2PEMS(file.name = file.choose(), ..., file.reader = read.delim, 
+import2PEMS(file.name = file.choose(), ..., 
+          file.reader = read.delim, 
           output="pems")
 
 importTAB2PEMS(..., file.reader = read.delim)
 
 importCSV2PEMS(..., file.reader = read.csv)
 
-
 #Horiba OBS
 
-importOBS2PEMS(file.name = file.choose(), pems = "Horiba OBS", 
+importOBS2PEMS(file.name = file.choose(), 
+          pems = "Horiba OBS", 
           constants = NULL, history = NULL, 
           analytes = c("co", "co2", "nox", "hc"),  
           fuel = c("petrol", "diesel", "gasoline"), ...)
 
-importOB12PEMS(file.name = file.choose(), pems = "Horiba OBS", 
+importOB12PEMS(file.name = file.choose(), 
+          pems = "Horiba OBS", 
           constants = NULL, history = NULL, 
           analytes = c("co", "co2", "nox", "hc"),  
           fuel = c("petrol", "diesel", "gasoline"), ...)
-
 
 #3DATX parSYNC
 
-importParSYNC2PEMS(file.name = file.choose(), reset.signals = TRUE, 
-         history = NULL, constants = NULL, pm.analyzer = "parSYNC",
-         ... )
+importParSYNC2PEMS(file.name = file.choose(), 
+          reset.signals = TRUE, 
+          history = NULL, constants = NULL, 
+          pm.analyzer = "parSYNC", ... )
 
 #3DATX CAGE
 importCAGE2PEMS(..., calibrator = "CAGE")
 
-
 #Sensors Inc SEMTECH
 
-importSEMTECH2PEMS(file.name = file.choose(), history = NULL, 
-          constants = NULL, pems = "SEMTECH", ...)
+importSEMTECH2PEMS(file.name = file.choose(), 
+          history = NULL, constants = NULL, 
+          pems = "SEMTECH", ...)
 
 
 #RoyalTek GPS
 
 importRoyalTek2PEMS(file.name = file.choose(), 
           file.type = c("special", "txt", "nmea"),
-          vbox = "RoyalTEk", history = NULL, constants = NULL, ...) 
+          vbox = "RoyalTEk", history = NULL, 
+          constants = NULL, ...) 
 
 
 #KML files
 
-
 importKML2PEMS(file.name = file.choose(), history = NULL, 
-    constants = NULL, source = "Unknown", ...) 
-
+          constants = NULL, source = "Unknown", ...) 
 
 }
 
@@ -115,24 +114,31 @@ importKML2PEMS(file.name = file.choose(), history = NULL,
 \arguments{
 
   \item{x}{
-  (A required object) For \code{is.pems}, any object to be tested as a \code{pems} object. 
-  For \code{pems}, an object to be used as the starting point to make a \code{pems} 
-  object, so typically a \code{data.frame} or another \code{pems} object. For 
-  \code{pems.element}, an object to be used as the starting point to make a 
-  \code{pems.element}. For \code{rebuildPEMS}, a \code{pems} object to be rebuilt.
+  (A required object) For \code{is.pems}, any object to 
+  be tested as a \code{pems} object. 
+  For \code{pems}, an object to be used as the starting 
+  point to make a \code{pems} object, so typically a 
+  \code{data.frame} or another \code{pems} object. For 
+  \code{pems.element}, an object to be used as the starting 
+  point to make a \code{pems.element}. 
+  For \code{rebuildPEMS}, a \code{pems} object to be 
+  rebuilt.
 } 
 
   \item{full.test}{
-  (Logical) For \code{is.pems}, should the full pems test be applied and the \code{pems} 
-  structure confirmed?  
+  (Logical) For \code{is.pems}, should the full pems 
+  test be applied and the \code{pems} structure 
+  confirmed?  
 } 
 
   \item{\dots}{
-  (Optional) Other arguments, handling varies. For \code{is.pems} these are ignored. For 
-  \code{pems} these are added to the pems object unmodified. For \code{import...} 
-  functions, these are passed on and added to the \code{constants} component of the 
-  \code{pems} object. Note: This different handling is experimental and may be subject to 
-  change in future. 
+  (Optional) Other arguments, handling varies. For 
+  \code{is.pems} these are ignored. For \code{pems} 
+  these are added to the pems object unmodified. For 
+  \code{import...} functions, these are passed on and 
+  added to the \code{constants} component of the 
+  \code{pems} object. Note: This different handling 
+  is experimental and may be subject to change in future. 
 }
 
   \item{units, constants, history}{

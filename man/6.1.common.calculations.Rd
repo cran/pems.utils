@@ -1,5 +1,5 @@
-\name{3.1.1.common.calculations}
-\alias{3.1.1.common.calculations}
+\name{6.1.common.calculations}
+\alias{6.1.common.calculations}
 \alias{common.calculations}
 \alias{calcDistance}
 \alias{calcSpeed}

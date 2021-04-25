@@ -35,23 +35,24 @@ import(dplyr)
 #import(plyr) #replacing with dplyr
 
 ## requested by CRAN
-
-importFrom("grDevices", "colorRampPalette", "gray")
+importFrom("grDevices", "colorRampPalette", "gray",
+           "boxplot.stats")
 importFrom("graphics", "abline", "arrows", "plot")
 importFrom("methods", "is")
 importFrom("stats", "aggregate", "as.formula", "ccf", "model.frame",
            "na.omit", "na.pass", "complete.cases", "approx", "lm", 
-           "predict")
+           "predict", "quantile", "update")
 importFrom(utils, read.table, read.csv, read.delim, write.table, 
            head, tail, capture.output, install.packages, 
            installed.packages)
 importFrom(baseline, baseline, getBaseline, getCorrected)
 
 #importFrom(lazyeval, lazy, lazy_eval) #replaced this with rlang, eval_tidy, etc...
-importFrom(rlang, eval_tidy, quo_is_null, get_expr, exprs)
+importFrom(rlang, eval_tidy, quo_is_null, get_expr, exprs, 
+           quos)
 
 #I don't think I need to importFrom round because 
-#  it is primative and in base...
+#  it is primitive and in base...
 
 
 
@@ -103,6 +104,10 @@ S3method(na.omit, pems)
 
 S3method(as.data.frame, pems.element)
 S3method(as.pems, pems.element)
+
+#S3method(c, pems.element)
+export(cpe)
+
 S3method(print, pems.element)
 S3method("[", pems.element)
 S3method("[<-", pems.element)
@@ -192,8 +197,10 @@ export(stackPEMS)
 export(C_ylagxCOR) 
 
 #export
-export(exportPEMSData)
+export(exportPEMS)
+export(exportPEMS2TAB)
 export(exportPEMS2CSV)
+#export(exportPEMSData) #gone 2019/03 0.2.25. 
 
 ###############################
 #tidyverse
@@ -324,14 +331,18 @@ export(pemsPlot)
 export(panel.pemsPlot)
 export(preprocess.pemsPlot)
 export(pemsXYZCondUnitsHandler)
+export(panel.routePath)
 export(WatsonPlot)
 export(preprocess.WatsonPlot)
 export(panel.WatsonBinPlot)
 export(panel.WatsonContourPlot)
 export(panel.WatsonSmoothContourPlot)
-
-
-
+export(coldStartPlot) 
+export(panel.coldStartPlot1)
+export(panel.coldStartPlot2)
+export(speedEmPlot)
+export(VSPPlot)
+export(VSPBinPlot)
 
 #calcs
 export(calcDistance)
@@ -344,12 +355,17 @@ export(calcVSP_JimenezPalacios)
 export(calcEm)
 export(calcEm_HoribaPitot)
 
+#fits
+export(fitColdStart)
+export(fitSpeedEm)
+
+
 #bins
-export(binVSP)
+export(refVSPBin)
 ##not exporting/removing...
 ##export(binVSP.old)
-export(binVSP_NCSU.14)
-export(binVSP_MOVES.23)
+export(refVSPBin_NCSU.14)
+export(refVSPBin_MOVES.23)
 
 #calc handlers
 export(calcChecks)
@@ -361,9 +377,11 @@ export(correctInput)
 export(zeroNegatives)
 export(correctBaseline)
 
-#cutBy
-export(cutBy)
-export(cutByRow)
+#reference
+export(refRow)
+export(refX)
+export(refEngineOn)
+export(refDrivingMode)
 
 #time.handlers
 export(regularize)

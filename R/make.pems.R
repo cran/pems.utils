@@ -90,7 +90,7 @@ pems <- function(x, units = NULL, constants = NULL,
 #################
 
                  if(is(x)[1]=="pems" && is.null(units)) return(rebuildPEMS(x))
-
+  
 ##################
 #testing 
 #allow x = vector or pems.element
@@ -152,7 +152,6 @@ pems <- function(x, units = NULL, constants = NULL,
     #restack pems so all columns are pems.elements
     for(i in names(output))
          output[["data"]][, i] <- output[, i]
-
     rebuildPEMS(output)
 }
 
@@ -198,16 +197,63 @@ is.pems <- function(x, full.test = TRUE, ...){
    output <- if(is(x)[1]=="pems") TRUE else FALSE
    #full.test
    if(full.test){
-       if(is.null(x)) comment(output) <- "NULL" else 
-           if(is(x)[1]=="pems") comment(output) <- "pems" else
-               if(is.data.frame(x)) comment(output) <- "data.frame" else
-                    comment(output) <- "other"
+     comment(output) <- if(is.null(x)) "NULL" else 
+           if(is(x)[1]=="pems") "pems" else
+               if(is.data.frame(x)) "data.frame" else "other"
    }
    #output
    output
 }
 
 isPEMS <- function(...) is.pems(...)
+
+
+
+##########################
+##########################
+##test.pems
+##########################
+##########################
+
+#kr 26/09/2019 v 0.0.1
+
+#what it does
+##########################
+#tests a pems for faulty configuration
+
+#not exported
+
+#not finished 
+
+test.pems <- function(x, verbose = FALSE, ...){
+  
+  temp <- rebuildPEMS(x)[[]]
+  #class(temp) <- "not.pems"
+  
+  reply <- names(temp$data)
+  if(is.null(reply))
+    message("\npems object: no named data [suspect]") else 
+      message("\npems object: ", ncol(temp$data), 
+              " data series (each ", nrow(temp$data), " cases)")
+  
+  reply <- names(temp)[names(temp) %in% c("units", "constants", "history")]
+  if(length(reply) < 1)
+    message("\twith no supporting structure [suspect]") else 
+      message("\twith supporting structures: ", paste(reply, collapse=", ", sep="")) 
+  
+  #remember hidden 
+  #refine
+  
+  reply <- names(temp)[!names(temp) %in% c("data", "units", "constants", "history", "dem")]
+  if(length(reply) > 0)
+    message("\t[and unique tags: ", paste(reply, collapse=", ", sep=""), "]\n")
+  
+  invisible(x)
+}
+
+
+
+
 
 
 

@@ -79,9 +79,20 @@ align <- function(data1, data2, n=0, ...){
    extra.args <- list(...)
    this.call <- if("this.call" %in% names(extra.args))
                      extra.args$this.call else match.call()
+   data1 <- rebuildPEMS(makePEMS(data1), "new")
+   data2 <- rebuildPEMS(makePEMS(data2), "new")
 
-   data1 <- rebuildPEMS(makePEMS(data1), "old")
-   data2 <- rebuildPEMS(makePEMS(data2), "old")
+   att <- listUpdate(attributes(data1)$pems.tags,
+                     attributes(data1)$pems.tags, 
+                     ignore.b="history")
+   #att <- attributes(data1)
+#print(names(att))
+   #att <- listUpdate(att, attributes(data2))
+#print(names(att$pems.tags))
+#print(names(data1[["constants"]])) 
+
+  data1 <- rebuildPEMS(makePEMS(data1), "old")
+  data2 <- rebuildPEMS(makePEMS(data2), "old")
 
    new.names <- make.names(c(names(data1), names(data2)), unique=TRUE)
    names(data1) <- new.names[1:ncol(data1)]
@@ -107,17 +118,21 @@ align <- function(data1, data2, n=0, ...){
    new.units <- cbind(units(data1), units(data2))
    new.units <- new.units[new.names[new.names %in% names(new.units)]]
 
-   #smash pems
-   class(data1) <- "list"
-   class(data2) <- "list"
-   data1 <- listUpdate(data2, data1, ignore=c("data", "units"))
-   data1 <- listUpdate(list(data=new.data, units=new.units), data1)
+   #get rest of structure
+   #class(data1) <- class(data1)[class(data1)!="pems"]
+   #class(data2) <- class(data2)[class(data2)!="pems"]
+#print(data1)
+   out <- pems(x=new.data, units=new.units)
+   attributes(out)$pems.tags <- listUpdate(att, attributes(out)$pems.tags)
+#   data1 <- listUpdate(data2, data1, ignore=c("data", "units"))
+#   data1 <- listUpdate(list(data=new.data, units=new.units), data1)
+
 #this should keep all tags
 #but needs testing
-   data1$history <- this.call
-   class(data1) <- "pems" 
+   out[["history"]] <- this.call
+   #class(data1) <- "pems" 
 
-   return(rebuildPEMS(data1))
+   return(rebuildPEMS(out))
 }
 
 
@@ -378,10 +393,15 @@ cAlign <- function(form, data1=NULL, data2 = NULL, ...){
     if(nrow(data1)<1){
       data2 <- data1
     } else {
+      #data2 <- makePEMS(data1[all.vars(form)[2]])
+      #data2 <- makePEMS(data2)
       data2 <- makePEMS(data1[all.vars(form)[2]])
       data1 <- data1[names(data1)[names(data1) != all.vars(form)[2]]]
     }
   }
+
+  
+  
   #this first variable with be vars[1]
   #note: x and y remain data.frames here
   #(see below about making this work with no data)
@@ -399,8 +419,10 @@ cAlign <- function(form, data1=NULL, data2 = NULL, ...){
     stop("cAlign() conflict, '", temp, "' not found where expected", 
          call. = FALSE)
   #to make above work with data sources
+  
   if(nrow(data1)<1) data1 <- makePEMS(x)
   if(nrow(data2)<1) data2 <- makePEMS(y)
+
   x <- x[,1]
   y <- y[,1]
 
@@ -453,7 +475,6 @@ cAlign <- function(form, data1=NULL, data2 = NULL, ...){
   if("offset" %in% output)
      if(!"pems" %in% output) return(ans2) else 
          print(paste("offset = ", ans2, sep=""))
-
   return(align(data1, data2, ans2))
 
 }

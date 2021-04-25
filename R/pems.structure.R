@@ -12,6 +12,7 @@
 #in place
 #################
 #getPEMSElement
+#cpe
 
 
 
@@ -73,7 +74,10 @@
 
 
 getPEMSElement <- function (x, pems = NULL, units = NULL, ..., 
-                         fun.name = "getPEMSElement", if.missing = "stop",
+                         fun.name = "getPEMSElement", 
+                         if.missing = "stop",
+                         if.null = if.missing,
+                         track.name = TRUE,
                          .x = enquo(x)){
 
 #################################################
@@ -88,20 +92,27 @@ getPEMSElement <- function (x, pems = NULL, units = NULL, ...,
     #test...
     #NB if quo_is_null(.x) that means x is null because nothing to do???
 
+#return(.x)
+    
+    
     ref.name <- if(is.null(list(...)$ref.name)) "element" else list(...)$ref.name
     ##element.name <- try(quo_name(.x), silent=TRUE)
     if(quo_is_null(.x)){
-         checkIfMissing(if.missing = if.missing,
+         checkIfMissing(if.missing = if.null,
                        reply = paste("required ", ref.name, " NULL", sep=""),
                        suggest = "checking call arguments", 
                        if.warning = NULL, 
                        fun.name = fun.name)
          return(NULL)
     }
-    element.name <- quo_name(.x)    
+    
+    element.name <- try(quo_name(.x), silent = TRUE)   
+    if(class(element.name)[1]=="try-error"){
+        element.name <- ""
+    }
 
     ans <- if (is.null(pems)) NULL else 
-                try(pems[element.name], silent = TRUE)
+                try(as.data.frame(pems)[[element.name]], silent = TRUE)
 ###############
 #testing cond eval
     if (is.null(ans) | class(ans)[1] == "try-error") {
@@ -124,21 +135,112 @@ getPEMSElement <- function (x, pems = NULL, units = NULL, ...,
                        if.warning = NULL, 
                        fun.name = fun.name) 
 
-#no name attribute management
+    ##name management
+    if(track.name) {
+        attributes(ans)$name <- element.name
+    }
+    
     #pass ref to convertUnits?
 #no option if units are set but ans does not have units...
 
-    if (!is.null(units) & !is.null(ans)) 
+    if (!is.null(units) & !is.null(ans)){ 
+        temp <- attributes(ans)$name
         ans <- convertUnits(ans, to = units)
+        attributes(ans)$name <- temp
+    }
     ans
 }
 
+##################################
+#cpe
+##################################
 
+#c.pems.element alternative
+#################################
+#currently have a problem  with c.pems.element
+#so using this as work around
+
+cpe <- function(...){
+    
+    ref <- quos(..., .named=TRUE)
+    ans <- list(...)
+    #get attributes
+    temp <- lapply(ans, function(x) attributes(x))
+    b <- temp[[1]]
+    if(length(temp)>1){
+        for(i in 2:length(temp)){
+            for(j in names(b)){
+                if(j %in% names(temp[[i]])){
+                    b[[j]] <- c(b[[j]], temp[[i]][[j]])
+                } 
+                nms <- names(temp[[i]])[!names(temp[[i]]) %in% names(b)] 
+                if(length(nms)>0){
+                    for(j in nms){
+                        b[[j]] <- temp[[i]][[j]]
+                    }
+                }
+            }
+        }
+    }
+    
+    ######################################
+    #this might not be best way to handle 
+    #cpe() same repeat elements, cpe(a,a)
+    ######################################
+    local.names <- make.unique(names(ref))
+
+    #update name because they might have modified
+    b$name <- paste(local.names, collapse=", ")
+    temp <- names(b)[names(b)!="name"]
+    for(i in temp){
+        if(i=="units"){
+            if(length(unique(b[[i]]))>1){
+                b$sub.un <- b$units
+                b$units <- paste(b$units, collapse = ", ")
+            } else {
+                b$units <- unique(b$units)
+                b$sub.un <- NULL
+            }
+        } else {
+            b[[i]] <- unique(b[[i]])
+        }
+    }
+    
+
+    refs <- unlist(lapply(ans, function(x) length(x)))
+    
+    if(any(refs==0)){
+        stop("unknown element requested")
+    }
+    
+    if(length(refs)>1){
+        b$sub.id <- refs
+        b$sub.nm <- local.names 
+    } else {
+        b$sub.id <- NULL
+        b$sub.nm <- NULL
+    }
+    
+    if(any(b$class=="factor")){
+        warning("dropping factor structure")
+        b$class <- b$class[b$class!="factor"]
+        b$levels <- NULL
+        b$labels <- NULL
+    }
+    
+    b$class <- unique("pems.element", b$class)
+    
+    ans <- lapply(ans, as.vector)
+    ans <- do.call(c, ans)
+    attributes(ans) <- b
+    return(ans)
+
+}
 
 
 #########################
 #########################
-##testPEMS
+##getPEMSSetUp
 #########################
 #########################
 
@@ -146,13 +248,14 @@ getPEMSElement <- function (x, pems = NULL, units = NULL, ...,
 #karl 24/06/2018
 
 #this is a general test for several of the getPEMS... functions
-#might not export it....
+#not exporting it....
 
 #this kills function if missing and if.missing="stop"
 #returns NULL, FALSE or TRUE
 
-testPEMS <- function(pems=NULL, fun.name = "testPEMS", if.missing = "stop",
-         .pems = enquo(pems), ...){
+getPEMSSetUp <- function(pems=NULL, fun.name = "getPEMSSetUp", 
+                         if.missing = "stop", 
+                         .pems = enquo(pems), ...){
 
     if(quo_is_null(.pems)){
          checkIfMissing(if.missing = if.missing,
@@ -196,7 +299,7 @@ getPEMSConstants <- function(pems=NULL, ...,
          fun.name = "getPEMSConstants", if.missing = "stop",
          .pems = enquo(pems)){
 
-    test <- testPEMS(pems, fun.name=fun.name, if.missing=if.missing, 
+    test <- getPEMSSetUp(pems, fun.name=fun.name, if.missing=if.missing, 
              .pems=.pems)
     if(is.logical(test) && test) pems[["constants"]] else NULL
 }
@@ -220,7 +323,7 @@ getPEMSData <- function(pems=NULL, ...,
 #more aggressive conversions
 #################
 
-    test <- testPEMS(pems, fun.name=fun.name, if.missing=if.missing, 
+    test <- getPEMSSetUp(pems, fun.name=fun.name, if.missing=if.missing, 
              .pems=.pems)
     if(is.logical(test) && test) pems[["data"]] else NULL
 }

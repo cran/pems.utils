@@ -193,7 +193,9 @@ convertUnits <- function(input = NULL, to = NULL, from = NULL, data = NULL, ...,
 
     ans <- getPEMSElement(!!enquo(input), data, fun.name=fun.name,
                         if.missing = "return", ref.name="input")
-#was
+    
+    
+    #was
 #    ans <- if(!hijack)
 #               checkInput(input = input, data = data, if.missing = if.missing, 
 #                          output = "input", fun.name = fun.name) else 
@@ -264,12 +266,13 @@ convertUnits <- function(input = NULL, to = NULL, from = NULL, data = NULL, ...,
         attributes(ans)$units <- as.character(from)
     }
 
-
     if(!is.null(to)){
+        temp <- attributes(ans)$name
         ans <- checkUnits(ans, to, unit.conversions = unit.conversions,  
-                          fun.name = fun.name)
+                          fun.name = fun.name, track.name=FALSE)
+        attributes(ans)$name <- temp
     }
-
+    
     checkOutput(input = ans, data = data, if.missing = if.missing, 
                 fun.name = fun.name, output = output, overwrite = overwrite) 
     

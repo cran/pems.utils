@@ -1,5 +1,5 @@
-\name{5.1.1.common.check.functions}
-\alias{5.1.1.common.check.functions}
+\name{6.2.common.check.functions}
+\alias{6.2.common.check.functions}
 \alias{check...}
 \alias{checkOption}
 \alias{checkPEMS}

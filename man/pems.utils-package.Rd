@@ -15,8 +15,8 @@
 \tabular{ll}{
 Package: \tab pems.utils\cr
 Type: \tab Package\cr
-Version: \tab 0.2.26.4\cr 
-Date: \tab 2018-11-18\cr
+Version: \tab 0.2.29.1\cr 
+Date: \tab 2021-04-20\cr
 License: \tab GPL (>= 2)\cr
 LazyLoad: \tab yes\cr
 }
@@ -36,51 +36,51 @@ follows:
 2.1. The pems object structure: \code{\link{pems.structure}}, \code{\link{getPEMSElement}}, 
 \code{\link{pemsData}}, etc. 
 
-2.2. Generic pems handling
+3. Generic pems handling
 
-2.2.1. pems objects, \code{\link{pems.generics}}.
+3.1. pems objects, \code{\link{pems.generics}}.
 
-2.2.2. pems.element objects, \code{\link{pems.element.generics}}.
+3.2. pems.element objects, \code{\link{pems.element.generics}}.
 
-2.3. Structure Handling 
+4. Structure Handling 
 
-2.3.1. Merging pems objects: \code{\link{merge.pems}}, \code{\link{align}}, etc. 
+4.1. Merging pems objects: \code{\link{merge.pems}}, \code{\link{align}}, etc. 
 
-2.3.2. Conditioning pems objects: \code{\link{conditioning.pems.data}}, \code{\link{cutBy}}, etc.
+4.2. Referencing pems objects: \code{\link{referencing.pems.data}}, \code{\link{refRow}}, etc.
 
-2.3.3. Time handling functions: \code{\link{regularize}}, etc.  
+4.3. Time handling functions: \code{\link{regularize}}, etc.  
 
-2.3.4. Unit handler functions: \code{\link{getUnits}}, \code{\link{setUnits}}, \code{\link{convertUnits}}, etc.
+4.4. Unit handler functions: \code{\link{getUnits}}, \code{\link{setUnits}}, \code{\link{convertUnits}}, etc.
 
-3. pems Data Handling 
+5. pems Data Handling 
 
-3.1. Calculations
+5.1. Plots for pems objects: \code{\link{pems.plots}}, \code{\link{latticePlot}}, \code{\link{pemsPlot}}, etc.
 
-3.1.1. Common calculations: \code{\link{common.calculations}}, \code{\link{calcDistance}}, \code{\link{calcAccel}}, etc.
+6. Calculations
 
-3.1.2. VSP calculations: \code{\link{calcVSP}}, etc.
+6.1. Common calculations: \code{\link{common.calculations}}, \code{\link{calcDistance}}, \code{\link{calcAccel}}, etc.
 
-3.1.3. Emissions calculations: \code{\link{calcEm}}, etc.
-
-3.2. Analysing data in pems objects: \code{\link{summary.reports}}
-
-3.3. Plots for pems objects: \code{\link{pems.plots}}, \code{\link{latticePlot}}, \code{\link{pemsPlot}}, etc.
-
-4. Refernce datasets, examples, look-up tables, etc.
-
-4.1. Example datasets: \code{\link{pems.1}}.
-
-4.2. look-up tables: \code{\link{ref.unit.conversions}}, etc.
-
-5. Other Code 
-
-5.1. Misc
-
-5.1.1. Common \code{\link{check...}} functions for the routine handling of function arguments/user inputs.
+6.2. Common \code{\link{check...}} functions for the routine handling of function arguments/user inputs.
  
-5.1.2. Other correction code
+6.3. Other correction code
 
-5.2. Tidyverse related code... \code{\link{pems.tidyverse}}
+6.4. Analysing data in pems objects: \code{\link{summary.reports}}
+
+7. Refernce datasets, examples, look-up tables, etc.
+
+7.1. Example datasets: \code{\link{pems.1}}.
+
+7.2. look-up tables: \code{\link{ref.unit.conversions}}, etc.
+
+8. Specialist code
+
+8.1. VSP calculations: \code{\link{calcVSP}}, etc.
+
+8.2. Emissions calculations: \code{\link{calcEm}}, etc.
+
+9. Other Code 
+
+9.1. Tidyverse related code... \code{\link{pems.tidyverse}}
 
 }
 \author{

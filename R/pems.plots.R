@@ -52,8 +52,10 @@
 #version 0.0.1
 
 
-pemsPlot <- function(x, y = NULL, z = NULL, ..., data = NULL, 
-         cond = NULL, units = TRUE, fun.name="pemsPlot",
+pemsPlot <- function(x, y = NULL, z = NULL, 
+         groups = NULL, cond = NULL, ..., data = NULL, 
+         units = TRUE, multi.y = "special", 
+         fun.name="pemsPlot",
          panel = panel.pemsPlot, scheme = pems.scheme){
 
     #passes settings on to convert units
@@ -61,18 +63,55 @@ pemsPlot <- function(x, y = NULL, z = NULL, ..., data = NULL,
     #setup
     extra.args <- list(...)
     settings <- calcChecks(fun.name, ..., data = data)
+    
+#    x <- getPEMSElement(!!enquo(x), data, if.missing="stop")
+    
+#    if(!missing(y))
+#        y <- getPEMSElement(!!enquo(y), data, if.missing="stop")
+
+#    if(!missing(z))
+#        z <- getPEMSElement(!!enquo(z), data, if.missing="stop")
+
+#    if(!missing(groups))
+#        groups <- getPEMSElement(!!enquo(groups), data, if.missing="stop")
+
+#    if(!missing(cond))
+#        cond <- getPEMSElement(!!enquo(cond), data, if.missing="stop")
 
     #standardise formula or x,y,z,cond input as formula
     #and grab units
     extra.args$units <- listLoad(listUpdate(extra.args, list(load="units")))
-    extra.args <- pemsXYZCondUnitsHandler(!!enquo(x), !!enquo(y), !!enquo(z), 
-                              !!enquo(cond), data = data,
-                              units = units, settings = settings, ...)
+    extra.args <- pemsXYZCondUnitsHandler(x=!!enquo(x), 
+                                          y=!!enquo(y), 
+                                          z=!!enquo(z), 
+                                          cond=!!enquo(cond),
+                              groups=!!enquo(groups), data = data,
+                              units = units, settings = settings, 
+                              multi.y = multi.y, ...)
 
     extra.args <- listUpdate(extra.args, list(panel = panel, scheme = scheme, 
                                               data = data))
 
-    do.call(loaPlot, extra.args)
+    plt <- do.call(loaPlot, extra.args)
+    
+    #scales handling
+    #done after plot because 
+    #    loa::loaPlot currently can't handle scales internally
+    #think about 
+    #    moving code to loa or fixing in loa 
+    #    error catcher for below because 
+    #          lattice::scales error messages are not great...
+    test <- grep("scales[.]", names(extra.args))
+    if(any(test)){
+        extra.args <- extra.args[test]
+        extra.args <- do.call(scalesHandler, extra.args)
+        extra.args <- listUpdate(list(object=plt),
+                                 extra.args)
+        plt <- do.call(update, extra.args)
+    }
+    
+    #output
+    plt
 
 }
 
@@ -81,7 +120,8 @@ pemsPlot <- function(x, y = NULL, z = NULL, ..., data = NULL,
 #pemsXYZCondUnitsHandler
 ##############################
 
-pemsXYZCondUnitsHandler <- function(x, y = NULL, z = NULL, cond = NULL, data = NULL, units = TRUE, 
+pemsXYZCondUnitsHandler <- function(x, y = NULL, z = NULL, cond = NULL, 
+                                    groups = NULL, data = NULL, units = TRUE, 
          ..., fun.name = "pemsXYZCondHandler"){
 
 #think about error messaging and 
@@ -96,6 +136,7 @@ pemsXYZCondUnitsHandler <- function(x, y = NULL, z = NULL, cond = NULL, data = N
     #setup
     extra.args <- list(...)
     settings <- calcChecks(fun.name, ..., data = data)
+    #data <- as.data.frame(data)
 
     #units handling 
     #note: this could be less complex
@@ -103,47 +144,95 @@ pemsXYZCondUnitsHandler <- function(x, y = NULL, z = NULL, cond = NULL, data = N
                                                list(load="units", units=units)))
     extra.args$units <- listUpdate(list(add.to.labels=TRUE), extra.args$units)
     extra.args$units$units <- if(isGood4LOA(units)) TRUE else FALSE
+    
+    l.x <- as_label(enquo(x))
+    l.y <- as_label(enquo(y))
+    l.z <- as_label(enquo(z))
+    l.groups <- as_label(enquo(groups))
+    l.cond <- as_label(enquo(cond))
 
+    x <- getPEMSElement(!!enquo(x), data, if.missing="stop")
+#factor handling
+#move to loa?
+#same for others?
+    if(is.factor(x)){
+        extra.args <- listUpdate(list(scales=list(x=list(at=c(1:length(levels(x))),
+                                                         labels=levels(x),
+                                                         rot=45))),
+                                 extra.args)
+        x <- pems.element(as.numeric(x))
+    }
+
+    if(!missing(y))
+        y <- getPEMSElement(!!enquo(y), data, if.missing="stop", 
+                            if.null="return")
+    if(is.factor(y)){
+        extra.args <- listUpdate(list(scales=list(y=list(at=c(1:length(levels(y))),
+                                                         labels=levels(y)))),
+                                 extra.args)
+        y <- pems.element(as.numeric(y))
+    }
+    
+    if(!missing(z))
+        z <- getPEMSElement(!!enquo(z), data, if.missing="stop",
+                            if.null="return")
+    
+    if(!missing(groups))
+        groups <- getPEMSElement(!!enquo(groups), data, if.missing="stop",
+                                 if.null="return")
+    
+    if(!missing(cond))
+        cond <- getPEMSElement(!!enquo(cond), data, if.missing="stop",
+                               if.null="return")
+
+    
 ###########################
 #rlang update
 #    temp <- if(hijack) x else 
 #                checkInput(x, data=data, if.missing="return")
 ############################
-    temp <- getPEMSElement(!!enquo(x), data, fun.name=fun.name,
-                            if.missing = "return")
+    
+#####################################    
+#    temp <- getPEMSElement(!!enquo(x), data, fun.name=fun.name,
+#                            if.missing = "return")
 
-    if(!is.na(as.character(temp[1])) && as.character(temp)[1]=="~"){
-        #this is a formula
-        is.formula <- TRUE
-    } else {
-        is.formula <- FALSE
-        x <- temp
-    }
+#    if(!is.na(as.character(temp[1])) && as.character(temp)[1]=="~"){
+#        #this is a formula
+#        is.formula <- TRUE
+#    } else {
+#        is.formula <- FALSE
+#        x <- temp
+#    }
 
     #if formula I assume you have put everything in formula
-    if(is.formula){
+#    if(is.formula){
 
          #add x and y units to units
-         temp <- formulaHandler(x, data, output="lattice.like")
-         extra.args$units$x.units <- eval(parse(text=paste("getUnits(", temp$xlab,", ", "data", ", if.missing='return')", sep="")))
-         extra.args$units$y.units <- eval(parse(text=paste("getUnits(", temp$ylab,", ", "data", ", if.missing='return')", sep="")))
-         if("zlab" %in% names(temp))
-             extra.args$units$z.units <- eval(parse(text=paste("getUnits(", temp$zlab,", ", "data", ", if.missing='return')", sep="")))
+#         temp <- formulaHandler(x, data, output="lattice.like")
+#         extra.args$units$x.units <- eval(parse(text=paste("getUnits(", temp$xlab,", ", "data", ", if.missing='return')", sep="")))
+#         extra.args$units$y.units <- eval(parse(text=paste("getUnits(", temp$ylab,", ", "data", ", if.missing='return')", sep="")))
+#         if("zlab" %in% names(temp))
+#             extra.args$units$z.units <- eval(parse(text=paste("getUnits(", temp$zlab,", ", "data", ", if.missing='return')", sep="")))
          #return ans
          #note units already in extra.args
-         return(listUpdate(extra.args, list(x=x, data=data)))
+#         return(listUpdate(extra.args, list(x=x, data=data)))
         
-    }
+#    }
 
     #if formula you cant get to here
     #so this is none formula handling
 
-    y <- getPEMSElement(!!enquo(y), data, fun.name=fun.name,
-                        if.missing = "return")
-    z <- getPEMSElement(!!enquo(z), data, fun.name=fun.name,
-                        if.missing = "return")
-    cond <- getPEMSElement(!!enquo(cond), data, fun.name=fun.name,
-                           if.missing = "return")
+    
+    
+ #   y <- getPEMSElement(!!enquo(y), data, fun.name=fun.name,
+ #                       if.missing = "stop", if.null="return")
+ #   z <- getPEMSElement(!!enquo(z), data, fun.name=fun.name,
+ #                       if.missing = "stop", if.null="return")
+ #   cond <- getPEMSElement(!!enquo(cond), data, fun.name=fun.name,
+ #                          if.missing = "stop", if.null="return")
+ #   groups <- getPEMSElement(!!enquo(groups), data, fun.name=fun.name,
+ #                          if.missing = "stop", if.null="return")
+
 ################################
 #as of pemsGetElement update
 #    if(!hijack){   
@@ -153,15 +242,51 @@ pemsXYZCondUnitsHandler <- function(x, y = NULL, z = NULL, cond = NULL, data = N
 #    }
 ################################
 
-    #this bit is for index case, like plot(x)
+    #index case, like plot(x)
     if(is.null(y)){
         y <- x
         x <- 1:length(x)
         attr(x, "name") <- "Index"
     }
 
+    #multi.y 
+    if("sub.id" %in% names(attributes(y))){
+        if(is.null(extra.args$multi.y)) {
+            extra.args$multi.y <- "special"   #should never happen
+        }
+        if("special" %in% extra.args$multi.y){
+            if(is.null(groups)){
+                extra.args$multi.y <- c(extra.args$multi.y, 
+                                        "groups")
+            } else {
+                if(!"zcases" %in% names(extra.args)){
+                    extra.args$multi.y <- c(extra.args$multi.y, 
+                                            "zcases")
+                } else {
+                    if(is.null(cond)){
+                        extra.args$multi.y <- c(extra.args$multi.y, 
+                                                "cond")
+                    } else {
+                        warning("using all multi.y handlers; not tracking...",
+                                call. = FALSE)
+                    }
+                        
+                }
+            }
+        }
+        sub.id <- rep(attributes(y)$sub.nm, 
+                      attributes(y)$sub.id)
+        if("groups" %in% extra.args$multi.y){
+            groups <- ordered(sub.id)
+        }
+        if("zcases" %in% extra.args$multi.y){
+            extra.args$zcases <- ordered(sub.id)
+        }
+        if("cond" %in% extra.args$multi.y){
+            cond <- ordered(sub.id)
+        }
+    }
 
-    #this bit may now continue if there are no units
 
     if(is.null(x))
         checkIfMissing(settings$if.missing, reply = "argument 'x' not supplied or null")
@@ -186,18 +311,19 @@ pemsXYZCondUnitsHandler <- function(x, y = NULL, z = NULL, cond = NULL, data = N
 #        temp
 #    } 
     if(!"xlab" %in% names(extra.args)) 
-       extra.args$xlab <- if(is.null(attr(x, "name"))) "x" else attr(x, "name")
+       extra.args$xlab <- if(is.null(attr(x, "name"))) l.x else attr(x, "name")
     if(!"ylab" %in% names(extra.args)) 
-       extra.args$ylab <- if(is.null(attr(y, "name"))) "y" else attr(y, "name")
+       extra.args$ylab <- if(is.null(attr(y, "name"))) l.y else attr(y, "name")
     if(!is.null(z) && !"zlab" %in% names(extra.args)) 
-       extra.args$zlab <- if(is.null(attr(z, "name"))) "z" else attr(z, "name")
+       extra.args$zlab <- if(is.null(attr(z, "name"))) l.z else attr(z, "name")
 
-
+    extra.args$groups <- groups
 
 #        extra.args$xlab <- lab.fun(x, "x", extra.args$units, extra.args$units$x.units)
 
     #extra.args$x must exist and data not needed
     #extra.args$units updated
+    
     return(extra.args)
 
 
@@ -252,20 +378,26 @@ preprocess.pemsPlot <- function(lattice.like=lattice.like, units=units,...){
 
             if("add.to.labels" %in% names(units) && units$add.to.labels){
                if(!is.null(xlab))
-                   lattice.like$xlab <- if("x.units" %in% names(units))
-                        paste(xlab, " [", units$x.units, "]", sep = "") else xlab
-               xlab <- lattice.like$xlab
+                   if(is.character(xlab) && xlab!=""){
+                        lattice.like$xlab <- if("x.units" %in% names(units))
+                            paste(xlab, " [", units$x.units, "]", sep = "") else xlab
+                        xlab <- lattice.like$xlab
+                   }
                if(!is.null(ylab))
-                   lattice.like$ylab <- if("y.units" %in% names(units))
-                        paste(ylab, " [", units$y.units, "]", sep = "") else ylab
-               ylab <- lattice.like$ylab
+                   if(is.character(ylab) && ylab!=""){
+                        lattice.like$ylab <- if("y.units" %in% names(units))
+                            paste(ylab, " [", units$y.units, "]", sep = "") else ylab
+                        ylab <- lattice.like$ylab
+                   }
 ###################
 #update to zlab so units on next line
 ###################
                if(!is.null(zlab))
-                   lattice.like$zlab <- if("z.units" %in% names(units))
-                        paste(zlab, "\n[", units$z.units, "]", sep = "") else zlab
-               zlab <- lattice.like$zlab
+                   if(is.character(zlab) && zlab!=""){
+                        lattice.like$zlab <- if("z.units" %in% names(units))
+                            paste(zlab, "\n[", units$z.units, "]", sep = "") else zlab
+                        zlab <- lattice.like$zlab
+                   }
             }
 
         }
@@ -282,31 +414,148 @@ panel.pemsPlot <- function(..., loa.settings = FALSE){
 #could probably lose a lot of these arguments
 #but then I would not document them anywhere
 
+#not sure I need to set multi.y here... 
+
         extra.args <- list(...)
 
         if(loa.settings){
-            temp <- loaHandler(panel.loaPlot)
+            temp <- loaHandler(panel.loa, loa.settings = TRUE)
             temp$common.args <- unique(c(temp$common.args, "units"))
             temp$default.settings <- listUpdate(temp$default.settings, 
                                                 list(loa.preprocess = preprocess.pemsPlot, 
-                                                     grid=TRUE))
+                                                     grid = TRUE,
+                                                     multi.y = "special"))
             return(temp)
         }
-
+        
         #add z if missing
-
-#this will be redundant if I can find a better way of
-#handling colHandler(z = 1 or NULL or 1:n ... 
-#with different colour schemes 
-
         if(is.null(extra.args$z)) extra.args$z <- 1
 
         #plot
-        do.call(panel.loaPlot, extra.args)
+        do.call(panel.loa, extra.args)
 
     }
 
 
+
+
+############################
+#panel.routePath
+############################
+
+panel.routePath <- function(..., loa.settings = FALSE){
+
+#could probably lose a lot of these arguments
+#but then I would not document them anywhere
+
+        extra.args <- list(...)
+
+        if(loa.settings){
+            temp <- loaHandler(panel.loa)
+            temp$common.args <- unique(c(temp$common.args, "units"))
+            temp$default.settings <- listUpdate(temp$default.settings, 
+                                                list(loa.preprocess = preprocess.pemsPlot, 
+                                                     grid=TRUE, group.args= c("col", "lwd"),
+                                                     type="l",  
+                                                     lwd=8,
+                                                     start.cex=1,
+                                                     start.pch=20,
+                                                     smooth.path=5))
+            return(temp)
+        }
+
+        #add z if missing give proxy...
+        if(is.null(extra.args$z)) extra.args$z <- 1
+        if(isGood4LOA(extra.args$grid)){
+            panel.loaGrid(panel.scales = extra.args$panel.scales, 
+                          grid = extra.args$grid, 
+                          xlim = extra.args$xlim, 
+                          ylim = extra.args$ylim)
+        }
+        extra.args$grid <- NULL
+
+        #plot
+        plot.fun <- function(...) {
+            extra.args <- list(...)
+            if("smooth.path" %in% names(extra.args)){
+                #by distance smooth journey
+                if(length(extra.args$y)<2 | length(extra.args$x)<2)
+                    stop("need at least two lat/lon sets to draw path",
+                         call. = FALSE)
+                deg2rad <- function(x) x * (pi/180)
+                rad2deg <- function(x) x * (180/pi)
+                
+                lat2 <- extra.args$y[-1]
+                lat1 <- extra.args$y[-length(extra.args$y)]
+                lon2 <- extra.args$x[-1]
+                lon1 <- extra.args$x[-length(extra.args$x)]
+                
+                #using The haversine formula
+                dLat <- deg2rad(lat2-lat1)
+                dLon <- deg2rad(lon2-lon1)
+                lat1 <- deg2rad(lat1)
+                lat2 <- deg2rad(lat2)
+                
+                #the square of half the chord length between the points
+                a <- sin(dLat/2) * sin(dLat/2) +
+                    sin(dLon/2) * sin(dLon/2) * cos(lat1) * cos(lat2)
+                
+                #the angular distance in radians
+                c <- 2 * atan2(sqrt(a), sqrt(1-a)) 
+                
+                #radius of earth, km
+                R <- 6371
+                
+                #output as m
+                dist <- R * c * 1000
+                dist <- ifelse(is.na(dist), 0, dist)
+                #dist[dist<0.15] <- 0
+                
+                dist <- c(0, cumsum(dist))
+                res <- length(dist)/extra.args$smooth.path
+                new.dist <- seq(0, dist[length(dist)], 
+                                length.out=res)
+                new.lat <- suppressWarnings(approx(dist, extra.args$y, new.dist))
+                new.lon <- suppressWarnings(approx(dist, extra.args$x, new.dist))
+                
+                extra.args$y <- new.lat$y 
+                extra.args$x  <- new.lon$y
+                
+            }
+            extra.args$col <- do.call(colHandler, extra.args)
+            #extra.args$cex <- do.call(cexHandler, extra.args)
+            #extra.args$pch <- do.call(pchHandler, listUpdate(extra.args, 
+            #                                                 list(z = NULL)))
+            #starts
+            temp <- extra.args
+            temp$load <- "start"
+            temp <- listUpdate(temp, do.call(listLoad, temp)$start)
+            panel.xyplot(x=temp$x[1], y=temp$y[1],
+                         col=temp$col[1],
+                         cex=temp$cex[1]*4,
+                         type="p", pch=temp$pch[1])
+            #lines
+            do.call(panel.xyplot, extra.args)
+            #end
+            if(length(extra.args$x)>2){
+                ref <- length(extra.args$x)
+                temp <- extra.args
+                temp$load <- "end"
+                temp <- listUpdate(temp, do.call(listLoad, temp)$end)
+                panel.arrows(x1=temp$x[ref], 
+                             x2=temp$x[ref-1],
+                             y1=temp$y[ref],
+                             y2=temp$y[ref-1],
+                             col=temp$col[1],
+                             lwd=temp$lwd,
+                             cex=4)
+                
+            }
+        
+        }
+        do.call(groupsAndZcasesPanelHandler, listUpdate(extra.args, 
+                                                        list(panel = plot.fun)))
+    }
 
 
 

@@ -1,5 +1,5 @@
-\name{2.2.2.generic.pems.element.handlers}
-\alias{2.2.2.generic.pems.element.handlers}
+\name{3.2.generic.pems.element.handlers}
+\alias{3.2.generic.pems.element.handlers}
 \alias{generic.pems.element.handlers}
 \alias{pems.element.generics}
 \alias{print.pems.element}
@@ -49,8 +49,9 @@
 
   \item{x,object}{ 
   (An Object of pems.element class). For direct use with \code{print}, \code{plot}, \code{summary}, 
-  etc. NOTE: Object naming (i.e., \code{x} or \code{object}) is determined in parent or 
-  base function in R, so naming can vary by method.
+  etc. NOTE: Object naming (i.e., \code{x} or \code{object}) 
+  is determined in parent or base function in R, so naming 
+  varies by method.
 }
 
   \item{i}{ 
@@ -85,25 +86,26 @@
 }
 
 \value{
-  Generic functions provide appropriate (conventional) handling of objects of 
-  \code{'pems.elements'} class: 
+  Generic functions provide appropriate (conventional) 
+  handling of objects of \code{'pems.elements'} class: 
 
-  \code{print(pems.element)} provides a (to console) description of the 
-  supplied \code{pems.element} object. 
+  \code{print(pems.element)} provides a (to console) 
+  description of the supplied \code{pems.element} object. 
 
-  \code{plot(pems.element)} generates a standard R plot of the supplied 
-  \code{pems.element}. 
+  \code{plot(pems.element)} generates a standard R plot 
+  of the supplied \code{pems.element}. 
 
-  \code{units(pems.element)} extracts the units from the supplied 
-  \code{pems.element}.  
+  \code{units(pems.element)} extracts the units from the 
+  supplied \code{pems.element}.  
  
 }
 
 \author{ Karl Ropkins }
 
 \note{
-  Special \code{round(pems.element)} is required to as a wrapper to \code{round.Date} and 
-  \code{round.POSIXt} handling.
+  A dedicated \code{round(pems.element)} is required as 
+  a wrapper to \code{round.Date} and \code{round.POSIXt} 
+  handling.
 }
 
 

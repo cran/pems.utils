@@ -1,5 +1,5 @@
-\name{4.2.look-up.tables}
-\alias{4.2.look-up.tables}
+\name{9.2.look-up.tables}
+\alias{9.2.look-up.tables}
 \alias{look-up.tables}
 \alias{ref.unit.conversions}
 \alias{ref.chem}

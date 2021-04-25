@@ -971,7 +971,7 @@ pull.pems <- function (.data, ...) {
 #not yet working
 
 
-group_by.pems <- function(.data, ..., add = FALSE) {
+group_by.pems <- function(.data, ..., .add = FALSE) {
 
 #this'll be fun...
   
@@ -988,28 +988,28 @@ group_by.pems <- function(.data, ..., add = FALSE) {
           "data.frame" else
                class(.data)[class(.data) != "pems"] 
     ######################
-
+    
     #function coding
-    groups <- group_by_prepare(.data, ..., add = add)
+    groups <- group_by_prepare(.data, ..., .add = .add)
     out <- grouped_df(groups$data, groups$group_names)
 
     #add group term units if not there
     for(i in attributes(out)$vars)
           if(!i %in% names(bare.bones$units))
                 bare.bones$units[,i] <- ""
-
+    
     #######################
     #rebuild
     attributes(out)$units <- bare.bones$units
     attributes(out)$pems.tags <- bare.bones$pems.tags
-    class(out) <- unique(c("grouped_df", bare.bones$class))
-    out
-
+    class(out) <- unique(c("pems", "grouped_df", bare.bones$class))
+    return(out)    
 }
 
 
+
 #as above plus warning
-group_by_.pems <- function(.data, ..., add = FALSE, warn = TRUE) {
+group_by_.pems <- function(.data, ..., .add = FALSE, warn = TRUE) {
 
     #like above
     if(warn)
@@ -1029,7 +1029,7 @@ group_by_.pems <- function(.data, ..., add = FALSE, warn = TRUE) {
     ######################
 
     #function coding
-    groups <- group_by_prepare(.data, ..., add = add)
+    groups <- group_by_prepare(.data, ..., .add = add)
     out <- grouped_df(groups$data, groups$group_names)
 
     #add group term units if not there
@@ -1041,7 +1041,7 @@ group_by_.pems <- function(.data, ..., add = FALSE, warn = TRUE) {
     #rebuild
     attributes(out)$units <- bare.bones$units
     attributes(out)$pems.tags <- bare.bones$pems.tags
-    class(out) <- unique(c("grouped_df", bare.bones$class))
+    class(out) <- unique(c("pems", "grouped_df", bare.bones$class))
     out
 
 }
@@ -1063,9 +1063,13 @@ ungroup.pems <- function(x, ...){
 #this may need fixing even if it works...
    
     class(x) <- c("pems", "tbl_df", "tbl", "data.frame")
-    if(!"pems.tags" %in% names(attributes(x)))
+    if(!"pems.tags" %in% names(attributes(x))){
         warning(paste("ungroup.pems: tidyverse broke me;", 
         "Oh well", sep=" "), call. = FALSE)
+    }
+    if("groups" %in% names(attributes(x))){
+         attributes(x)$groups <- NULL 
+    }
     x
         
 }

@@ -2,8 +2,8 @@ Package: pems.utils
 Type: Package
 Title: Portable Emissions (and Other Mobile) Measurement System
         Utilities
-Version: 0.2.26.4
-Date: 2018-11-18
+Version: 0.2.29.1
+Date: 2021-04-20
 Authors@R: c(
     person("Karl", "Ropkins", email="karl.ropkins@gmail.com", 
             role= c("aut", "cre")),
@@ -26,10 +26,8 @@ LinkingTo: Rcpp
 License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes
-Repository: CRAN
-Repository/R-Forge/Project: pems
-Repository/R-Forge/Revision: 105
-Repository/R-Forge/DateTimeStamp: 2018-11-18 12:12:11
-Date/Publication: 2018-11-18 16:30:10 UTC
+RoxygenNote: 7.1.1
 NeedsCompilation: yes
-Packaged: 2018-11-18 12:35:09 UTC; rforge
+Packaged: 2021-04-20 17:07:31 UTC; Karl
+Repository: CRAN
+Date/Publication: 2021-04-25 06:40:02 UTC

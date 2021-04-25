@@ -1,3 +1,41 @@
+Changes in pems.utils 0.2.29 [2021-04-13]
+========================================
+
+*       fixed align, previous dropping constants 
+*       tidied documents 
+
+
+Changes in pems.utils 0.2.28 [2021-02-12]
+========================================
+
+*       added pems[[extra.pems.tags]] option 
+*       updated pemsPlot, now uses panel.loa 
+*       added cpe function, as prelim to 
+        c.pems.element method
+*       replaced cutBy... with ref... functions 
+*       added panel.routePath
+*       renumbered documentation
+*       renamed binVSP... functions as refVSPBin functions 
+*       added refX, refEngineOn, refDrivingMode
+*       getPEMSElement update, drop name tracking option 
+*       added provisional cold start code 
+*       fixed refRow, now handling pems and elements 
+        consistently
+*       added speedEmPlot, VSPPlot, VSPBinPlot 
+
+
+Changes in pems.utils 0.2.27 [2019-05-15]
+========================================
+
+*       tidied calcJerk, was not tracking data/pems 
+*       tidied cutByRow 
+*       removed exportPEMSData, added exportPEMS and  
+        exportPEMS2TAB, updated exportPEMS2CVS 
+*       updated import2PEMS 
+*       updates to [.pems and print.pems., tidier 
+        1 column handling
+
+
 Changes in pems.utils 0.2.26 [2018-11-18]
 ========================================
 

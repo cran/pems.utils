@@ -4,7 +4,7 @@
 ##########################
 ##########################
 
-#check re pemselement but I don't think it contains any
+#check re pems.element but I don't think it contains any
 
 #might to archive a copy of this and then tidy
 #because it is a real mess at the moment
@@ -19,7 +19,6 @@
 #dim.pems
 
 #cheated old code
-
 #[.pems, [<-.pems using cheat code
 #$.pems, $<- works if above works
 #summary, head, tail, 
@@ -60,10 +59,16 @@
 #handles pems console appearance 
 #
 
-
 ###################################
 #too fix
 ###################################
+#
+
+##################################
+#to watch 
+##################################
+#print(pems, width [smaller than first column width])
+#print(pems, cols [less than 1])
 #
 
 
@@ -170,16 +175,38 @@ print.pems <- function(x,..., rows=NULL, cols=NULL, width=NULL){
 
 #test removed \n from start of header
     header <- paste("pems (", nrow(x), "x", ncol(x), ")", sep="")
-    if(grpd) header <- paste(header, "\n<grp>: ", paste(attributes(x)$vars, collapse="; "), sep="", collapse="")
-
+    if(grpd) {
+      gg <- names(attributes(x)$groups)
+      gg <- gg[gg != ".rows"]
+      header <- paste(header, "\n<grp>: ", paste(gg, collapse="; "), sep="", collapse="")
+    }
     #############################
     #the shown data grid
-    out <- apply(b, 1, function(x) paste(x, collapse=""))          
-    out <- paste(paste(out, collaspe="\n", sep=""), collapse="")
+
+    #############################
+    #test == 1 does not show data....
+    #############################
+    #replaced code
+    ##out <- apply(b, 1, function(x) paste(x, collapse=""))          
+    ##out <- paste(paste(out, collaspe="\n", sep=""), collapse="")
+    if(test>1){
+       out <- apply(b, 1, function(x) paste(x, collapse=""))          
+       out <- paste(paste(out, collaspe="\n", sep=""), collapse="")
+    } else {
+       out <- ""
+    }
+    ##############################
     out <- paste(header, out, sep="\n", collapse="\n")
  
-    h.row <- nrow(x)-nrow(b)+2 #+2 for header
-    h.col <- ncol(x)-ncol(b)+1 #+1 for row.number
+    #############################
+    #with above replaced code
+    ##h.row <- nrow(x)-nrow(b)+2 #+2 for header
+    ##h.col <- ncol(x)-ncol(b)+1 #+1 for row.number
+    h.row <- if(is.null(nrow(b)))  
+                  nrow(x) else nrow(x)-nrow(b) +2      ##+2 for header
+    h.col <- if(is.null(ncol(b))) 
+                  ncol(x) else ncol(x)-ncol(b) +1       #+1 for row.number
+    ################################
 
     #################################
     #first footer rows and rows not plotted
@@ -194,6 +221,7 @@ print.pems <- function(x,..., rows=NULL, cols=NULL, width=NULL){
     } 
 
 #this needs tidying
+#header and foooter widths not controlled by forced width.....
 
     ################################
     #second footer other columns 
@@ -509,11 +537,26 @@ dim.pems <- function(x, ...) dim(as.data.frame(x))
 
 `[[.pems` <- function(x, k, ...){
 
+  
     x <- rebuildPEMS(x, "old")
     #break pems
     class(x) <- "list"
+    
+    
+    #special operators
+    #####################
+    #testing
+    #####################
+    if("extra.pems.tags" %in% as.character(match.call())){
+      #out
+      ###########################
+      #cat(out, footer, footer2, "\n", collapse="", sep="")
+      #invisible(x)
+      return(x[!tolower(names(x)) %in% 
+                 c("data", "units", "constants", "history", "pems.build")])
+    }
 
-    #return as list is nothing declared
+    #return as list if nothing declared
     if(missing(k)) return(x)
 
     #select structural elements
@@ -587,6 +630,8 @@ dim.pems <- function(x, ...) dim(as.data.frame(x))
     #quick cheat
     x <- rebuildPEMS(x, "old")
 
+
+
     ########################
     #generic pems handling
     ########################
@@ -651,7 +696,7 @@ dim.pems <- function(x, ...) dim(as.data.frame(x))
         i <- 1:nrow(x$data)
     
     #otherwise it is pems[i,j], etc
-
+    
 #####################
 #new fix/testing
 #####################
@@ -788,7 +833,7 @@ dim.pems <- function(x, ...) dim(as.data.frame(x))
 
         ans <- dummy
         dummy <- dummy[1,,drop = FALSE]
-        dummy[index.j] <- x$units[j]
+        dummy[index.j] <- x$units[j, drop=FALSE]
         names(ans) <- make.names(names(ans), unique = TRUE)
         names(dummy) <- names(ans)
         j <- names(ans)
@@ -801,6 +846,7 @@ dim.pems <- function(x, ...) dim(as.data.frame(x))
 #which to do, if doing only one?
 #if doing both, are both handled elsewhere?
     }
+
 
     #if simplify can be done return pems.element
     if(simplify & ncol(ans)==1){
@@ -821,10 +867,13 @@ dim.pems <- function(x, ...) dim(as.data.frame(x))
     
     #otherwise return rebuilt pems
     x$data <- ans
-    x$units <- x$units[1,j]
+    #######################
+    #this update to stop pems.1[1, simplify=FALSE] killing print.pems
+    ##x$units <- x$units[1,j]
+    x$units <- x$units[j]
     if("history" %in% names(x))
          x$history <- c(x$history, call2)
-      
+
 #    class(x) <- old.class
     class(x) <- "pems"
     rebuildPEMS(x)
