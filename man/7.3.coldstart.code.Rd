@@ -28,8 +28,7 @@ fitColdStart(em, time, engine.on = NULL,
 coldStartPlot(time, em = NULL,  
              ..., data = NULL, engine.on = NULL,
              plot.type = 1, method = 2,
-             fun.name="coldStartPlot",
-             scheme = pems.scheme)
+             fun.name="coldStartPlot")
 
 panel.coldStartPlot1(..., loa.settings = FALSE)
 panel.coldStartPlot2(..., loa.settings = FALSE)
@@ -66,7 +65,8 @@ panel.coldStartPlot2(..., loa.settings = FALSE)
 
   \item{\dots}{
   (Optional) Other arguments, currently passed on as supplied 
-  to assoicated calculation or plotting function.
+  to assoicated calculation or plotting function, or passed 
+  back to pemsPlot. 
 }
 
   \item{fun.name}{
@@ -79,11 +79,6 @@ panel.coldStartPlot2(..., loa.settings = FALSE)
   start plot to generate: 1 a conventional accumulation profile;
   or 2 an emission time-series. If not supplied, plot type 1 is 
   selected by default. 
-}
-
-  \item{scheme}{
-  (Various) For \code{coldStartPlot}, the scheme to apply to 
-  the plot, \code{loa} argument. 
 }
 
   \item{loa.settings}{

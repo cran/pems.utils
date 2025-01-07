@@ -1,3 +1,25 @@
+Changes in pems.utils 0.3.0 [2024-12-28]
+========================================
+
+*       restructured package for more stable pkg::function  
+        use, reduced number of imports 
+*       better import handling of files with large headers  
+*       new WatsonPlot(..., plot.type=3) panel 
+*       better units(pems) handling  
+*       removing C++ code (hopefully temporarily) 
+        
+
+Changes in pems.utils 0.2.30 [2024-11-10]
+========================================
+
+*       requested change to citation and description 
+        documentation 
+*       regularize update; added method 2 (data binning) 
+        and improved factor and character time-series 
+        handling 
+*       updated citation formattig 
+        
+
 Changes in pems.utils 0.2.29 [2021-04-13]
 ========================================
 

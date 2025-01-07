@@ -77,7 +77,7 @@ exportPEMS <- function(pems, file = "tempfile", file.writer = write.table, sep =
                           addUnitsToNames, args=args)
 
      #file.writer call
-     args <- listUpdate(list(as.data.frame(pems), file=file, sep=sep), 
+     args <- loa::listUpdate(list(as.data.frame(pems), file=file, sep=sep), 
                         args)
      do.call(file.writer, args)
 } 
@@ -95,8 +95,8 @@ exportPEMS <- function(pems, file = "tempfile", file.writer = write.table, sep =
 
 exportPEMS2TAB <- function(pems, file = "tempfile", file.writer = write.table, sep = "\t",  
                            ...){
-     args <- listUpdate(list(pems, file = file, file.writer = file.writer, sep=sep),
-                        listUpdate(list(row.names = FALSE, na = "", quote = FALSE), 
+     args <- loa::listUpdate(list(pems, file = file, file.writer = file.writer, sep=sep),
+                        loa::listUpdate(list(row.names = FALSE, na = "", quote = FALSE), 
                                    list(...)))
      do.call(exportPEMS, args)
 }
@@ -113,8 +113,8 @@ exportPEMS2TAB <- function(pems, file = "tempfile", file.writer = write.table, s
 
 exportPEMS2CSV <- function(pems, file = "tempfile", file.writer = write.table, sep = ",",  
                            ...){
-     args <- listUpdate(list(pems, file = file, file.writer = file.writer, sep=sep),
-                        listUpdate(list(row.names = FALSE, na = "", quote = FALSE), 
+     args <- loa::listUpdate(list(pems, file = file, file.writer = file.writer, sep=sep),
+                        loa::listUpdate(list(row.names = FALSE, na = "", quote = FALSE), 
                                    list(...)))
      do.call(exportPEMS, args)
 }

@@ -55,13 +55,15 @@
 pemsPlot <- function(x, y = NULL, z = NULL, 
          groups = NULL, cond = NULL, ..., data = NULL, 
          units = TRUE, multi.y = "special", 
-         fun.name="pemsPlot",
-         panel = panel.pemsPlot, scheme = pems.scheme){
+         fun.name="pemsPlot"){
 
     #passes settings on to convert units
 
     #setup
-    extra.args <- list(...)
+    extra.args <- list(...) 
+    #loa::listLoad(list(scheme=pems.utils::pems.scheme,
+                  #                   panel=pems.utils::panel.pemsPlot),
+                  #              list(...))
     settings <- calcChecks(fun.name, ..., data = data)
     
 #    x <- getPEMSElement(!!enquo(x), data, if.missing="stop")
@@ -80,7 +82,7 @@ pemsPlot <- function(x, y = NULL, z = NULL,
 
     #standardise formula or x,y,z,cond input as formula
     #and grab units
-    extra.args$units <- listLoad(listUpdate(extra.args, list(load="units")))
+    extra.args$units <- loa::listLoad(loa::listUpdate(extra.args, list(load="units")))
     extra.args <- pemsXYZCondUnitsHandler(x=!!enquo(x), 
                                           y=!!enquo(y), 
                                           z=!!enquo(z), 
@@ -88,11 +90,16 @@ pemsPlot <- function(x, y = NULL, z = NULL,
                               groups=!!enquo(groups), data = data,
                               units = units, settings = settings, 
                               multi.y = multi.y, ...)
-
-    extra.args <- listUpdate(extra.args, list(panel = panel, scheme = scheme, 
-                                              data = data))
-
-    plt <- do.call(loaPlot, extra.args)
+    if(!"panel" %in% names(extra.args)){
+      extra.args$panel <- panel.pemsPlot
+    }
+    if(!"scheme" %in% names(extra.args)){
+      extra.args$scheme <- pems.scheme
+    }
+    if(!"data" %in% names(extra.args)){
+      extra.args$data <- data
+    }
+    plt <- do.call(loa::loaPlot, extra.args)
     
     #scales handling
     #done after plot because 
@@ -104,8 +111,8 @@ pemsPlot <- function(x, y = NULL, z = NULL,
     test <- grep("scales[.]", names(extra.args))
     if(any(test)){
         extra.args <- extra.args[test]
-        extra.args <- do.call(scalesHandler, extra.args)
-        extra.args <- listUpdate(list(object=plt),
+        extra.args <- do.call(loa::scalesHandler, extra.args)
+        extra.args <- loa::listUpdate(list(object=plt),
                                  extra.args)
         plt <- do.call(update, extra.args)
     }
@@ -140,10 +147,10 @@ pemsXYZCondUnitsHandler <- function(x, y = NULL, z = NULL, cond = NULL,
 
     #units handling 
     #note: this could be less complex
-    extra.args <- do.call(listLoad, listUpdate(extra.args, 
+    extra.args <- do.call(loa::listLoad, loa::listUpdate(extra.args, 
                                                list(load="units", units=units)))
-    extra.args$units <- listUpdate(list(add.to.labels=TRUE), extra.args$units)
-    extra.args$units$units <- if(isGood4LOA(units)) TRUE else FALSE
+    extra.args$units <- loa::listUpdate(list(add.to.labels=TRUE), extra.args$units)
+    extra.args$units$units <- if(loa::isGood4LOA(units)) TRUE else FALSE
     
     l.x <- as_label(enquo(x))
     l.y <- as_label(enquo(y))
@@ -156,7 +163,7 @@ pemsXYZCondUnitsHandler <- function(x, y = NULL, z = NULL, cond = NULL,
 #move to loa?
 #same for others?
     if(is.factor(x)){
-        extra.args <- listUpdate(list(scales=list(x=list(at=c(1:length(levels(x))),
+        extra.args <- loa::listUpdate(list(scales=list(x=list(at=c(1:length(levels(x))),
                                                          labels=levels(x),
                                                          rot=45))),
                                  extra.args)
@@ -167,7 +174,7 @@ pemsXYZCondUnitsHandler <- function(x, y = NULL, z = NULL, cond = NULL,
         y <- getPEMSElement(!!enquo(y), data, if.missing="stop", 
                             if.null="return")
     if(is.factor(y)){
-        extra.args <- listUpdate(list(scales=list(y=list(at=c(1:length(levels(y))),
+        extra.args <- loa::listUpdate(list(scales=list(y=list(at=c(1:length(levels(y))),
                                                          labels=levels(y)))),
                                  extra.args)
         y <- pems.element(as.numeric(y))
@@ -352,7 +359,7 @@ preprocess.pemsPlot <- function(lattice.like=lattice.like, units=units,...){
 # 
 #        if(is.null(lattice.like$z)) lattice.like$z <- 1
 
-        if(isGood4LOA(units$units)){
+        if(loa::isGood4LOA(units$units)){
 
             if("x.to" %in% names(extra.args)){
                 from <- if("x.from" %in% names(extra.args)) extra.args$x.from else units$x.units     
@@ -419,9 +426,9 @@ panel.pemsPlot <- function(..., loa.settings = FALSE){
         extra.args <- list(...)
 
         if(loa.settings){
-            temp <- loaHandler(panel.loa, loa.settings = TRUE)
+            temp <- loa::loaHandler(loa::panel.loa, loa.settings = TRUE)
             temp$common.args <- unique(c(temp$common.args, "units"))
-            temp$default.settings <- listUpdate(temp$default.settings, 
+            temp$default.settings <- loa::listUpdate(temp$default.settings, 
                                                 list(loa.preprocess = preprocess.pemsPlot, 
                                                      grid = TRUE,
                                                      multi.y = "special"))
@@ -432,7 +439,7 @@ panel.pemsPlot <- function(..., loa.settings = FALSE){
         if(is.null(extra.args$z)) extra.args$z <- 1
 
         #plot
-        do.call(panel.loa, extra.args)
+        do.call(loa::panel.loa, extra.args)
 
     }
 
@@ -451,9 +458,9 @@ panel.routePath <- function(..., loa.settings = FALSE){
         extra.args <- list(...)
 
         if(loa.settings){
-            temp <- loaHandler(panel.loa)
+            temp <- loa::loaHandler(loa::panel.loa)
             temp$common.args <- unique(c(temp$common.args, "units"))
-            temp$default.settings <- listUpdate(temp$default.settings, 
+            temp$default.settings <- loa::listUpdate(temp$default.settings, 
                                                 list(loa.preprocess = preprocess.pemsPlot, 
                                                      grid=TRUE, group.args= c("col", "lwd"),
                                                      type="l",  
@@ -466,8 +473,8 @@ panel.routePath <- function(..., loa.settings = FALSE){
 
         #add z if missing give proxy...
         if(is.null(extra.args$z)) extra.args$z <- 1
-        if(isGood4LOA(extra.args$grid)){
-            panel.loaGrid(panel.scales = extra.args$panel.scales, 
+        if(loa::isGood4LOA(extra.args$grid)){
+            loa::panel.loaGrid(panel.scales = extra.args$panel.scales, 
                           grid = extra.args$grid, 
                           xlim = extra.args$xlim, 
                           ylim = extra.args$ylim)
@@ -522,27 +529,27 @@ panel.routePath <- function(..., loa.settings = FALSE){
                 extra.args$x  <- new.lon$y
                 
             }
-            extra.args$col <- do.call(colHandler, extra.args)
+            extra.args$col <- do.call(loa::colHandler, extra.args)
             #extra.args$cex <- do.call(cexHandler, extra.args)
             #extra.args$pch <- do.call(pchHandler, listUpdate(extra.args, 
             #                                                 list(z = NULL)))
             #starts
             temp <- extra.args
             temp$load <- "start"
-            temp <- listUpdate(temp, do.call(listLoad, temp)$start)
-            panel.xyplot(x=temp$x[1], y=temp$y[1],
+            temp <- loa::listUpdate(temp, do.call(loa::listLoad, temp)$start)
+            lattice::panel.xyplot(x=temp$x[1], y=temp$y[1],
                          col=temp$col[1],
                          cex=temp$cex[1]*4,
                          type="p", pch=temp$pch[1])
             #lines
-            do.call(panel.xyplot, extra.args)
+            do.call(lattice::panel.xyplot, extra.args)
             #end
             if(length(extra.args$x)>2){
                 ref <- length(extra.args$x)
                 temp <- extra.args
                 temp$load <- "end"
-                temp <- listUpdate(temp, do.call(listLoad, temp)$end)
-                panel.arrows(x1=temp$x[ref], 
+                temp <- loa::listUpdate(temp, do.call(loa::listLoad, temp)$end)
+                lattice::panel.arrows(x1=temp$x[ref], 
                              x2=temp$x[ref-1],
                              y1=temp$y[ref],
                              y2=temp$y[ref-1],
@@ -553,8 +560,8 @@ panel.routePath <- function(..., loa.settings = FALSE){
             }
         
         }
-        do.call(groupsAndZcasesPanelHandler, listUpdate(extra.args, 
-                                                        list(panel = plot.fun)))
+        do.call(loa::groupsAndZcasesPanelHandler, 
+                loa::listUpdate(extra.args, list(panel = plot.fun)))
     }
 
 
@@ -590,8 +597,7 @@ panel.routePath <- function(..., loa.settings = FALSE){
 
 
 WatsonPlot <- function(speed, accel = NULL, z = NULL, ..., data = NULL, 
-         cond = NULL, units = TRUE, plot.type = 2, fun.name="WatsonPlot",
-         scheme = pems.scheme){
+         cond = NULL, units = TRUE, plot.type = 2, fun.name="WatsonPlot"){
 
     #passes settings on to convert units
 
@@ -601,7 +607,7 @@ WatsonPlot <- function(speed, accel = NULL, z = NULL, ..., data = NULL,
 
     #standardise formula or x,y,z,cond input as formula
     #and grab units
-    extra.args$units <- listLoad(listUpdate(extra.args, list(load="units")))
+    extra.args$units <- loa::listLoad(loa::listUpdate(extra.args, list(load="units")))
     extra.args <- pemsXYZCondUnitsHandler(!!enquo(speed), !!enquo(accel), !!enquo(z), 
                               !!enquo(cond), data = data,
                               units = units, settings = settings, ...)
@@ -616,11 +622,10 @@ WatsonPlot <- function(speed, accel = NULL, z = NULL, ..., data = NULL,
                 call.=FALSE)
         extra.args$panel <- panel.pemsPlot
     }
-    extra.args <- listUpdate(extra.args, list(scheme = scheme, 
-                                              data = data))
-
-    do.call(loaPlot, extra.args)
-
+    extra.args <- loa::listUpdate(list(scheme=pems.utils::pems.scheme, 
+                                       data=data), 
+                                  extra.args)
+    do.call(loa::loaPlot, extra.args)
 }
 
 
@@ -713,7 +718,7 @@ preprocess.WatsonPlot <- function (lattice.like = lattice.like, ...)
     }
  
     #output
-    listUpdate(list(lattice.like = lattice.like), new.args)
+    loa::listUpdate(list(lattice.like = lattice.like), new.args)
 
 }
 
@@ -724,22 +729,34 @@ preprocess.WatsonPlot <- function (lattice.like = lattice.like, ...)
 
 
 panel.WatsonBinPlot <- function(..., ref.line = TRUE,
-         process.panel = panel.binPlot, plot.panel = panel.binPlot, 
+         process.panel = NULL, plot.panel = NULL, 
          omit.stopped = FALSE, process = TRUE, plot = TRUE, 
          loa.settings = FALSE){
 
-    extra.args <- list(...)
-
+  #see notes !!!
+  # temp function below / unexported 
+  # fix in panel.binplot in loa as on 0.3.0.2...
+  # not in CRAN version...
+  if(is.null(process.panel)){
+    process.panel <- loa::panel.binPlot
+    ##process.panel <- panel.pemsBinPlot 
+  }
+  if(is.null(plot.panel)){
+    plot.panel <- loa::panel.binPlot
+    ##plot.panel <- panel.pemsBinPlot 
+  }
+  extra.args <- list(...)
+  
     if (loa.settings) {
-        temp <- loaHandler(process.panel)
+        temp <- loa::loaHandler(process.panel)
         temp$common.args <- unique(c(temp$common.args, "units", "omit.stopped", 
                                      "stopped.speed.accel", "settings"))
-        temp$default.settings <- listUpdate(temp$default.settings, 
+        temp$default.settings <- loa::listUpdate(temp$default.settings, 
                                      list(loa.preprocess = preprocess.WatsonPlot, 
                                           grid = TRUE, aspect = 0.5))
         return(temp)
     }
-
+  
     if(process){
         if(!"z" %in% names(extra.args)){
             extra.args$z <- rep(1, length(extra.args$x))
@@ -750,14 +767,14 @@ panel.WatsonBinPlot <- function(..., ref.line = TRUE,
                 extra.args$statistic <- function(x) mean(na.omit(x))
         }
         ans <- do.call(process.panel, 
-                       listUpdate(extra.args, list(plot=FALSE, process=TRUE)))
+                       loa::listUpdate(extra.args, list(plot=FALSE, process=TRUE)))
         if(!plot) return(ans)
     }
 
     if(plot){
-
+     
         #bin border cols
-        col <- getPlotArgs("background")$col
+        col <- loa::getPlotArgs("background")$col
         if(col=="transparent") col <- "white" 
         if(!"col" %in% names(extra.args))
             extra.args$col <- col
@@ -767,15 +784,17 @@ panel.WatsonBinPlot <- function(..., ref.line = TRUE,
 #or switch it off here after it is called
 
         #grid
-        if (isGood4LOA(extra.args$grid)) 
-            panel.loaGrid(panel.scales = extra.args$panel.scales, 
+        if (loa::isGood4LOA(extra.args$grid)) 
+            loa::panel.loaGrid(panel.scales = extra.args$panel.scales, 
                 grid = extra.args$grid)
                         
         #plot bins and ref.line
         do.call(plot.panel, 
-            listUpdate(extra.args, list(plot=TRUE, process=FALSE)))
-        if(isGood4LOA(ref.line))
-            do.call(panel.abline, getPlotArgs(local.resets=list(h=0, lty=3), user.resets=ref.line, defaults.only=FALSE))               
+            loa::listUpdate(extra.args, list(plot=TRUE, process=FALSE)))
+        if(loa::isGood4LOA(ref.line))
+            do.call(lattice::panel.abline, 
+                    loa::getPlotArgs(local.resets=list(h=0, lty=3), 
+                                     user.resets=ref.line, defaults.only=FALSE))               
     }
 }
 
@@ -789,49 +808,44 @@ panel.WatsonBinPlot <- function(..., ref.line = TRUE,
 #don't know if I can do test
 #maybe drop cases outside rather than add in max/min???
 
-panel.WatsonContourPlot <- function(..., plot.panel=panel.kernelDensity,          
-         process = TRUE, plot = TRUE, loa.settings = FALSE){
-
-    extra.args <- listUpdate(list(...), list(plot.panel=plot.panel, 
-                                             process=process, plot=plot, 
-                                             loa.settings=loa.settings))
-
-    if(loa.settings){
-        temp <- loaHandler(panel.WatsonBinPlot)
-        temp$default.settings <- listUpdate(temp$default.settings, 
-                                            list(key.fun=draw.loaColorRegionsKey, 
-                                                 alpha.regions = 0.5))
-        return(temp)
+panel.WatsonContourPlot.old <- function(..., plot.panel = NULL, process = TRUE, 
+                                        plot = TRUE, loa.settings = FALSE){
+  if(is.null(plot.panel)){
+    plot.panel <- loa::panel.kernelDensity
+  }
+  extra.args <- loa::listUpdate(list(...), list(plot.panel=plot.panel, 
+                                                process=process, plot=plot, 
+                                                loa.settings=loa.settings))
+  
+  if(loa.settings){
+    temp <- loa::loaHandler(panel.WatsonBinPlot)
+    temp$default.settings <- loa::listUpdate(temp$default.settings, 
+                                             list(key.fun=loa::draw.loaColorRegionsKey, 
+                                                  alpha.regions = 0.5))
+    return(temp)
+  }
+  
+  if(plot & !process){
+    
+    if(!"at" %in% names(extra.args)){
+      temp <- pretty(extra.args$zlim, 10)
+      temp <- unique(temp)
+      extra.args$at <- temp
     }
-
-    if(plot & !process){
-
-        if(!"at" %in% names(extra.args)){
-            temp <- pretty(extra.args$zlim, 10)
-######################
-#test
-######################
-#might come back to bite me
-#
-#            temp[temp<min(extra.args$zlim)] <- min(extra.args$zlim)
-#            temp[temp>max(extra.args$zlim)] <- max(extra.args$zlim)
-######################
-            temp <- unique(temp)
-            extra.args$at <- temp
-        }
-
-    #contout cols
+    
     if(!"col" %in% names(extra.args))
-        extra.args$col <- getPlotArgs()$col
+      extra.args$col <- loa::getPlotArgs()$col
     
     #other tweaks
     if(!"labels" %in% names(extra.args))
-        extra.args$labels <- TRUE
-   
-    }
-                     
-    do.call(panel.WatsonBinPlot, extra.args)
+      extra.args$labels <- TRUE
+    
+  }
+  
+  do.call(panel.WatsonBinPlot, extra.args)
 }
+
+
 
 
 
@@ -852,85 +866,148 @@ panel.WatsonContourPlot <- function(..., plot.panel=panel.kernelDensity,
 
 #lim.borders
 
-panel.WatsonSmoothContourPlot <- function(..., plot.panel=panel.surfaceSmooth,          
-         process = TRUE, plot = TRUE, loa.settings = FALSE){
+#a <- calcAccel(velocity, local.time, data = pems.1, output="pems")
+#WatsonPlot(velocity, accel, data=a, plot.type=3)
+#WatsonPlot(velocity, accel, data=a, plot.type=3, zlim=c(0, 250))
+#WatsonPlot(velocity, accel, data=a, plot.type=3, zlim=c(0, 250), at=c(0,1,2,5,10,20, 50, 100,200, 500))
+#WatsonPlot(velocity, accel, data=a, plot.type=3, zlim=c(0, 250), at=c(0, 50, 100, 150, 200, 250))
+#WatsonPlot(velocity, accel, data=a, plot.type=3, plot.panel=loa::panel.surfaceSmooth) 
+#WatsonPlot(velocity, accel, data=a, plot.type=3, zlim=c(0,250), at=c(1:5, ((1:5)*10), ((1:5)*100)))
+#WatsonPlot(velocity, accel, data=a, plot.type=4, zlim=c(0,250), at=pretty(c(0, 250), 10), span=0.1, col.regions=rev(loa::colRegionsHandler(z=1:10, col.regions="Spectral")), contour=F)
 
-    extra.args <- listUpdate(list(...), list(plot.panel=plot.panel, 
-                                             process=process, plot=plot, 
-                                             loa.settings=loa.settings))
 
-    if(loa.settings){
-        temp <- loaHandler(panel.WatsonBinPlot)
-        temp$default.settings <- listUpdate(temp$default.settings, 
-                                            list(key.raster = TRUE,  
-                                                 contour = TRUE, regions = TRUE,
-                                                 alpha.regions = 0.5))
-        return(temp)
+panel.WatsonContourPlot <- function(..., plot.panel = NULL, process = TRUE, 
+                                    plot = TRUE, loa.settings = FALSE){
+  
+  #currently don't have a proper contour plot
+  #    current work-around solution is a smooth surface with very 
+  #           little smoothing or extrapolation...
+  if(is.null(plot.panel)){
+    plot.panel <- loa::panel.surfaceSmooth
+  }
+  extra.args <- loa::listUpdate(list(...), list(plot.panel=plot.panel, 
+                                                process=process, plot=plot, 
+                                                loa.settings=loa.settings))
+  
+  if(loa.settings){
+    temp <- loa::loaHandler(panel.WatsonBinPlot)
+    temp$default.settings <- loa::listUpdate(temp$default.settings, 
+                                             list(key.raster = TRUE,
+                                                  span=0.1, too.far=0.05,
+                                                  contour = TRUE, regions = TRUE, 
+                                                  alpha.regions = 0.5))
+    return(temp)
+  }
+  
+  if(process){
+    if(!"z" %in% names(extra.args)){
+      extra.args$z <- rep(1, length(extra.args$x))
+      if(!"statistic" %in% names(extra.args))
+        extra.args$statistic <- function(x) length(na.omit(x))
+    } else {
+      if(!"statistic" %in% names(extra.args))
+        extra.args$statistic <- function(x) mean(na.omit(x))
     }
-
-    if(process){
-        if(!"z" %in% names(extra.args)){
-            extra.args$z <- rep(1, length(extra.args$x))
-            if(!"statistic" %in% names(extra.args))
-                extra.args$statistic <- function(x) length(na.omit(x))
-        } else {
-            if(!"statistic" %in% names(extra.args))
-                extra.args$statistic <- function(x) mean(na.omit(x))
-        }
-        ans <- do.call(panel.binPlot, 
-                       listUpdate(extra.args, list(plot=FALSE, process=TRUE)))
-
-        extra.args <- listUpdate(extra.args, ans)
-
-######################
-#stop surface smooth using x/ylims 
-#might move this to panel.surfaceSmooth
-#or refine the modelling
-#currently just nas between x/ys and borders
-#        extra.args <- listUpdate(extra.args, list(x.breaks=200, y.breaks=200))
-
-        extra.args <- listUpdate(extra.args, list(x.breaks=200, y.breaks=200), ignore=c("xlim", "ylim"))
-
-        ans <- do.call(panel.surfaceSmooth, extra.args)
-
-        if(!plot) return(ans)
+    ans <- do.call(loa::panel.binPlot, 
+                   loa::listUpdate(extra.args, list(plot=FALSE, process=TRUE)))
+    
+    extra.args <- loa::listUpdate(extra.args, ans)
+    
+    if(!"zlim" %in% names(extra.args)){
+      extra.args$zlim <- range(pretty(ans$z))
     }
-
-
-    if(plot & !process){
-
-#currently does contours and regions
-#want it to just do at
-
-#        if(!"at" %in% names(extra.args)){
-#            temp <- pretty(extra.args$zlim, 10)
-######################
-#test
-######################
-#might come back to bite me
-#
-#            temp[temp<min(extra.args$zlim)] <- min(extra.args$zlim)
-#            temp[temp>max(extra.args$zlim)] <- max(extra.args$zlim)
-######################
-#            temp <- unique(temp)
-#            extra.args$at <- temp
-#        }
-
+    extra.args <- loa::listUpdate(extra.args, 
+                                  list(x.breaks=250, y.breaks=250),
+                                  ignore=c("xlim", "ylim"))
+    
+    ans <- suppressWarnings(do.call(loa::panel.surfaceSmooth, extra.args))
+    ans$z[ans$z<extra.args$zlim[1] | ans$z>extra.args$zlim[2]] <- NA
+    
+    if(!plot) return(ans)
+  }
+  
+  
+  if(plot & !process){
+    
     #contout cols
     if(!"col" %in% names(extra.args))
-        extra.args$col <- getPlotArgs()$col
+      extra.args$col <- loa::getPlotArgs()$col
     
     #other tweaks
-#    if(!"labels" %in% names(extra.args))
-#        extra.args$labels <- TRUE
-                     
+    #    if(!"labels" %in% names(extra.args))
+    #        extra.args$labels <- TRUE
+    
+    #suppressWarnings(do.call(panel.WatsonBinPlot, extra.args))
     do.call(panel.WatsonBinPlot, extra.args)
-    }
+    
+  }
 }
 
 
 
 
+panel.WatsonSmoothContourPlot <- function(..., plot.panel = NULL, process = TRUE, 
+                                          plot = TRUE, loa.settings = FALSE){
+  if(is.null(plot.panel)){
+    plot.panel <- loa::panel.surfaceSmooth
+  }
+  extra.args <- loa::listUpdate(list(...), list(plot.panel=plot.panel, 
+                                                process=process, plot=plot, 
+                                                loa.settings=loa.settings))
+  
+  if(loa.settings){
+    temp <- loa::loaHandler(panel.WatsonBinPlot)
+    temp$default.settings <- loa::listUpdate(temp$default.settings, 
+                                             list(key.raster = TRUE,  
+                                                  contour = TRUE, regions = TRUE, 
+                                                  alpha.regions = 0.5))
+    return(temp)
+  }
+  
+  if(process){
+    if(!"z" %in% names(extra.args)){
+      extra.args$z <- rep(1, length(extra.args$x))
+      if(!"statistic" %in% names(extra.args))
+        extra.args$statistic <- function(x) length(na.omit(x))
+    } else {
+      if(!"statistic" %in% names(extra.args))
+        extra.args$statistic <- function(x) mean(na.omit(x))
+    }
+    ans <- do.call(loa::panel.binPlot, 
+                   loa::listUpdate(extra.args, list(plot=FALSE, process=TRUE)))
+    
+    extra.args <- loa::listUpdate(extra.args, ans)
+    
+    ######################
+    #stop surface smooth using x/ylims 
+    #might move this to panel.surfaceSmooth
+    #or refine the modelling
+    #currently just nas between x/ys and borders
+    #        extra.args <- listUpdate(extra.args, list(x.breaks=200, y.breaks=200))
+    
+    extra.args <- loa::listUpdate(extra.args, 
+                                  list(x.breaks=250, y.breaks=250), 
+                                  ignore=c("xlim", "ylim"))
+    
+    ans <- suppressWarnings(do.call(loa::panel.surfaceSmooth, extra.args))
+    
+    if(!plot) return(ans)
+  }
+  
+  
+  if(plot & !process){
+    
+    if(!"col" %in% names(extra.args))
+      extra.args$col <- loa::getPlotArgs()$col
+    
+    #other tweaks
+    #    if(!"labels" %in% names(extra.args))
+    #        extra.args$labels <- TRUE
+    
+    #suppressWarnings(do.call(panel.WatsonBinPlot, extra.args))
+    do.call(panel.WatsonBinPlot, extra.args)
+  }
+}
 
 
 
@@ -984,7 +1061,7 @@ panel.WatsonSmoothContourPlot <- function(..., plot.panel=panel.surfaceSmooth,
 
 
 
-latticePlot <- function(x = NULL, data = NULL, plot = xyplot, panel = NULL, ..., 
+latticePlot <- function(x = NULL, data = NULL, plot = lattice::xyplot, panel = NULL, ..., 
                    greyscale = FALSE, fun.name = "latticePlot"){
 
     this.call <- match.call()
@@ -1097,8 +1174,8 @@ panel.PEMSXYPlot <- function(..., grid=NULL){
     if(is.list(grid))
         temp[names(grid)] <- grid
 
-    do.call(panel.grid, temp)
-    panel.xyplot(...)
+    do.call(lattice::panel.grid, temp)
+    lattice::panel.xyplot(...)
 
 } 
 
@@ -1125,7 +1202,7 @@ panel.PEMSXYPlot <- function(..., grid=NULL){
 
 
 XYZPlot <- function(x = NULL, ..., data = NULL, statistic = NULL, 
-                    x.res = 10, y.res = 20, plot = levelplot,
+                    x.res = 10, y.res = 20, plot = lattice::levelplot,
                     fun.name = "XYZPlot"){
 
 
@@ -1146,12 +1223,14 @@ XYZPlot <- function(x = NULL, ..., data = NULL, statistic = NULL,
 
 
     #get structure formula
-    d1 <- try(latticeParseFormula(x, data, dimension = 3, 
+    d1 <- try(lattice::latticeParseFormula(x, data, dimension = 3, 
                                   multiple = TRUE),
               silent = TRUE)
     if(is(d1)[1] == "try-error")
-        checkIfMissing(if.missing = settings$if.missing, reply = "mismatched 'x/data' data combination", 
-                       suggest = "see ?XYZPlot for help", fun.name = fun.name)
+        checkIfMissing(if.missing = settings$if.missing, 
+                       reply = "mismatched 'x/data' data combination", 
+                       suggest = "see ?XYZPlot for help", 
+                       fun.name = fun.name)
 
     ##################
     #statistcs handling 
@@ -1203,8 +1282,8 @@ XYZPlot <- function(x = NULL, ..., data = NULL, statistic = NULL,
     if(!is.numeric(y.res))    
           y.res <- 10
 
-    x.res <- do.breaks(xlim, x.res)
-    y.res <- do.breaks(ylim, y.res)
+    x.res <- lattice::do.breaks(xlim, x.res)
+    y.res <- lattice::do.breaks(ylim, y.res)
 
     x <- cut(d1$right.y, x.res)
     y <- cut(d1$right.x, y.res)
@@ -1278,3 +1357,122 @@ XYZPlot <- function(x = NULL, ..., data = NULL, statistic = NULL,
 
 
 #}
+
+
+#############################
+# sneak fix
+##############################
+
+
+#this should replace panel.binplot in loa on next update!!!
+#set default settings for panel, key and scheme... 
+
+old_panel.pemsBinPlot <- 
+  function (x = NULL, y = NULL, z = NULL, breaks = 20, x.breaks = breaks, 
+          y.breaks = breaks, x1 = NULL, x2 = NULL, y1 = NULL, y2 = NULL, 
+          statistic = mean, pad.grid = FALSE, ..., plot = TRUE, process = TRUE, 
+          loa.settings = FALSE) 
+  {
+  if (loa.settings) 
+    return(list(group.args = c("col"), zcase.args = c("pch"), 
+                common.args = c("breaks", "pad.grid", "x.breaks", 
+                                "y.breaks", "statistics"), 
+                default.settings = list(key.fun = loa::draw.loaColorKey, 
+                                        key.raster = TRUE, 
+                                        x.elements = c("x", "x1", "x2"), 
+                                        isolate.col.regions = TRUE, 
+                                        scheme = "loa.scheme")))
+  extra.args <- list(...)
+  if (process) {
+    temp <- if ("xlim" %in% names(extra.args)) 
+      extra.args$xlim
+    else range(x)
+    x.cuts <- if (length(x.breaks) == 1) {
+      seq(min(temp), max(temp), length.out = (x.breaks + 
+                                                1))
+    }
+    else {
+      if (min(x.breaks) > min(temp)) 
+        temp <- c(min(temp), x.breaks)
+      if (min(x.breaks) < max(temp)) 
+        temp <- c(max(temp), x.breaks)
+      temp <- unique(sort(temp))
+    }
+    x.case <- cut(x, x.cuts)
+    x.1 <- x.cuts[-length(x.cuts)]
+    x.2 <- x.cuts[-1]
+    x.1.5 <- x.1 + ((x.2 - x.1)/2)
+    temp <- if ("ylim" %in% names(extra.args)) 
+      extra.args$ylim
+    else range(y)
+    y.cuts <- if (length(y.breaks) == 1) {
+      seq(min(temp), max(temp), length.out = (y.breaks + 
+                                                1))
+    }
+    else {
+      if (min(y.breaks) > min(temp)) 
+        temp <- c(min(temp), y.breaks)
+      if (min(y.breaks) < max(temp)) 
+        temp <- c(max(temp), y.breaks)
+      temp <- unique(sort(temp))
+    }
+    y.case <- cut(y, y.cuts)
+    y.1 <- y.cuts[-length(y.cuts)]
+    y.2 <- y.cuts[-1]
+    y.1.5 <- y.1 + ((y.2 - y.1)/2)
+    if (is.null(z)) {
+      z <- rep(1, length = length(x))
+      statistic = length
+      warning("no z values supplied; so binned as counts", 
+              call. = FALSE)
+    }
+    ans <- aggregate(z, data.frame(x.case, y.case), statistic)
+    ans <- na.omit(ans)
+    temp <- ans$x.case
+    levels(temp) <- x.1.5
+    x <- as.numeric(as.character(temp))
+    levels(temp) <- x.1
+    x1 <- as.numeric(as.character(temp))
+    levels(temp) <- x.2
+    x2 <- as.numeric(as.character(temp))
+    temp <- ans$y.case
+    levels(temp) <- y.1.5
+    y <- as.numeric(as.character(temp))
+    levels(temp) <- y.1
+    y1 <- as.numeric(as.character(temp))
+    levels(temp) <- y.2
+    y2 <- as.numeric(as.character(temp))
+    z <- ans$x
+    if (pad.grid) {
+      test <- expand.grid(list(x = x.1.5, y = y.1.5))
+      test <- cbind(test, expand.grid(list(x1 = x.1, y1 = y.1)))
+      test <- cbind(test, expand.grid(list(x2 = x.2, y2 = y.2)))
+      ans <- data.frame(x = x, y = y, z = z)
+      ans <- merge(test, ans, all = TRUE)
+      x <- ans$x
+      y <- ans$y
+      z <- ans$z
+      x1 <- ans$x1
+      y1 <- ans$y1
+      x2 <- ans$x2
+      y2 <- ans$y2
+    }
+    if (!plot) 
+      return(list(x = x, y = y, z = z, x1 = x1, x2 = x2, 
+                  y1 = y1, y2 = y2))
+  }
+  if (plot) {
+    if (!"at" %in% names(extra.args)) 
+      extra.args$at <- seq(min(extra.args$zlim), max(extra.args$zlim), 
+                           length.out = 100)
+    col <- do.call(loa::colHandler, loa::listUpdate(extra.args, list(z = z, 
+                                                           ref = z), ignore = "col"))
+    if (is.null(extra.args$border) && "col" %in% names(extra.args)) 
+      extra.args$border <- do.call(loa::colHandler, loa::listUpdate(extra.args, 
+                                                          list(z = 1, ref = 1, zlim = c(1, 1)), ignore = c("col.regions", 
+                                                                                                           "alpha.regions")))
+    if (is.null(extra.args$border)) 
+      extra.args$border <- FALSE
+    lattice::lrect(x1, y1, x2, y2, col = col, border = extra.args$border)
+  }
+}

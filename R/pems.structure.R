@@ -72,7 +72,48 @@
 #attribute name handling
 #attribute units handling
 
+#######################
+#possible issue
+#######################
 
+#units(a$time.stamp)
+#units(a[, "time.stamp"])
+#units(a)[1]
+
+#but these not behaving... 
+#getPEMSElement(1, a)
+#getPEMSElement(time.stamp, a)
+
+#a[[1]][,1] still has original units
+#if changed with units(a)[1] <- "har"
+#but higher levels are tracking OK... 
+
+# I think you currently need 
+# units(a[,"time.stamp"]) <- "new"
+# to change it at all levels
+
+#units(a)[1] <- 1
+#units(a[["data"]][,"time.stamp"]) == units(a[, "time.stamp"])
+##[1] FALSE
+#units(a[["data"]][,"time.stamp"]) 
+##[1] "ho"
+#units(a[, "time.stamp"])
+##[1] "1"
+#units(a[, "time.stamp"])
+##[1] "1"
+#units(a$time.stamp)
+##[1] "1"
+#units(a[[1]]$time.stamp)
+##[1] "ho"
+
+## issue with a[[1]][, "time.stamp"]
+## but not a[, "time.stamp"]
+## wonder if something is using getPemsElement
+
+## units(a$time.stamp) <- "www" works but 
+## units(a)[1] <- "ick" does not 
+## units(a)[...] needs to be units(a$name) <- for each...
+ 
 getPEMSElement <- function (x, pems = NULL, units = NULL, ..., 
                          fun.name = "getPEMSElement", 
                          if.missing = "stop",

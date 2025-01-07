@@ -4,9 +4,9 @@ year <- sub("-.*", "", meta$Date)
 version <- meta$Version
 note <- sprintf("R package version %s", version) 
 
-citEntry(entry="Manual",
+bibentry(bibtype="Manual",
          title = "pems.utils: Data handling, analysis and visualisation tools for data from portable emissions monitoring systems and other mobile sources.",
-         author = personList(as.person("Karl Ropkins")),
+         author = c(as.person("Karl Ropkins")),
          year = year,
          note = note,
 
@@ -15,11 +15,11 @@ citEntry(entry="Manual",
                "). pems.utils: Data handling, analysis and visualisation tools for data from portable emissions monitoring systems and other mobile sources. ",
                "R package version ", version, ".", sep=""))
 
-citEntry(entry="proceedings",
+bibentry(bibtype="proceedings",
          title = "The R package pems.utils: open-source processing, Visualization and Analysis Tools for Portable Emissions Measurement Systems data.",
-         author = personList(as.person("Karl Ropkins"),
-                             as.person("Stephen Hanley"),
-                             as.person("Said Munir")),
+         author = c(as.person("Karl Ropkins"),
+                    as.person("Stephen Hanley"),
+                    as.person("Said Munir")),
          year = "2012",
          note = "22nd CRC Real World Emissions Workshop. San Diego, US, 25-28 March, 2012.",
 

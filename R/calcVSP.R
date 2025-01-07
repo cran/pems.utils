@@ -503,8 +503,7 @@ refVSPBin_MOVES.23 <- function (vsp = NULL, speed = NULL, data = NULL,
 VSPPlot <- function(vsp, em = NULL, 
                         ..., data = NULL,   
                         plot.type = 1, 
-                        fun.name="VSPPlot",
-                        scheme = pems.scheme){
+                        fun.name="VSPPlot"){
   
   #setup
   extra.args <- list(...)
@@ -542,26 +541,27 @@ VSPPlot <- function(vsp, em = NULL,
   
   #plot 1 scatter with loess or break.point
   if(plot.type=="1"){
-    extra.args <- listUpdate(list(x=vsp, y=em, 
+    extra.args <- loa::listUpdate(list(x=vsp, y=em, 
                                   data=NULL, xlab=xlab, 
-                                  ylab=ylab, report=FALSE),
+                                  ylab=ylab, report=FALSE,
+                                  scheme=pems.utils::pems.scheme),
                              extra.args)
     plt <- rlang::exec(pemsPlot, !!!extra.args)
-    if(isGood4LOA(extra.args$loess)){
+    if(loa::isGood4LOA(extra.args$loess)){
       ###########################
       #need to think about handling of this
-      temp <- do.call(listLoad, listUpdate(extra.args, 
+      temp <- do.call(loa::listLoad, loa::listUpdate(extra.args, 
                                            list(load="loess")))$loess
-      temp <- listUpdate(list(lattice.plot=plt,
+      temp <- loa::listUpdate(list(lattice.plot=plt,
                               type="n"), temp)
-      plt <- do.call(add.XYLOESSFit, temp)
+      plt <- do.call(loa::add.XYLOESSFit, temp)
     }
-    if(isGood4LOA(extra.args$break.point)){
+    if(loa::isGood4LOA(extra.args$break.point)){
       ###########################
       #need to think about handling of this
-      temp <- do.call(listLoad, listUpdate(extra.args, 
+      temp <- do.call(loa::listLoad, loa::listUpdate(extra.args, 
                                            list(load="break.point")))$break.point
-      temp <- listUpdate(list(lattice.plot=plt,
+      temp <- loa::listUpdate(list(lattice.plot=plt,
                               type="n"), temp)
       plt <- do.call(add.XYBreakPoint, temp)
     }
@@ -570,27 +570,35 @@ VSPPlot <- function(vsp, em = NULL,
   
   #plot2 boxplot
   if(plot.type=="2"){
-    extra.args <- listUpdate(list(x=vsp, y=em, 
+    extra.args <- loa::listUpdate(list(x=vsp, y=em, 
                                   data=NULL, xlab=xlab, 
                                   ylab=ylab, type="n",
-                                  key.fun=draw.groupPlotKey),
+                                  key.fun=loa::draw.groupPlotKey,
+                                  scheme=pems.utils::pems.scheme),
                              extra.args)
 #    if(isGood4LOA(extra.args$groups)){
 #############################
 #think about addNA for groups...       
 #############################
 #    }
-    plt <- rlang::exec(pemsPlot, !!!listHandler(extra.args,
+    plt <- rlang::exec(pemsPlot, !!!loa::listHandler(extra.args,
                                                 ignore = "breaks"))
-    temp <- do.call(listLoad, 
-                    listUpdate(extra.args, 
+    temp <- do.call(loa::listLoad, 
+                    loa::listUpdate(extra.args, 
                                list(load="bw")))$bw
+    if(is.null(extra.args$stat)){
+      extra.args$stat <- if(is.null(extra.args$y)){
+        function(x) length(x[!is.na(x)])
+      } else {
+        function(x) {mean(x, na.rm=TRUE)}
+      }
+    }
     if(is.null(extra.args$breaks)){
       extra.args$breaks <- seq(min(vsp, na.rm=TRUE), 
                                max(vsp, na.rm=TRUE) + 10,
                                by=10)
     }
-    temp <- listUpdate(list(lattice.plot=plt, 
+    temp <- loa::listUpdate(list(lattice.plot=plt, 
                             breaks=extra.args$breaks), temp)
     plt <- do.call(add.XBinYBarPlot, temp)
   }
@@ -602,8 +610,7 @@ VSPPlot <- function(vsp, em = NULL,
 VSPBinPlot <- function(vspbin, em = NULL,  
                     ..., data = NULL,   
                     plot.type = 1, stat = NULL,
-                    fun.name="VSPBinPlot",
-                    scheme = pems.scheme){
+                    fun.name="VSPBinPlot"){
   
   #setup
   extra.args <- list(...)
@@ -691,51 +698,53 @@ VSPBinPlot <- function(vspbin, em = NULL,
   #plot1 bar
   #this needs calculating, plotting and resizing
   if(plot.type=="1"){
-    extra.args <- listUpdate(list(x=vspbin, y=em, 
+    extra.args <- loa::listUpdate(list(x=vspbin, y=em, 
                                   data=NULL, xlab=xlab, 
-                                  ylab=ylab, type="n",
-                                  key.fun=draw.groupPlotKey),
+                                  ylab=ylab, type="n", 
+                                  scheme=pems.utils::pems.scheme,
+                                  key.fun=loa::draw.groupPlotKey),
                              extra.args)
     #    if(isGood4LOA(extra.args$groups)){
     #############################
     #think about addNA for groups...       
     #############################
     #    }
-    plt <- rlang::exec(pemsPlot, !!!listHandler(extra.args,
+    plt <- rlang::exec(pemsPlot, !!!loa::listHandler(extra.args,
                                                 ignore = "breaks"))
-    temp <- do.call(listLoad, 
-                    listUpdate(extra.args, 
+    temp <- do.call(loa::listLoad, 
+                    loa::listUpdate(extra.args, 
                                list(load="bw")))$bw
     if(is.null(extra.args$breaks)){
       extra.args$breaks <- (1:(length(levels(vspbin))+1))-0.5
     }
-    temp <- listUpdate(list(lattice.plot=plt, 
+    temp <- loa::listUpdate(list(lattice.plot=plt, 
                             stat=stat,
                             breaks=extra.args$breaks), temp)
     plt <- do.call(add.XBinYBarPlot, temp)
   }
   
-  #plot1 boxplot
+  #plot2 boxplot
   if(plot.type=="2"){
-    extra.args <- listUpdate(list(x=vspbin, y=em, 
+    extra.args <- loa::listUpdate(list(x=vspbin, y=em, 
                                   data=NULL, xlab=xlab, 
                                   ylab=ylab, type="n",
-                                  key.fun=draw.groupPlotKey),
+                                  scheme=pems.utils::pems.scheme,
+                                  key.fun=loa::draw.groupPlotKey),
                              extra.args)
     #    if(isGood4LOA(extra.args$groups)){
     #############################
     #think about addNA for groups...       
     #############################
     #    }
-    plt <- rlang::exec(pemsPlot, !!!listHandler(extra.args,
+    plt <- rlang::exec(pemsPlot, !!!loa::listHandler(extra.args,
                                                 ignore = "breaks"))
-    temp <- do.call(listLoad, 
-                    listUpdate(extra.args, 
+    temp <- do.call(loa::listLoad, 
+                    loa::listUpdate(extra.args, 
                                list(load="bw")))$bw
     if(is.null(extra.args$breaks)){
       extra.args$breaks <- (1:(length(levels(vspbin))+1))-0.5
     }
-    temp <- listUpdate(list(lattice.plot=plt, 
+    temp <- loa::listUpdate(list(lattice.plot=plt, 
                             breaks=extra.args$breaks), temp)
     plt <- do.call(add.XBinYBoxPlot, temp)
   }
@@ -752,7 +761,7 @@ VSPBinPlot <- function(vspbin, em = NULL,
 
 #should move to loa and tidy this... 
 
-add.XYBreakPoint <- function(lattice.plot=trellis.last.object(),
+add.XYBreakPoint <- function(lattice.plot=lattice::trellis.last.object(),
                              preprocess = add.XYBreakPoint_prep,
                              model.method = XYBreakPoint,
                              panel = panel.XYBreakPoint, ...){
@@ -761,10 +770,10 @@ add.XYBreakPoint <- function(lattice.plot=trellis.last.object(),
                  preprocess = preprocess, panel=panel)
   x.args$grid <- FALSE
   x.args$type <- "l"
-  do.call(add.loaPanel, x.args)
+  do.call(loa::add.loaPanel, x.args)
 }
 
-add.XYBreakPoint_prep<- function(lattice.plot=trellis.last.object(),
+add.XYBreakPoint_prep<- function(lattice.plot=lattice::trellis.last.object(),
                                  model.method=XYBreakPoint,
                                  ...){
   
@@ -782,7 +791,7 @@ add.XYBreakPoint_prep<- function(lattice.plot=trellis.last.object(),
   }
   ans <- lapply(lattice.plot$panel.args, 
                 function(x){
-                  temp <- listUpdate(common, x)
+                  temp <- loa::listUpdate(common, x)
                   if(!"groups" %in% names(temp)){
                     temp$groups <- rep(temp$group.ids[[1]], 
                                        length(temp$x))
@@ -878,7 +887,7 @@ XYBreakPoint <- function(x, y, group.id=NULL,
 
 panel.XYBreakPoint <- function(...){
   
-  plot.args <- listUpdate(list(fit = TRUE, se = TRUE, report = TRUE), 
+  plot.args <- loa::listUpdate(list(fit = TRUE, se = TRUE, report = TRUE), 
                                               list(...))
   if (!"group.ids" %in% names(plot.args)) {
     plot.args$group.ids <- "default"
@@ -886,7 +895,7 @@ panel.XYBreakPoint <- function(...){
       plot.args$groups <- rep("default", length(plot.args$x))
   }
   if (!"col" %in% names(plot.args)) {
-  plot.args$col <- do.call(colHandler, listUpdate(plot.args, 
+  plot.args$col <- do.call(loa::colHandler, loa::listUpdate(plot.args, 
                                                   list(ref = 1:length(plot.args$group.ids))))
 }
 if (!"lty" %in% names(plot.args)) 
@@ -894,19 +903,19 @@ if (!"lty" %in% names(plot.args))
 if (!"lwd" %in% names(plot.args)) 
   plot.args$lwd <- rep(1, length(plot.args$group.ids))
 all.mods <- if ("loa.XYBreakPoint" %in% names(plot.args)) 
-  plot.args$loa.XYBreakPoint[[panel.number()]]
+  plot.args$loa.XYBreakPoint[[lattice::panel.number()]]
 else {
-  temp2 <- add.XYFit_prep(list(panel.args.common = plot.args, 
+  temp2 <- loa::add.XYFit_prep(list(panel.args.common = plot.args, 
                                panel.args = list(list())))
   temp2$panel.args.common$loa.XYBreakPoint[[1]]
 }
 for (i in names(all.mods)) {
   mod <- all.mods[[i]]
   if (!is.null(mod$bp)) {
-    if (isGood4LOA(plot.args$se)) {
-      m.args <- listUpdate(plot.args, do.call(listLoad, 
-                                              listUpdate(plot.args, list(load = "se")))[["se"]])
-      m.args <- listUpdate(list(group.args = "col", 
+    if (loa::isGood4LOA(plot.args$se)) {
+      m.args <- loa::listUpdate(plot.args, do.call(loa::listLoad, 
+                                              loa::listUpdate(plot.args, list(load = "se")))[["se"]])
+      m.args <- loa::listUpdate(list(group.args = "col", 
                                 levels = 3, alpha = 0.75, border = FALSE), 
                            m.args)
       for (j in m.args$group.args) {
@@ -919,13 +928,13 @@ for (i in names(all.mods)) {
         m.args$x <- c(mod$x, rev(mod$x))
         m.args$y <- c(mod$bp + (k * mod$bp.err), 
                       rev(mod$bp - (k * mod$bp.err)))
-        do.call(panel.polygon, m.args)
+        do.call(lattice::panel.polygon, m.args)
       }
     }
-    if (isGood4LOA(plot.args$fit)) {
-      m.args <- listUpdate(plot.args, do.call(listLoad, 
-                                              listUpdate(plot.args, list(load = "fit")))[["fit"]])
-      m.args <- listUpdate(list(group.args = c("col", 
+    if (loa::isGood4LOA(plot.args$fit)) {
+      m.args <- loa::listUpdate(plot.args, do.call(loa::listLoad, 
+                                              loa::listUpdate(plot.args, list(load = "fit")))[["fit"]])
+      m.args <- loa::listUpdate(list(group.args = c("col", 
                                                "lty"), type = "l"), m.args)
       m.args$group.args <- c("col", "lty", 
                              "lwd")
@@ -937,38 +946,40 @@ for (i in names(all.mods)) {
       m.args$x <- mod$x
       m.args$y <- mod$bp
       m.args$subscripts <- 1:length(m.args$x)
-      do.call(panel.xyplot, m.args)
+      do.call(lattice::panel.xyplot, m.args)
     }
   }
 }
-if (isGood4LOA(plot.args$report)) {
-  m.args <- listUpdate(plot.args, do.call(listLoad, listUpdate(plot.args, 
+if (loa::isGood4LOA(plot.args$report)) {
+  m.args <- loa::listUpdate(plot.args, do.call(loa::listLoad, 
+                                               loa::listUpdate(plot.args, 
                                                                list(load = "report")))[["report"]])
-  m.args <- listUpdate(list(position = c(0.15, 0.85)), 
+  m.args <- loa::listUpdate(list(position = c(0.15, 0.85)), 
                        m.args)
   report.mod.form <- unlist(lapply(all.mods, function(x) x$formula[1]))
   report.mod.r2 <- unlist(lapply(all.mods, function(x) x$r2[1]))
   refs <- plot.args$group.ids %in% unique(names(report.mod.form), 
                                           names(report.mod.r2))
-  lines <- list(col = c(NA, plot.args$col[refs]), lty = c(1, 
-                                                          plot.args$lty[refs]), lwd = c(1, plot.args$lwd[refs]), 
+  lines <- list(col = c(NA, plot.args$col[refs]), 
+                lty = c(1, plot.args$lty[refs]), 
+                lwd = c(1, plot.args$lwd[refs]), 
                 size = 0.9)
   formulas <- c("Fit", report.mod.form)
   r2 <- c(NA, report.mod.r2)
   r2[1] <- expression(paste("(", R^2, ")", 
                             sep = ""))
-  key.gf <- draw.key(list(lines = lines, text = list(formulas, 
-                                                     cex = 0.65), text = list(r2, cex = 0.65), between = 0.9, 
+  key.gf <- lattice::draw.key(list(lines = lines, text = list(formulas, 
+                          cex = 0.65), text = list(r2, cex = 0.65), between = 0.9, 
                           padding.text = 1, border = 1, background = "white"), 
                      draw = FALSE)
-  vp <- viewport(x = unit(m.args$position[1], "npc") + 
-                   unit(0.5 - m.args$position[1], "grobwidth", 
-                        list(key.gf)), y = unit(m.args$position[2], "npc") + 
-                   unit(0.5 - m.args$position[2], "grobheight", 
+  vp <- grid::viewport(x = grid::unit(m.args$position[1], "npc") + 
+                       grid::unit(0.5 - m.args$position[1], "grobwidth", 
+                        list(key.gf)), y = grid::unit(m.args$position[2], "npc") + 
+                   grid::unit(0.5 - m.args$position[2], "grobheight", 
                         list(key.gf)))
-  pushViewport(vp)
-  grid.draw(key.gf)
-  upViewport()
+  grid::pushViewport(vp)
+  grid::grid.draw(key.gf)
+  grid::upViewport()
 }
 }
 
@@ -978,7 +989,7 @@ if (isGood4LOA(plot.args$report)) {
 #XBinYBar
 
 #this is same as previous
-add.XBinYBarPlot <- function(lattice.plot=trellis.last.object(),
+add.XBinYBarPlot <- function(lattice.plot=lattice::trellis.last.object(),
                              preprocess = add.XBinYBarPlot_prep,
                              model.method = XBinYBarPlot,
                              stat = NULL,
@@ -989,10 +1000,10 @@ add.XBinYBarPlot <- function(lattice.plot=trellis.last.object(),
                  preprocess = preprocess, panel=panel)
   x.args$grid <- FALSE
   x.args$type <- "l"
-  do.call(add.loaPanel, x.args)
+  do.call(loa::add.loaPanel, x.args)
 }
 
-add.XBinYBarPlot_prep<- function(lattice.plot=trellis.last.object(),
+add.XBinYBarPlot_prep<- function(lattice.plot=lattice::trellis.last.object(),
                                  model.method=XBinYBarPlot,
                                  ...){
   
@@ -1010,7 +1021,7 @@ add.XBinYBarPlot_prep<- function(lattice.plot=trellis.last.object(),
   }
   ans <- lapply(lattice.plot$panel.args, 
                 function(x){
-                  temp <- listUpdate(common, x)
+                  temp <- loa::listUpdate(common, x)
                   if(!"groups" %in% names(temp)){
                     temp$groups <- rep(temp$group.ids[[1]], 
                                        length(temp$x))
@@ -1092,6 +1103,7 @@ XBinYBarPlot <- function(x, y, group.id=NULL,
   #see handling in loaXYFit_loess
   #cut by x ranges
   
+  
   if(length(x[!is.na(x)]) < 1) {
     return(NULL)
   } else {
@@ -1099,6 +1111,9 @@ XBinYBarPlot <- function(x, y, group.id=NULL,
       pretty(x)
     } else {
       breaks
+    }
+    if(is.null(stat)){
+      stat <- function(x){ mean(x, na.rm=TRUE)}
     }
     ans <- lapply(1:(length(x.range)-1), function(xx){
       x1 <- x[x >= x.range[xx] & x < x.range[xx+1]]
@@ -1117,7 +1132,7 @@ XBinYBarPlot <- function(x, y, group.id=NULL,
 
 panel.XBinYBarPlot <- function(...){
   #print("panel")
-  plot.args <- listUpdate(list(box = TRUE, wisk = TRUE, 
+  plot.args <- loa::listUpdate(list(box = TRUE, wisk = TRUE, 
                                out = TRUE, line.col = 1), 
                           list(...))
   #print(names(plot.args))
@@ -1127,14 +1142,15 @@ panel.XBinYBarPlot <- function(...){
       plot.args$groups <- rep("default", length(plot.args$x))
       if(!"col" %in% names(plot.args)) {
         #use default no group colour if no groups...
-        plot.args$col <- do.call(colHandler, 
-                                 listUpdate(plot.args, list(z = 1)))
+        plot.args$col <- do.call(loa::colHandler, 
+                                 loa::listUpdate(plot.args, list(z = 1)))
       }
     }
   }
   if (!"col" %in% names(plot.args)) {
-    plot.args$col <- do.call(colHandler, listUpdate(plot.args, 
-                                                    list(ref = 1:length(plot.args$group.ids))))
+    plot.args$col <- do.call(loa::colHandler, 
+                             loa::listUpdate(plot.args, 
+                                            list(ref = 1:length(plot.args$group.ids))))
   }
   #  if (!"lty" %in% names(plot.args)) 
   #    plot.args$lty <- rep(1, length(plot.args$group.ids))
@@ -1142,7 +1158,7 @@ panel.XBinYBarPlot <- function(...){
   #    plot.args$lwd <- rep(1, length(plot.args$group.ids))
   all.mods <- if ("loa.XBinYBarPlot" %in% names(plot.args)){ 
     #print("all.mods")
-    plot.args$loa.XBinYBarPlot[[panel.number()]]
+    plot.args$loa.XBinYBarPlot[[lattice::panel.number()]]
   } else {
     temp2 <- add.XBinYBarPlot_prep(list(panel.args.common = plot.args, 
                                         panel.args = list(list())))
@@ -1160,10 +1176,11 @@ panel.XBinYBarPlot <- function(...){
       mod <- all.mods[[i]]
       #print(mod)
       if (!is.null(mod)) { #this stops missing mods being plotted
-        if (isGood4LOA(plot.args$box)) {
-          m.args <- listUpdate(plot.args, do.call(listLoad, 
-                                                listUpdate(plot.args, list(load = "box")))[["box"]])
-          m.args <- listUpdate(list(group.args = "col", 
+        if (loa::isGood4LOA(plot.args$box)) {
+          m.args <- loa::listUpdate(plot.args, 
+                                    do.call(loa::listLoad, 
+                                            loa::listUpdate(plot.args, list(load = "box")))[["box"]])
+          m.args <- loa::listUpdate(list(group.args = "col", 
                                   levels = 3, border = FALSE), 
                              m.args)
           for (j in m.args$group.args) {
@@ -1195,7 +1212,7 @@ panel.XBinYBarPlot <- function(...){
           x1 <- (temp*(1-scale)*0.5) + mod$x1
           x2 <- mod$x2 - (temp*(1-scale)*0.5) 
           #box
-          lrect(x1, mod$y1, x2, mod$y2,
+          lattice::lrect(x1, mod$y1, x2, mod$y2,
               border = m.args$line.col,
               col=m.args$col) #, alpha=m.args$alpha)
           ##lsegments(x1=x1, x2=x2, 

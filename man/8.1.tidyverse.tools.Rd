@@ -136,7 +136,7 @@ Various codes and methods.
    is the \code{pems} dataset to be grouped. 
    For \code{...join} functions, 
    \code{x} and \code{y} are the two datasets 
-   (\code{pems}, code{data.frame}, etc) to 
+   (\code{pems}, \code{data.frame}, etc) to 
    be joined together.
 }
   \item{.add}{

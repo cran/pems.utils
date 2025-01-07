@@ -47,11 +47,10 @@ refVSPBin_MOVES.23(vsp = NULL, speed = NULL, data = NULL,
 #vsp plotting
 
 VSPPlot(vsp, em = NULL, ..., data = NULL, plot.type = 1, 
-          fun.name="VSPPlot", scheme = pems.scheme)
+          fun.name="VSPPlot")
 
 VSPBinPlot(vspbin, em = NULL, ..., data = NULL, 
-          plot.type = 1, stat = NULL, fun.name="VSPBinPlot",
-          scheme = pems.scheme)
+          plot.type = 1, stat = NULL, fun.name="VSPBinPlot")
           
 }
 
@@ -78,7 +77,8 @@ VSPBinPlot(vspbin, em = NULL, ..., data = NULL,
 }
   \item{\dots}{
   (Optional) Other arguments, currently passed on as supplied 
-  to assoicated calculation or binning method.
+  to associated calculation or binning method, or back to 
+  pemsPlot.
 }
   \item{fun.name}{
   (Optional character) The name of the parent function, to be 
@@ -86,7 +86,7 @@ VSPBinPlot(vspbin, em = NULL, ..., data = NULL,
 }
   \item{this.call}{
   (Optional) Initial call, should generally be ignored. See 
-  code{\link{common.calculations}} for further details.
+  \code{\link{common.calculations}} for further details.
 }
   \item{vehicle.weight, vsp.a, vsp.b, vsp.c, vsp.g}{
   (Numerics) VSP constants. If not supplied, defaults are 
@@ -104,10 +104,6 @@ VSPBinPlot(vspbin, em = NULL, ..., data = NULL,
   calculating bar scales for \code{plot.type} 1. By default this 
   is mean if \code{em} is supplied or count if not. NOTE: 
   stat is ignore when \code{plot.type} is used
-}
-  \item{scheme}{
-  (Various) For \code{speedEmPlot}, the scheme to apply to 
-  the plot, \code{loa} argument. 
 }
     
 }

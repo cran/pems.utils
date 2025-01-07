@@ -89,7 +89,7 @@ calcPack2(input, ..., settings = NULL, data = NULL)
 
    \code{correctBaseline} attempts to correct the baseline of a supplied data 
    (\code{pems.element} \code{vector}) time-series. Baseline corrections are 
-   carried out using methods from the \code{\link{baseline}} package. See Below.
+   carried out using methods from the \code{\link[baseline]{baseline}} package. See Below.
 
   \code{calcPack2} is an alternative version of \code{\link{calcPack}}. See 
   associated help for details. 
@@ -101,8 +101,8 @@ calcPack2(input, ..., settings = NULL, data = NULL)
   With the exception of \code{calcPack2}, all the above functions generate 
   input corrections. 
 
-   \code{correctBaseline} returns the supplied data time-series (\code{x}) after applying the 
-   requested baseline correction (see below).
+   \code{correctBaseline} returns the supplied data time-series (\code{x}) 
+   after applying the requested baseline correction (see below).
 
 }
 
@@ -141,7 +141,7 @@ calcPack2(input, ..., settings = NULL, data = NULL)
   See \code{\link{calcChecks}} documentation for details. 
 
   \code{correctBaseline} is a recent transfer from \code{sleeper.service}. 
-  It uses \code{\link{baseline}} functions to provide 'best guess' baseline 
+  It uses \code{\link[baseline]{baseline}} functions to provide 'best guess' baseline 
   corrections. 
 
   By default, it applies: 
@@ -163,7 +163,7 @@ calcPack2(input, ..., settings = NULL, data = NULL)
 
 \seealso{
 
-  \code{\link{baseline}} regarding baseline corrections.
+  \code{\link[baseline]{baseline}} regarding baseline corrections.
 
   \code{\link{common.calculations}}, \code{\link{calcVSP}} or \code{\link{calcEm}} for calculation functions.
  

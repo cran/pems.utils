@@ -6,7 +6,6 @@
 \alias{tAlign}
 \alias{findLinearOffset}
 \alias{stackPEMS}
-\alias{C_ylagxCOR}
 
 \title{
   Merging data and pems objects
@@ -32,9 +31,6 @@
 
   #historical
   findLinearOffset(x = NULL, y = NULL, ...)
-
-  #c wrappers
-  C_ylagxCOR(x, y)
 
 }
 
@@ -109,8 +105,6 @@
    It is intended to be used in the form:
 
    \code{aligned.data <- cAlign(name1~name2, data1, data2)}
-
-   \code{C_ylagxCOR} is a wrapper for C++ code used by \code{cAlign}. 
 
    The \code{tAlign} function accepts a formula and two data sets 
    and returns a single data set (as a \code{pems} object) of the 
@@ -195,7 +189,7 @@
 
 \seealso{
   See also: \code{\link{cbind}} for standard column binding in \code{R}; 
-  \code{\link{dplyr}} for \code{\link{full_join}}. 
+  \code{\link[dplyr]{dplyr}} for \code{\link[dplyr]{full_join}}. 
 }
 \examples{
 

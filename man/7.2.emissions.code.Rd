@@ -87,7 +87,7 @@ calcEm_HoribaPitot(conc = NULL, time = local.time, exflow = exh.flow.rate,
   \code{calcEm...} functions calculate emissions.
 
   \code{calcEm} is a wrapper function which is intended to provide a conventient front for 
-  emissions calculation methods. It accepts an input code{conc} which it checks and passes 
+  emissions calculation methods. It accepts an input \code{conc} which it checks and passes 
   on to \code{calc.method}, along with other supplied arguments. 
 
   \code{calcEm_HoribaPitot} calculates emissions using methods described in the Horiba OBS 

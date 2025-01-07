@@ -16,7 +16,7 @@
 
 \usage{
 
-regularize(data, Hz=1, ...)
+regularize(data, Hz=1, method=1, ...)
 
 repairLocalTime(data, local.time, ref, ..., reset.count = TRUE,
       fun.name = "repairLocalTime")
@@ -35,6 +35,13 @@ repairLocalTime(data, local.time, ref, ..., reset.count = TRUE,
    (For \code{regularize}) (Required numeric) The time resolution to 
    regularize the data to in Hertz. So, the default, \code{Hz=1} is 
    one measurement (or row of data) per second.  
+   }
+   
+  \item{method}{
+   (For \code{regularize}) (Required numeric) The regularization method 
+   to apply. The default, \code{method=1} uses \code{approx} to linearly 
+   interpolate regular time-series for all supplied time-series. The 
+   alternative \code{method=2} uses a bin-and-average strategy. 
    }
 
   \item{\dots}{
@@ -62,10 +69,22 @@ repairLocalTime(data, local.time, ref, ..., reset.count = TRUE,
 
 \details{
   \code{regularize} attempts to extrapolate a regular series, generated at the 
-  time resolution requested, from the supplied \code{data}. It can be useful 
-  for the regularization of irregularly time-logged data and 
-  for hole-filling missing records but should not be used aggressively, 
-  to convert 1Hz to 10Hz data.  
+  time resolution requested, from the supplied \code{data}. Both methods can 
+  be used for the regularization of irregularly time-logged data, but differ 
+  in their data handling. Method \code{1} estimates measurements at regular 
+  intervals by linearly interpolating between the last valid point and the next 
+  valid point in supplied time-series. It therefore hole-fills gaps in 
+  time-series and is perhaps best suited for use with sparser data-sets. It 
+  can also be used to interolate time-series to higher time-resolutions, but 
+  should not be used aggressively, e.g. to convert 1Hz data data to 10Hz. By 
+  contrast, method \code{2} uses data binning to aggregate all supplied 
+  measurements (e.g. all measurements between -0.5 and +0.5 seconds of requested 
+  times when returning 1 Hz data) and (mean) average these. It is better suited 
+  for use with higher resolution time-series (e.g. gong from about 10Hz to 1Hz) 
+  and does not hole-fill empty time intervals. If you want mean binning and 
+  hole-filling, apply method 2 then method 1, e.g.: 
+  
+  \code{new.data <- regularize(regularize(my.data, method=2), method=1)}
   
   \code{repairLocalTime} attempts to repair an incomplete \code{local.time} 
   record. For example, if you merge two datasets with overlapping but 
@@ -80,7 +99,8 @@ repairLocalTime(data, local.time, ref, ..., reset.count = TRUE,
    \code{regularize} returns the supplied dataset (\code{data}) with time-series 
    (\code{time.stamp} and \code{local.time}) are regularized at the 
    requestion time resolution, based on \code{Hz} value. It uses 
-   \code{approx} the estimate associated changes for other data-series.
+   \code{approx} or data binning to estimate associated changes for other 
+   data-series.
    
    \code{repairLocalTime} returns a repaired \code{local.time} 
    \code{pem.element}, typically the supplied \code{local.time} with 
@@ -90,7 +110,7 @@ repairLocalTime(data, local.time, ref, ..., reset.count = TRUE,
 
 \references{
 
-  \code{regularize} uses \code{approx}:
+  \code{regularize(..., method=1)} uses \code{approx}:
 
   Base R Stats package function based on Becker, R. A., Chambers, 
   J. M. and Wilks, A. R. (1988) The New S Language. Wadsworth & 

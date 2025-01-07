@@ -140,8 +140,7 @@ fitColdStart <- function(em, time, engine.on = NULL,
 coldStartPlot <- function(time, em = NULL,  
                           ..., data = NULL, engine.on = NULL,
                           plot.type = 1, method = 2,
-                          fun.name="coldStartPlot",
-                          scheme = pems.scheme){
+                          fun.name="coldStartPlot"){
   
   #setup
   extra.args <- list(...)
@@ -196,7 +195,7 @@ coldStartPlot <- function(time, em = NULL,
   
   #reset extra.args for data rework here
   #terms going to all plot
-  extra.args <- listUpdate(list(x=time, data=ans, bp=ans$bp, 
+  extra.args <- loa::listUpdate(list(x=time, data=ans, bp=ans$bp, 
                                 bp.upper=ans$bp.upper, 
                                 hot=ans$hot, 
                                 hot.upper=ans$hot.upper,
@@ -204,28 +203,30 @@ coldStartPlot <- function(time, em = NULL,
                                 engine.on=ans$engine.on,
                                 cold=ans$bkpt, ref.best=ans$bkpt,
                                 type="l", xlab=xlab),
-                           extra.args)
+                             extra.args)
   
   if(plot.type==1){
     #terms unique to type 1 plot
     #y must be acc em, but ylab, panel can be overwritten 
-    extra.args <- listUpdate(list(ylab=paste("acc(", ylab,
-                                             ")", sep=""),
-                                  multi.y="cond",
-                                  panel=panel.coldStartPlot1),
-                             extra.args)
-    extra.args <- listUpdate(list(y=acc), extra.args)
-    plt <- rlang::exec(pemsPlot, !!!extra.args)
+    
+    extra.args <- loa::listUpdate(list(ylab=ylab, multi.y="cond",
+                                       panel=pems.utils::panel.coldStartPlot1, 
+                                       scheme=pems.utils::pems.scheme),
+                                  extra.args)    
+    extra.args <- loa::listUpdate(list(y=acc), extra.args)
+    plt <- rlang::exec(pems.utils::pemsPlot, !!!extra.args)
     #see https://stackoverflow.com/questions/54593806/do-call-forces-argument-evaluation-before-rlangs-tidy-evaluation
     #re invoke versus do.call for rlang...
     #then docs exec replaces invoke (sort of)
   } else {
     if(plot.type==2){
-      extra.args <- listUpdate(list(ylab=ylab, multi.y="cond",
-                                    panel=panel.coldStartPlot2),
-                               extra.args)
-      extra.args <- listUpdate(list(y=em), extra.args)
-      plt <- rlang::exec(pemsPlot, !!!extra.args)
+      #which is better; this or above???
+      extra.args <- loa::listUpdate(list(ylab=ylab, multi.y="cond",
+                                    panel=pems.utils::panel.coldStartPlot2, 
+                                    scheme=pems.utils::pems.scheme),
+                                    extra.args)
+      extra.args <- loa::listUpdate(list(y=em), extra.args)
+      plt <- rlang::exec(pems.utils::pemsPlot, !!!extra.args)
     } else {
       stop("plot type unknown")
     }
@@ -243,10 +244,10 @@ panel.coldStartPlot1 <- function(..., loa.settings = FALSE){
   extra.args <- list(...)
   
   if(loa.settings){
-    temp <- loaHandler(panel.loa, loa.settings = TRUE)
+    temp <- loa::loaHandler(loa::panel.loa, loa.settings = TRUE)
     temp$common.args <- unique(c(temp$common.args, "units"))
-    temp$default.settings <- listUpdate(temp$default.settings, 
-                                        list(loa.preprocess = preprocess.pemsPlot, 
+    temp$default.settings <- loa::listUpdate(temp$default.settings, 
+                                        list(loa.preprocess = pems.utils::preprocess.pemsPlot, 
                                              type="l", lty=1, lwd=1,
                                              grid = TRUE, cs.model = TRUE,
                                              multi.y = "cond",
@@ -261,8 +262,8 @@ panel.coldStartPlot1 <- function(..., loa.settings = FALSE){
   do.call(function(...){
     extra.args = list(...)
     #grid
-    if(isGood4LOA(extra.args$grid)){
-      panel.loaGrid(panel.scales = extra.args$panel.scales,
+    if(loa::isGood4LOA(extra.args$grid)){
+      loa::panel.loaGrid(panel.scales = extra.args$panel.scales,
                     grid = extra.args$grid, 
                     xlim = extra.args$xlim, 
                     ylim = extra.args$ylim)
@@ -271,13 +272,14 @@ panel.coldStartPlot1 <- function(..., loa.settings = FALSE){
     #main acc trend
     #using panel.loaPlot2 
     #   - better output for lines if lots of points
-    do.call(panel.loaPlot2, extra.args)
+    do.call(loa::panel.loaPlot2, extra.args)
     
     #hot contribution model
-    if(isGood4LOA(extra.args$cs.model)){
-      cs <- listUpdate(extra.args, 
-                       do.call(listLoad, 
-                               listUpdate(extra.args, 
+    #if(loa::isGood4LOA(extra.args$cs.model)){
+      if(TRUE){
+      cs <- loa::listUpdate(extra.args, 
+                       do.call(loa::listLoad, 
+                               loa::listUpdate(extra.args, 
                                           list(load="cs.model")))[["cs.model"]])
       if(!"groups" %in% names(cs)){
         cs$groups <- rep("default", 
@@ -285,8 +287,8 @@ panel.coldStartPlot1 <- function(..., loa.settings = FALSE){
       }
       grp.ref <- unique(cs$groups)
       if(!"col" %in% names(cs)){
-        cs$col <- do.call(colHandler, 
-                          listUpdate(cs,
+        cs$col <- do.call(loa::colHandler, 
+                          loa::listUpdate(cs,
                                      list(z=1:length(grp.ref),
                                           ref=1:length(grp.ref))))
       }
@@ -308,7 +310,7 @@ panel.coldStartPlot1 <- function(..., loa.settings = FALSE){
         temp$col <- col
         temp$alpha <- 0.3
         temp$border <- NA
-        do.call(panel.polygon, temp)
+        do.call(lattice::panel.polygon, temp)
         
         #line
         temp <- cs
@@ -316,13 +318,13 @@ panel.coldStartPlot1 <- function(..., loa.settings = FALSE){
         temp$y <- temp$hot[temp$groups==i]
         temp$col <- rep(col, length(temp$x))
         temp$lty <- rep(3, length(temp$x))
-        do.call(panel.loaPlot2, temp)
+        do.call(loa::panel.loaPlot2, temp)
         
         #arrow 1
         x <- temp$engine.on[temp$groups==i]
         x1 <- min(x[!is.na(x)])
         y1 <- min(temp$y[!is.na(temp$y)])
-        panel.arrows(x1=x1, x2=x1, y1=y1, y2=0,
+        lattice::panel.arrows(x1=x1, x2=x1, y1=y1, y2=0,
                      col=col,
                      length=0.1)
         #line 2
@@ -330,14 +332,14 @@ panel.coldStartPlot1 <- function(..., loa.settings = FALSE){
         x2 <- min(x[!is.na(x)])
         x2 <- x1 + x2
         y <- temp$y[temp$x==x2][1]
-        panel.lines(x=c(x2,x2), y=c(y,0),
+        lattice::panel.lines(x=c(x2,x2), y=c(y,0),
                     lty=2,
                     col=col,
                     length=0.1)
         
         #arrow 3
         y <- (((max(y, na.rm=TRUE))-0)*0.5) + 0
-        panel.arrows(x1=x1, x2=x2, y1=y, y2=y, 
+        lattice::panel.arrows(x1=x1, x2=x2, y1=y, y2=y, 
                      col=col,
                      length=0.08, ends="both")
 
@@ -345,7 +347,7 @@ panel.coldStartPlot1 <- function(..., loa.settings = FALSE){
         lbls <- paste("Cold Start: ", signif(y1, 3),
                       units(temp$y), "; ", x2-x1,
                       "s", sep="")
-        panel.text(x=x2, y=y, labels=lbls, 
+        lattice::panel.text(x=x2, y=y, labels=lbls, 
                    col=col, pos=4)
         #line name to decide...
         #arguments to tidy
@@ -363,10 +365,10 @@ panel.coldStartPlot2 <- function(..., loa.settings = FALSE){
   extra.args <- list(...)
   
   if(loa.settings){
-    temp <- loaHandler(panel.loa, loa.settings = TRUE)
+    temp <- loa::loaHandler(loa::panel.loa, loa.settings = TRUE)
     temp$common.args <- unique(c(temp$common.args, "units"))
-    temp$default.settings <- listUpdate(temp$default.settings, 
-                                        list(loa.preprocess = preprocess.pemsPlot, 
+    temp$default.settings <- loa::listUpdate(temp$default.settings, 
+                                        list(loa.preprocess = pems.utils::preprocess.pemsPlot, 
                                              type="l", lty=1, lwd=1,
                                              grid = TRUE, cs.model = TRUE,
                                              multi.y = "cond",
@@ -381,8 +383,8 @@ panel.coldStartPlot2 <- function(..., loa.settings = FALSE){
   do.call(function(...){
     extra.args = list(...)
     #grid
-    if(isGood4LOA(extra.args$grid)){
-      panel.loaGrid(panel.scales = extra.args$panel.scales,
+    if(loa::isGood4LOA(extra.args$grid)){
+      loa::panel.loaGrid(panel.scales = extra.args$panel.scales,
                     grid = extra.args$grid, 
                     xlim = extra.args$xlim, 
                     ylim = extra.args$ylim)
@@ -390,10 +392,10 @@ panel.coldStartPlot2 <- function(..., loa.settings = FALSE){
     extra.args$grid <- FALSE
     
     #hot contribution model
-    if(isGood4LOA(extra.args$cs.model)){
-      cs <- listUpdate(extra.args, 
-                       do.call(listLoad, 
-                               listUpdate(extra.args, 
+    if(loa::isGood4LOA(extra.args$cs.model)){
+      cs <- loa::listUpdate(extra.args, 
+                       do.call(loa::listLoad, 
+                               loa::listUpdate(extra.args, 
                                           list(load="cs.model")))[["cs.model"]])
       if(!"groups" %in% names(cs)){
         cs$groups <- rep("default", 
@@ -401,8 +403,8 @@ panel.coldStartPlot2 <- function(..., loa.settings = FALSE){
       }
       grp.ref <- unique(cs$groups)
       if(!"col" %in% names(cs)){
-        cs$col <- do.call(colHandler, 
-                          listUpdate(cs,
+        cs$col <- do.call(loa::colHandler, 
+                          loa::listUpdate(cs,
                                      list(z=1:length(grp.ref),
                                           ref=1:length(grp.ref))))
       }
@@ -443,21 +445,21 @@ panel.coldStartPlot2 <- function(..., loa.settings = FALSE){
         col <- rep(temp$col, length(ref))
         col <- col[ref==i]
   
-        panel.polygon(temp$x, temp$y,
+        lattice::panel.polygon(temp$x, temp$y,
                       col=col,
                       border=FALSE,
                       alpha=0.3)
         
         #arrow labels
         y <- (((max(temp$y, na.rm=TRUE))-0)*0.95) + 0
-        panel.arrows(x1=x1, x2=x2, y1=y, y2=y, 
+        lattice::panel.arrows(x1=x1, x2=x2, y1=y, y2=y, 
                      col=col,
                      length=0.08, ends="both")
-        panel.lines(x=c(x2,x2), y=c(y,0),
+        lattice::panel.lines(x=c(x2,x2), y=c(y,0),
                     lty=2,
                     col=col[1],
                     length=0.1)
-        panel.lines(x=c(x1,x1), y=c(y,0),
+        lattice::panel.lines(x=c(x1,x1), y=c(y,0),
                     lty=2,  
                     col=col[1],
                     length=0.1)
@@ -471,7 +473,7 @@ panel.coldStartPlot2 <- function(..., loa.settings = FALSE){
         lbls <- paste("Cold Start: ", signif(ref, 3),
                        units(ref), "; ", x2-x1,
                        "s", sep="")
-        panel.text(x=x2, y=y, labels=lbls, 
+        lattice::panel.text(x=x2, y=y, labels=lbls, 
                    col=col[1], pos=4)
         #line name to decide...
         #arguments to tidy
@@ -482,7 +484,7 @@ panel.coldStartPlot2 <- function(..., loa.settings = FALSE){
     #using panel.loaPlot2 
     #   - better output for lines if lots of points
     #     doing this after adding cold start region
-    do.call(panel.loaPlot2, extra.args)
+    do.call(loa::panel.loaPlot2, extra.args)
     
   }, extra.args)
 }

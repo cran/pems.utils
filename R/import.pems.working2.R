@@ -76,7 +76,7 @@ importParSYNC2PEMS <- function(file.name = file.choose(), reset.signals = TRUE,
         ans <- file.name
     } else {
         #read file in
-        extra.args <- listUpdate(list(header=TRUE), extra.args)
+        extra.args <- loa::listUpdate(list(header=TRUE), extra.args)
         extra.args$file <- file.name
         ans <- do.call(read.csv, extra.args)
     }
@@ -175,7 +175,8 @@ importParSYNC2PEMS <- function(file.name = file.choose(), reset.signals = TRUE,
         names(ans) <- tolower(names(ans))
 
     #make pems
-    output <- makePEMS(x = ans, units = units, constants = constants, history = history, pm.analyzer=pm.analyzer, ...)
+    output <- makePEMS(x = ans, units = units, constants = constants, 
+                       history = history, pm.analyzer=pm.analyzer, ...)
 
 #################
 #rediscarding history 

@@ -175,8 +175,7 @@ speedEmPlot <- function(speed, em = NULL, time = NULL,
                         ..., data = NULL, engine.on = NULL,
                         min.speed = 5, bin.size = NULL,  
                         plot.type = 1, method = 1,
-                        fun.name="speedEmPlot",
-                        scheme = pems.scheme){
+                        fun.name="speedEmPlot"){
   
   #setup
   extra.args <- list(...)
@@ -247,40 +246,42 @@ speedEmPlot <- function(speed, em = NULL, time = NULL,
   
   #plot 1 scatter with loess
   if(plot.type=="1"){
-    extra.args <- listUpdate(list(x=ans$speed, y=ans$temp, 
+    extra.args <- loa::listUpdate(list(x=ans$speed, y=ans$temp, 
                                   data=NULL, xlab=xlab, 
-                                  ylab=ylab, report=FALSE),
+                                  ylab=ylab, report=FALSE,
+                                  scheme=pems.utils::pems.scheme),
                              extra.args)
     plt <- rlang::exec(pemsPlot, !!!extra.args)
-    if(isGood4LOA(extra.args$loess)){
+    if(loa::isGood4LOA(extra.args$loess)){
 ###########################
       #need to think about handling of this
-      temp <- do.call(listLoad, listUpdate(extra.args, 
+      temp <- do.call(loa::listLoad, loa::listUpdate(extra.args, 
                         list(load="loess")))$loess
-      temp <- listUpdate(list(lattice.plot=plt,
+      temp <- loa::listUpdate(list(lattice.plot=plt,
                               type="n"), temp)
-      plt <- do.call(add.XYLOESSFit, temp)
+      plt <- do.call(loa::add.XYLOESSFit, temp)
     }
   }
   
   #plot2 boxplot
   if(plot.type=="2"){
-    extra.args <- listUpdate(list(x=ans$speed, y=ans$temp, 
+    extra.args <- loa::listUpdate(list(x=ans$speed, y=ans$temp, 
                                   data=NULL, xlab=xlab, 
                                   ylab=ylab, type="n",
-                                  key.fun=draw.groupPlotKey),
+                                  scheme=pems.utils::pems.scheme,
+                                  key.fun=loa::draw.groupPlotKey),
                              extra.args)
-    plt <- rlang::exec(pemsPlot, !!!listHandler(extra.args,
+    plt <- rlang::exec(pemsPlot, !!!loa::listHandler(extra.args,
                                                 ignore = "breaks"))
-    temp <- do.call(listLoad, 
-                    listUpdate(extra.args, 
+    temp <- do.call(loa::listLoad, 
+                    loa::listUpdate(extra.args, 
                               list(load="bw")))$bw
     if(is.null(extra.args$breaks)){
       extra.args$breaks <- seq(min.speed, 
                                max(ans$speed, na.rm=TRUE) + 10,
                                by=10)
     }
-    temp <- listUpdate(list(lattice.plot=plt, 
+    temp <- loa::listUpdate(list(lattice.plot=plt, 
                             breaks=extra.args$breaks), temp)
     plt <- do.call(add.XBinYBoxPlot, temp)
   }
@@ -310,7 +311,7 @@ speedEmPlot <- function(speed, em = NULL, time = NULL,
 #methods currently not exported 
 #better in loa??
 
-add.XBinYBoxPlot <- function(lattice.plot=trellis.last.object(),
+add.XBinYBoxPlot <- function(lattice.plot=lattice::trellis.last.object(),
                            preprocess = add.XBinYBoxPlot_prep,
                            model.method = XBinYBoxPlot,
                            panel = panel.XBinYBoxPlot, ...){
@@ -319,10 +320,10 @@ add.XBinYBoxPlot <- function(lattice.plot=trellis.last.object(),
                  preprocess = preprocess, panel=panel)
   x.args$grid <- FALSE
   x.args$type <- "l"
-  do.call(add.loaPanel, x.args)
+  do.call(loa::add.loaPanel, x.args)
 }
 
-add.XBinYBoxPlot_prep<- function(lattice.plot=trellis.last.object(),
+add.XBinYBoxPlot_prep<- function(lattice.plot=lattice::trellis.last.object(),
                            model.method=XBinYBoxPlot,
                            ...){
   
@@ -340,7 +341,7 @@ add.XBinYBoxPlot_prep<- function(lattice.plot=trellis.last.object(),
   }
   ans <- lapply(lattice.plot$panel.args, 
                 function(x){
-                  temp <- listUpdate(common, x)
+                  temp <- loa::listUpdate(common, x)
                   if(!"groups" %in% names(temp)){
                     temp$groups <- rep(temp$group.ids[[1]], 
                                        length(temp$x))
@@ -406,7 +407,7 @@ XBinYBoxPlot <- function(x, y, group.id=NULL,
     ans <- lapply(1:(length(x.range)-1), function(xx){
       x1 <- x[x >= x.range[xx] & x < x.range[xx+1]]
       y1 <- y[x >= x.range[xx] & x < x.range[xx+1]]
-      temp <- boxplot.stats(y1)
+      temp <- grDevices::boxplot.stats(y1)
       #list(df = data.frame(x=x1,y=y1, ref=xx),
       #     box = temp)
       data.frame(x1 = x.range[xx], x2=x.range[xx+1],
@@ -422,7 +423,7 @@ XBinYBoxPlot <- function(x, y, group.id=NULL,
 
 panel.XBinYBoxPlot <- function(...){
   #print("panel")
-  plot.args <- listUpdate(list(box = TRUE, wisk = TRUE, 
+  plot.args <- loa::listUpdate(list(box = TRUE, wisk = TRUE, 
                                out = TRUE, line.col = 1), 
                           list(...))
   #print(names(plot.args))
@@ -432,13 +433,13 @@ panel.XBinYBoxPlot <- function(...){
       plot.args$groups <- rep("default", length(plot.args$x))
       if(!"col" %in% names(plot.args)) {
         #use default no group colour if no groups...
-        plot.args$col <- do.call(colHandler, 
-                                 listUpdate(plot.args, list(z = 1)))
+        plot.args$col <- do.call(loa::colHandler, 
+                                 loa::listUpdate(plot.args, list(z = 1)))
       }
     }
   }
   if (!"col" %in% names(plot.args)) {
-    plot.args$col <- do.call(colHandler, listUpdate(plot.args, 
+    plot.args$col <- do.call(loa::colHandler, loa::listUpdate(plot.args, 
                                                     list(ref = 1:length(plot.args$group.ids))))
   }
   #  if (!"lty" %in% names(plot.args)) 
@@ -447,7 +448,7 @@ panel.XBinYBoxPlot <- function(...){
   #    plot.args$lwd <- rep(1, length(plot.args$group.ids))
   all.mods <- if ("loa.XBinYBoxPlot" %in% names(plot.args)){ 
     #print("all.mods")
-    plot.args$loa.XBinYBoxPlot[[panel.number()]]
+    plot.args$loa.XBinYBoxPlot[[lattice::panel.number()]]
   } else {
     temp2 <- add.XBinYBoxPlot_prep(list(panel.args.common = plot.args, 
                                         panel.args = list(list())))
@@ -466,10 +467,10 @@ panel.XBinYBoxPlot <- function(...){
       mod <- all.mods[[i]]
       #print(mod)
       if (!is.null(mod)) { #this stops missing mods being plotted
-        if (isGood4LOA(plot.args$box)) {
-          m.args <- listUpdate(plot.args, do.call(listLoad, 
-                                                  listUpdate(plot.args, list(load = "box")))[["box"]])
-          m.args <- listUpdate(list(group.args = "col", 
+        if (loa::isGood4LOA(plot.args$box)) {
+          m.args <- loa::listUpdate(plot.args, do.call(loa::listLoad, 
+                                                  loa::listUpdate(plot.args, list(load = "box")))[["box"]])
+          m.args <- loa::listUpdate(list(group.args = "col", 
                                     levels = 3, border = FALSE), 
                                m.args)
           for (j in m.args$group.args) {
@@ -501,27 +502,27 @@ panel.XBinYBoxPlot <- function(...){
           x1 <- (temp*(1-scale)*0.5) + mod$x1
           x2 <- mod$x2 - (temp*(1-scale)*0.5) 
           #box
-          lrect(x1, mod$y2, x2, mod$y4,
+          lattice::lrect(x1, mod$y2, x2, mod$y4,
                 border = m.args$line.col,
                 col=m.args$col) #, alpha=m.args$alpha)
-          lsegments(x1=x1, x2=x2, 
+          lattice::lsegments(x1=x1, x2=x2, 
                     y1=mod$y3, y2=mod$y3, 
                     col=m.args$line.col)
           #wisk
-          lsegments(x1=x1, x2=x2, 
+          lattice::lsegments(x1=x1, x2=x2, 
                     y1=mod$y1, y2=mod$y1, 
                     col=m.args$line.col)
-          lsegments(x1=x1, x2=x2, 
+          lattice::lsegments(x1=x1, x2=x2, 
                     y1=mod$y5, y2=mod$y5,
                     col=m.args$line.col)
-          lsegments(x1=x.mid, x2=x.mid, 
+          lattice::lsegments(x1=x.mid, x2=x.mid, 
                     y1=mod$y1, y2=mod$y2,
                     col=m.args$line.col)
-          lsegments(x1=x.mid, x2=x.mid, 
+          lattice::lsegments(x1=x.mid, x2=x.mid, 
                     y1=mod$y4, y2=mod$y5,
                     col=m.args$line.col)
           #oulaying points
-          temp <- listHandler(plot.args, use=c("x", "y"))
+          temp <- loa::listHandler(plot.args, use=c("x", "y"))
           if("groups" %in% names(plot.args)){
             temp$x <- temp$x[plot.args$groups==i]
             temp$y <- temp$y[plot.args$groups==i]
@@ -537,7 +538,7 @@ panel.XBinYBoxPlot <- function(...){
           temp$y <- temp$y[ref]
           temp$col <- plot.args$col[plot.args$group.ids==i]
           temp$pch <- 20
-          do.call(lpoints, temp)
+          do.call(lattice::lpoints, temp)
         }
       }
     }

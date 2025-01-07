@@ -186,7 +186,7 @@ checkIfMissing(..., if.missing = c("stop", "warning", "return"),
 }
 \note{
   The \code{...name} arguments allow the \code{check...} functions to be used silently. 
-  If a parent function is identified as \code{fun.name} and the check case (code{input}, 
+  If a parent function is identified as \code{fun.name} and the check case (\code{input}, 
   \code{option}, etc.) is identified with the associated \code{...name} argument these are 
   used in any associated error messaging.
  

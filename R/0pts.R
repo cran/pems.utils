@@ -12,8 +12,9 @@
 
 globalVariables(c("pems.scheme", "ref.unit.conversions", "ref.chem", "ref.diesel", "ref.petrol",
                   "panel.surfaceSmooth", "data", "exh.flow.rate", "exh.press", "exh.temp", 
-                  "local.time", "pems_speedEm2", "add", "grp",
-                  "temp"))
+                  "local.time", "pems_speedEm2", "add", "grp", "..id..",
+                  "temp", "listUpdate", "panel.number"))
+# added these to above for now... listUpdate, panel.number
 
 #might move following into function
 #      exh.flow.rate exh.press exh.temp local.time
@@ -40,8 +41,7 @@ setup <- function(){
          }
 
 # c handling
-
-.onUnload <- function (libpath) {
-  library.dynam.unload("pems.utils", libpath)
-}
+#.onUnload <- function (libpath) {
+#  library.dynam.unload("pems.utils", libpath)
+#}
 

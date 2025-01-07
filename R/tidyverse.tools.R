@@ -241,9 +241,9 @@ select.pems <- function (.data, ...){
           "data.frame" else
                class(.data)[class(.data) != "pems"] 
 
-    vars <- select_vars(names(.data), !!! quos(...))
-    .data <- select(.data, vars)
-    bare.bones$units <- select(bare.bones$units, vars)
+    vars <- dplyr::select_vars(names(.data), !!! quos(...))
+    .data <- dplyr::select(.data, vars)
+    bare.bones$units <- dplyr::select(bare.bones$units, vars)
 
     #rename
     names(.data) <- names(vars)
@@ -286,9 +286,9 @@ select_.pems <- function (.data, ..., warn=TRUE){
     class(.data) <- if(length(class(.data))==1) 
           "data.frame" else
                class(.data)[class(.data) != "pems"] 
-    vars <- select_vars(names(.data), !!! quos(...))
-    .data <- select(.data, vars)
-    bare.bones$units <- select(bare.bones$units, vars)
+    vars <- dplyr::select_vars(names(.data), !!! quos(...))
+    .data <- dplyr::select(.data, vars)
+    bare.bones$units <- dplyr::select(bare.bones$units, vars)
     names(.data) <- names(vars)
     for(i in names(vars))
           attributes(.data[,i])$name <- i 
@@ -355,12 +355,12 @@ rename.pems <- function (.data, ...){
           "data.frame" else
                class(.data)[class(.data) != "pems"] 
 ################################
-    vars <- rename_vars(names(.data), !!! quos(...))
+    vars <- dplyr::rename_vars(names(.data), !!! quos(...))
 #this is select.pems above
 #with select_vars replaced with rename_vars in above
 ################################   
-    .data <- select(.data, vars)
-    bare.bones$units <- select(bare.bones$units, vars)
+    .data <- dplyr::select(.data, vars)
+    bare.bones$units <- dplyr::select(bare.bones$units, vars)
     names(.data) <- names(vars)
     for(i in names(vars))
           attributes(.data[,i])$name <- i 
@@ -391,9 +391,9 @@ rename_.pems <- function (.data, ..., warn = TRUE){
     class(.data) <- if(length(class(.data))==1) 
           "data.frame" else
                class(.data)[class(.data) != "pems"] 
-    vars <- rename_vars(names(.data), !!! quos(...))
-    .data <- select(.data, vars)
-    bare.bones$units <- select(bare.bones$units, vars)
+    vars <- dplyr::rename_vars(names(.data), !!! quos(...))
+    .data <- dplyr::select(.data, vars)
+    bare.bones$units <- dplyr::select(bare.bones$units, vars)
     names(.data) <- names(vars)
     for(i in names(vars))
           attributes(.data[,i])$name <- i 
@@ -459,7 +459,7 @@ filter.pems <- function(.data, ...){
                class(.data)[class(.data) != "pems"] 
     ######################
 
-    .data <- as.data.frame(filter(tbl_df(.data), ...))
+    .data <- as.data.frame(dplyr::filter(tibble::as_tibble(.data), ...))
     
     #######################
     #rebuild
@@ -485,7 +485,7 @@ filter_.pems <- function(.data, ..., warn=TRUE){
     class(.data) <- if(length(class(.data))==1) 
           "data.frame" else
                class(.data)[class(.data) != "pems"] 
-    .data <- as.data.frame(filter(tbl_df(.data), ...))
+    .data <- as.data.frame(dplyr::filter(tibble::as_tibble(.data), ...))
     #rebuild
     attributes(.data)$units <- bare.bones$units
     attributes(.data)$pems.tags <- bare.bones$pems.tags
@@ -519,7 +519,7 @@ arrange.pems <- function(.data, ...){
 #    have to stay the same - I think
 
 #    #based on arange.data.frame
-#    .data[["data"]] <- as.data.frame(arrange(tbl_df(.data[["data"]]), ...))
+#    .data[["data"]] <- as.data.frame(arrange(tibble::as_tibble(.data[["data"]]), ...))
 #    .data
 
     #new structure
@@ -535,7 +535,7 @@ arrange.pems <- function(.data, ...){
                class(.data)[class(.data) != "pems"] 
     ######################
 
-    .data <- as.data.frame(arrange(tbl_df(.data), ...))
+    .data <- as.data.frame(dplyr::arrange(tibble::as_tibble(.data), ...))
     
     #######################
     #rebuild
@@ -562,7 +562,7 @@ arrange_.pems <- function(.data, ..., warn=TRUE){
     class(.data) <- if(length(class(.data))==1) 
           "data.frame" else
                class(.data)[class(.data) != "pems"] 
-    .data <- as.data.frame(arrange(tbl_df(.data), ...))
+    .data <- as.data.frame(dplyr::arrange(tibble::as_tibble(.data), ...))
     attributes(.data)$units <- bare.bones$units
     attributes(.data)$pems.tags <- bare.bones$pems.tags
     class(.data) <- bare.bones$class
@@ -596,7 +596,7 @@ slice.pems <- function(.data, ...) {
     #this is not like ...data.frame 
     #transposed code tripped on unexported functions...
 
-#    .data[["data"]] <- as.data.frame(slice(tbl_df(.data[["data"]]), ...))
+#    .data[["data"]] <- as.data.frame(slice(tibble::as_tibble(.data[["data"]]), ...))
 #    .data
 
 #new structure
@@ -613,7 +613,7 @@ slice.pems <- function(.data, ...) {
                class(.data)[class(.data) != "pems"] 
     ######################
 
-    .data <- as.data.frame(slice(tbl_df(.data), ...))
+    .data <- as.data.frame(dplyr::slice(tibble::as_tibble(.data), ...))
     
     #######################
     #rebuild
@@ -640,7 +640,7 @@ slice_.pems <- function(.data, ..., warn=TRUE) {
     class(.data) <- if(length(class(.data))==1) 
           "data.frame" else
                class(.data)[class(.data) != "pems"] 
-    .data <- as.data.frame(slice(tbl_df(.data), ...))
+    .data <- as.data.frame(dplyr::slice(tibble::as_tibble(.data), ...))
     attributes(.data)$units <- bare.bones$units
     attributes(.data)$pems.tags <- bare.bones$pems.tags
     class(.data) <- bare.bones$class
@@ -695,7 +695,7 @@ mutate.pems <- function(.data, ..., units=NULL, warn=TRUE) {
  
     #####################################
     #mutate data
-    .data <- as.data.frame(mutate(tbl_df(.data), ...))
+    .data <- as.data.frame(dplyr::mutate(tibble::as_tibble(.data), ...))
 
 #######################
 # this codes puts units in right places
@@ -760,7 +760,7 @@ mutate_.pems <- function(.data, ..., units=NULL, warn=TRUE) {
     class(.data) <- if(length(class(.data))==1) 
           "data.frame" else
                class(.data)[class(.data) != "pems"]
-    .data <- as.data.frame(mutate(tbl_df(.data), ...))
+    .data <- as.data.frame(dplyr::mutate(tibble::as_tibble(.data), ...))
     unit.rb <- !all(m.vars %in% names(bare.bones$units))
     if(unit.rb){
         temp <- data.frame(t(rep(NA, ncol(.data))))
@@ -822,7 +822,7 @@ summarise.pems <- function(.data, ...) {
 #suggest this drops whatever
 
 ##summarise.data.frame <- function(.data, ...) {
-##  as.data.frame(summarise(tbl_df(.data), ...)) 
+##  as.data.frame(summarise(tibble::as_tibble(.data), ...)) 
 ##}
 
 #new structure
@@ -839,8 +839,8 @@ summarise.pems <- function(.data, ...) {
                class(.data)[class(.data) != "pems"] 
     ######################
 
-#    .data <- as.data.frame(summarise(tbl_df(.data), ...))
-    .data <- summarise(.data, ...) 
+#    .data <- as.data.frame(summarise(tibble::as_tibble(.data), ...))
+    .data <- dplyr::summarise(.data, ...) 
    
     #######################
     #rebuild
@@ -863,7 +863,7 @@ summarise_.pems <- function(.data, ..., warn=TRUE) {
 #suggest this drops whatever
 
 ##summarise.data.frame <- function(.data, ...) {
-##  as.data.frame(summarise(tbl_df(.data), ...)) 
+##  as.data.frame(summarise(tibble::as_tibble(.data), ...)) 
 ##}
 
     if(warn)
@@ -885,8 +885,8 @@ summarise_.pems <- function(.data, ..., warn=TRUE) {
                class(.data)[class(.data) != "pems"] 
     ######################
 
-#    .data <- as.data.frame(summarise(tbl_df(.data), ...))
-    .data <- summarise(.data, ...)     
+#    .data <- as.data.frame(summarise(tibble::as_tibble(.data), ...))
+    .data <- dplyr::summarise(.data, ...)     
 
     #######################
     #rebuild
@@ -925,7 +925,7 @@ pull.pems <- function (.data, ...) {
 
     #make sure we have latest version
     .data <- as.data.frame(rebuildPEMS(.data, "new"))
-    pull(.data, ...)
+    dplyr::pull(.data, ...)
 
     #testing
     #pull(as.data.frame(.data), ...)
@@ -990,8 +990,8 @@ group_by.pems <- function(.data, ..., .add = FALSE) {
     ######################
     
     #function coding
-    groups <- group_by_prepare(.data, ..., .add = .add)
-    out <- grouped_df(groups$data, groups$group_names)
+    groups <- dplyr::group_by_prepare(.data, ..., .add = .add)
+    out <- dplyr::grouped_df(groups$data, groups$group_names)
 
     #add group term units if not there
     for(i in attributes(out)$vars)
@@ -1029,8 +1029,8 @@ group_by_.pems <- function(.data, ..., .add = FALSE, warn = TRUE) {
     ######################
 
     #function coding
-    groups <- group_by_prepare(.data, ..., .add = add)
-    out <- grouped_df(groups$data, groups$group_names)
+    groups <- dplyr::group_by_prepare(.data, ..., .add = add)
+    out <- dplyr::grouped_df(groups$data, groups$group_names)
 
     #add group term units if not there
     for(i in attributes(out)$vars)
@@ -1106,7 +1106,7 @@ joinPEMSPreOp <- function (x, y, by){
     #retains pems settings
     ref <- list(
        out.class = unique(c(class(x), class(y))),
-       out.pems.tags = listUpdate(attributes(y)$pems.tags, attributes(x)$pems.tags),
+       out.pems.tags = loa::listUpdate(attributes(y)$pems.tags, attributes(x)$pems.tags),
        x.units = attributes(x)$units,
        y.units = attributes(y)$units
     )
@@ -1137,9 +1137,9 @@ left_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
     ref <- joinPEMSPreOp(x,y,by)
 
     #operation
-    out <- left_join(as.data.frame(x), as.data.frame(y), by=by, copy=copy, ...)
+    out <- dplyr::left_join(as.data.frame(x), as.data.frame(y), by=by, copy=copy, ...)
     #units update
-    attributes(out)$units <- left_join(as.data.frame(ref$x.units), as.data.frame(ref$y.units), 
+    attributes(out)$units <- dplyr::left_join(as.data.frame(ref$x.units), as.data.frame(ref$y.units), 
                                         by=by, copy=copy,...)
     #repair
     attributes(out)$pems.tags <- ref$out.pems.tags 
@@ -1158,8 +1158,8 @@ inner_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
     x <- rebuildPEMS(x)            #in case old
     y <- rebuildPEMS(as.pems(y))   #in case not pems, old or new...
     ref <- joinPEMSPreOp(x,y,by)
-    out <- inner_join(as.data.frame(x), as.data.frame(y), by=by, copy=copy, ...)
-    attributes(out)$units <- inner_join(as.data.frame(ref$x.units), as.data.frame(ref$y.units), 
+    out <- dplyr::inner_join(as.data.frame(x), as.data.frame(y), by=by, copy=copy, ...)
+    attributes(out)$units <- dplyr::inner_join(as.data.frame(ref$x.units), as.data.frame(ref$y.units), 
                                         by=by, copy=copy,...)
     attributes(out)$pems.tags <- ref$out.pems.tags 
     class(out) <- ref$out.class
@@ -1177,8 +1177,8 @@ right_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
     x <- rebuildPEMS(x)            #in case old
     y <- rebuildPEMS(as.pems(y))   #in case not pems, old or new...
     ref <- joinPEMSPreOp(x,y,by)
-    out <- right_join(as.data.frame(x), as.data.frame(y), by=by, copy=copy, ...)
-    attributes(out)$units <- right_join(as.data.frame(ref$x.units), as.data.frame(ref$y.units), 
+    out <- dplyr::right_join(as.data.frame(x), as.data.frame(y), by=by, copy=copy, ...)
+    attributes(out)$units <- dplyr::right_join(as.data.frame(ref$x.units), as.data.frame(ref$y.units), 
                                         by=by, copy=copy,...)
     attributes(out)$pems.tags <- ref$out.pems.tags 
     class(out) <- ref$out.class
@@ -1195,8 +1195,8 @@ full_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
     x <- rebuildPEMS(x)            #in case old
     y <- rebuildPEMS(as.pems(y))   #in case not pems, old or new...
     ref <- joinPEMSPreOp(x,y,by)
-    out <- full_join(as.data.frame(x), as.data.frame(y), by=by, copy=copy, ...)
-    attributes(out)$units <- full_join(as.data.frame(ref$x.units), as.data.frame(ref$y.units), 
+    out <- dplyr::full_join(as.data.frame(x), as.data.frame(y), by=by, copy=copy, ...)
+    attributes(out)$units <- dplyr::full_join(as.data.frame(ref$x.units), as.data.frame(ref$y.units), 
                                         by=by, copy=copy,...)
     attributes(out)$pems.tags <- ref$out.pems.tags 
     class(out) <- ref$out.class
@@ -1216,7 +1216,7 @@ semi_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
     x <- rebuildPEMS(x)            #in case old
     y <- rebuildPEMS(as.pems(y))   #in case not pems, old or new...
     ref <- joinPEMSPreOp(x,y,by)
-    out <- semi_join(as.data.frame(x), as.data.frame(y), by=by, copy=copy, ...)
+    out <- dplyr::semi_join(as.data.frame(x), as.data.frame(y), by=by, copy=copy, ...)
     attributes(out)$units <- as.data.frame(ref$x.units)
     attributes(out)$pems.tags <- ref$out.pems.tags 
     class(out) <- ref$out.class
@@ -1236,7 +1236,7 @@ anti_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
     x <- rebuildPEMS(x)            #in case old
     y <- rebuildPEMS(as.pems(y))   #in case not pems, old or new...
     ref <- joinPEMSPreOp(x,y,by)
-    out <- anti_join(as.data.frame(x), as.data.frame(y), by=by, copy=copy, ...)
+    out <- dplyr::anti_join(as.data.frame(x), as.data.frame(y), by=by, copy=copy, ...)
     attributes(out)$units <- as.data.frame(ref$x.units)
     attributes(out)$pems.tags <- ref$out.pems.tags 
     class(out) <- ref$out.class

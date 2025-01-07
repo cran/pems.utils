@@ -56,7 +56,8 @@
 
 checkOption <- function (option=NULL, allowed.options=NULL,
   option.name = "option", allowed.options.name = "allowed.options",
-  partial.match=TRUE, fun.name = "checkOption", if.missing = c("stop", "warning", "return"),
+  partial.match=TRUE, fun.name = "checkOption", 
+  if.missing = c("stop", "warning", "return"),
   output = c("option", "test.result"), ...){
 
 #check options
@@ -370,7 +371,7 @@ checkUnits <- function (input = NULL, units = NULL, data = NULL,
 
        #moved forward
        if(is.null(unit.conversions)){
-            unit.conversions <- ref.unit.conversions
+            unit.conversions <- pems.utils::ref.unit.conversions
        }
 
         #get all aliases of input.units

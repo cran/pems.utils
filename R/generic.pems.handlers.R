@@ -1657,6 +1657,10 @@ summary.pems <- function(object, ...) {
 ##########################
 ##########################
 
+# kr 2024-12-2024 
+# maybe look at 
+# https://cran.r-project.org/web/packages/units/vignettes/measurement_units_in_R.html#related-work-in-r
+
 #kr 07/12/2011 v 0.2.0
 
 #what it does
@@ -1675,17 +1679,12 @@ summary.pems <- function(object, ...) {
 ##########################
 #to tidy
 
-#units uses new structure
-#units<- uses old structure
+#units and units<- both now use the new structure 
 
 ##' @S3method units.pems
 units.pems <- function(x) {
 
     x <- attributes(rebuildPEMS(x))$units
-
-#old
-#    class(x) <- "no.class"
-#    x <- x$units
 
     if(is.null(x)){
        warning("In units(pems): pems unitless [suspect]", call.=FALSE)
@@ -1698,54 +1697,43 @@ units.pems <- function(x) {
 
 
 
-## @S3method unit<-.pems
+## @S3method units<-.pems
 
 `units<-.pems` <- function(x, value) {
+  
+  #like names<-
+  #very crude handling units$ and units[]
+  
+  x <- rebuildPEMS(x)
+  old.class <- class(x)
+  class(x) <- "data.frame"
 
+  units <- attributes(x)$units 
+  if(is.null(units)){
+    warning("In units(pems): [suspect units]", call.=FALSE)
+    units <- data.frame(matrix(NA, nrow = 1, ncol = ncol(x$data)))
+    names(units) <- names(x$data)
+  }
+  
+  if(is.data.frame(value)){
+    units[1, 1:ncol(value)] <- value[1,]
+    if(!is.null(names(units)))
+      names(units)[1:ncol(value)] <- names(value)
+  } else {
+    units[1,1:length(value)] <- as.character(value)
+  }
+  attributes(x)$units <- units
+  #tidy layers
+  for(i in names(units)){
+    attributes(x[,i])$units <- units[i]
+  }
 
-    x <- rebuildPEMS(x, "old")
-
-    call2 <- match.call()
-    class(x)[1] <- "no.class"
-    units <- x$units
-
-    if(is.null(units)){
-       warning("In units(pems): [suspect units]", call.=FALSE)
-       units <- data.frame(matrix(NA, nrow = 1, ncol = ncol(x$data)))
-       names(units) <- names(x$data)
-    }
-
-#should this be a try?
-#should this foreshorten/expand?
-#should be check bad moves
-
-#######################
-
-#way units methods works this is only ever a data.frame and what you have to send it have to work
-#so thinking what follows is a waste of time
-#could just be x$units <- value
-
-    if(is.data.frame(value)){
-
-       units[1, 1:ncol(value)] <- value[1,]
-       if(!is.null(names(units)))
-          names(units)[1:ncol(value)] <- names(value)
-    } else {
-
-       units[1,1:length(value)] <- as.character(value)
-    }
-
-########################
-
-
-    if ("history" %in% names(x)) 
-        x$history <- c(x$history, call2)
-    
-    x$units <- units
-    class(x)[1] <- "pems"
-    return(rebuildPEMS(x))
-
+  class(x) <- old.class
+  return(x)
+  
 }
+
+
 
 
 

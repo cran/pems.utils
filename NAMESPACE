@@ -2,13 +2,43 @@
 #imports
 #############################
 
-useDynLib("pems.utils", .registration=TRUE)
+## c handling
+#useDynLib(pems.utils, .registration=TRUE)
+#useDynLib(pems.utls)
+#importFrom(Rcpp, evalCpp)
+#importFrom(Rcpp, sourceCpp)
+
+#testing
+#export(C_ylagxCOR)
+
+## imports
+
+#might be stuck with these...
+## using !!equo etc in some functions... 
+import(dplyr)
+importFrom(rlang, eval_tidy, quo_is_null, get_expr, exprs, 
+           quos)
+importFrom("grDevices", "colorRampPalette", "gray",
+           "boxplot.stats")
+importFrom("graphics", "abline", "arrows", "plot")
+importFrom("methods", "is")
+importFrom("stats", "aggregate", "as.formula", "ccf", "model.frame",
+           "na.omit", "na.pass", "complete.cases", "approx", "lm", 
+           "predict", "quantile", "update", "cor")
+importFrom(utils, read.table, read.csv, read.delim, write.table, 
+           head, tail, capture.output, install.packages, 
+           installed.packages)
 
 
-## import/depends
 
-import(lattice)
-import(loa)
+## old import/depends
+
+#importFrom(lazyeval, lazy, lazy_eval) #replaced this with rlang, eval_tidy, etc...
+
+
+
+#import(lattice)
+#import(loa)
 
 #NEED to work out how to compile
 #with imports
@@ -18,10 +48,20 @@ import(loa)
 
 ## imports
 
-import(grid)
-import(RColorBrewer)
-import(latticeExtra)
-import(dplyr)
+## should be able to take some of those out...
+
+#import(grid)
+#import(RColorBrewer)
+#import(latticeExtra)
+#importFrom(baseline, baseline, getBaseline, getCorrected)
+
+## requested by CRAN
+
+
+
+
+
+
 
 ## no longer importing all package
 
@@ -34,22 +74,6 @@ import(dplyr)
 
 #import(plyr) #replacing with dplyr
 
-## requested by CRAN
-importFrom("grDevices", "colorRampPalette", "gray",
-           "boxplot.stats")
-importFrom("graphics", "abline", "arrows", "plot")
-importFrom("methods", "is")
-importFrom("stats", "aggregate", "as.formula", "ccf", "model.frame",
-           "na.omit", "na.pass", "complete.cases", "approx", "lm", 
-           "predict", "quantile", "update")
-importFrom(utils, read.table, read.csv, read.delim, write.table, 
-           head, tail, capture.output, install.packages, 
-           installed.packages)
-importFrom(baseline, baseline, getBaseline, getCorrected)
-
-#importFrom(lazyeval, lazy, lazy_eval) #replaced this with rlang, eval_tidy, etc...
-importFrom(rlang, eval_tidy, quo_is_null, get_expr, exprs, 
-           quos)
 
 #I don't think I need to importFrom round because 
 #  it is primitive and in base...
@@ -114,6 +138,7 @@ S3method("[<-", pems.element)
 S3method(plot, pems.element)
 S3method(units, pems.element)
 S3method("units<-", pems.element)
+#S3method("units[<-", pems.element)
 S3method(summary, pems.element)
 S3method(round, pems.element)
 
@@ -133,6 +158,7 @@ export("$")
 export("$<-")
 export(units)
 export("units<-")
+#export("units[<-")
 export(head)
 export(tail)
 export("[[")
@@ -193,8 +219,7 @@ export(tAlign)
 export(stackPEMS)
 #export(bindPEMS)  #gone ~2017/12 0.2.18.01
 
-#testing
-export(C_ylagxCOR) 
+ 
 
 #export
 export(exportPEMS)
@@ -407,8 +432,4 @@ export(checkUnits)
 export(checkOutput)
 export(checkIfMissing)
 
-
-## C code setup 
-
-importFrom(Rcpp, sourceCpp)
 

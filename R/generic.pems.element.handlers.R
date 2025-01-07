@@ -28,6 +28,7 @@
 ###############################
 #to do
 #############
+
 #############
 #export [<-.pems.element
 #############
@@ -46,10 +47,10 @@
 #print.pems could have earlier classes
 #so don't dump attributes when
 #pems.utils not installed
-################
+#####################
 #cat or message???
-################
-#
+####################
+# pems.element attribute must be name not names 
 
 
 
@@ -126,7 +127,7 @@ print.pems.element <- function (x, ..., n = NULL, rows = NULL, width = NULL){
          if(!is.na(attributes(x)$units) && attributes(x)$units != "")
              out.3 <- paste(out.3, " [", attributes(x)$units, "]", sep="")
 
-    out.1 <- capture.output(print(ans, ...))
+    out.1 <- utils::capture.output(print(ans, ...))
     
 #testing this to strip old factor labels
     if("levels" %in% names(attributes(ans)))
@@ -348,11 +349,11 @@ units.pems.element <- function(x) attr(x, "units")
 
 `units<-.pems.element` <- function(x, value) { 
 
-    #could add padding to provent bad inserts being tried
-
+    #could add padding to prevent bad inserts being tried
     attr(x, "units") <- value 
     x
 }
+
 
 
 ####################

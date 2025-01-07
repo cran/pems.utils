@@ -28,8 +28,7 @@ speedEmPlot(speed, em = NULL, time = NULL,
          ..., data = NULL, engine.on = NULL,
          min.speed = 5, bin.size = NULL,  
          plot.type = 1, method = 1,
-         fun.name="speedEmPlot",
-         scheme = pems.scheme)
+         fun.name="speedEmPlot")
 
 }
 
@@ -73,7 +72,8 @@ speedEmPlot(speed, em = NULL, time = NULL,
 
   \item{\dots}{
   (Optional) Other arguments, currently passed on as supplied 
-  to assoicated calculation or plotting function.
+  to associated calculation or plotting function, or back to 
+  pemsPlot.
 }
 
   \item{fun.name}{
@@ -87,11 +87,6 @@ speedEmPlot(speed, em = NULL, time = NULL,
   scatter plot; or 2 a box-and-whisker plot. If not supplied, 
   plot type 1 is 
   selected by default. 
-}
-
-  \item{scheme}{
-  (Various) For \code{speedEmPlot}, the scheme to apply to 
-  the plot, \code{loa} argument. 
 }
 
 }

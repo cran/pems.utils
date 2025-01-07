@@ -53,6 +53,7 @@
 
 
 #kr 01/02/2012 v 0.1.0
+#      mods 2024/12/18
 
 #what it does
 ##########################
@@ -83,19 +84,21 @@ import2PEMS <- function(file.name = file.choose(), ...,
 #june updates
 # like to tidy some of this...
 ##################
-  args <- listUpdate(list(file = file, file.reader = file.reader, 
+  args <- loa::listUpdate(list(file = file, file.reader = file.reader, 
                           as.is = TRUE, names=1),
                      list(...))
-  if("names" %in% names(args) & !"header" %in% names(args)){
+  if(!"header" %in% names(args)){
     args$header = FALSE
-    if(is.numeric(args$names) & !"data.from" %in% names(args))
-      args$data.from <- max(args$names, na.rm=TRUE)+1
-  } 
+  }
+  if(!"data.from" %in% names(args)){
+    args$data.from <- if(is.numeric(args$names)) {
+      max(args$names, na.rm=TRUE) + 1
+    } else {
+      1
+    }
+  }
   if("data.from" %in% names(args) & !"skip" %in% names(args)){
-    #could take this further and make a 
-    #dataArgsHandler?
     args$skip = args$data.from-1
-    args <- args[names(args)!="data.from"]
   }
   
 ##################
@@ -112,12 +115,12 @@ import2PEMS <- function(file.name = file.choose(), ...,
   
   #if required get names from file
   if("names" %in% names(args) && length(args$names)==1)
-    args$names <- getNamesFromFile(file, file.reader, args$names)
+    { args$names <- getNamesFromFileRowNum(file, file.reader, args$names) }
   
   #if required get units from file or names
   if("units" %in% names(args) && length(args$units)==1){
     if(is.numeric(args$units))
-      args$units <- getNamesFromFile(file, file.reader, args$units)
+      args$units <- getNamesFromFileRowNum(file, file.reader, args$units)
     else if(is.character(args$units)){
       if(tolower(args$units)=="get.from.names"){
         temp <- getUnitsFromNames(args$names, args$prefix, 
@@ -131,7 +134,7 @@ import2PEMS <- function(file.name = file.choose(), ...,
   #update names(data) and units 
   if(!is.null(args$names)) data <- renameData(data, args$names)
   units <- args$units
-  args <- stripFormals(getNamesFromFile, getUnitsFromFile,
+  args <- stripFormals(getNamesFromFileRowNum, getUnitsFromFileRowNum,
                        getUnitsFromNames, args=args)
 
 #from this point forward we could have a pems.list  
@@ -166,7 +169,7 @@ import2PEMS <- function(file.name = file.choose(), ...,
   
   #if required tidy pems list
   #think about this...
-  temp <- tidyPEMSList(listUpdate(list(x=data, units=units), args))
+  temp <- tidyPEMSList(loa::listUpdate(list(x=data, units=units), args))
                   
   #output
   if(output=="data") return(temp$x)
@@ -204,8 +207,8 @@ import2PEMS.old <- function(file.name = file.choose(), names = NULL, units = NUL
     if(is.character(units) && length(units)==1){
         temp <- file.reader(file, header=FALSE, as.is=TRUE, nrow=4) #currently assuming into is in first 4 rows
         if(units=="get.from.header"){
-            extra.args <- do.call(listLoad, listUpdate(extra.args, list(load="units")))
-            temp <- do.call(getUnitsFromNames, listUpdate(list(names=as.character(temp[1,]), output="all"), extra.args$units))
+            extra.args <- do.call(loa::listLoad, loa::listUpdate(extra.args, list(load="units")))
+            temp <- do.call(getUnitsFromNames, loa::listUpdate(list(names=as.character(temp[1,]), output="all"), extra.args$units))
             units <- temp$units
             if(is.null(names)) names <- temp$names
         } else if(units=="get.from.row.2"){
@@ -284,7 +287,7 @@ import2PEMS.old <- function(file.name = file.choose(), names = NULL, units = NUL
 #sensible unit handler
 ##################
 
-    output <- do.call(pems, listUpdate(list(x = data, units = units, constants = constants, 
+    output <- do.call(pems, loa::listUpdate(list(x = data, units = units, constants = constants, 
                        history = history), extra.args)) 
     
     #reset history?
@@ -722,17 +725,30 @@ importOB12PEMS <- function(file.name = file.choose(), pems = "Horiba OBS",
 ###################################
 ###################################
 
+#kr 30/12/2017 
+#   mod 18/12/2024 
+#        note some files with very long headers if different numbers of 
+#        rows were killing previous version...
+#        did same to units 
+#unexported
+getNamesFromFileRowNum <- function(file, file.reader, names){
+    skip <- if(names<2) { 0 } else { names - 1 }
+    names <- file.reader(file, header=FALSE, as.is=TRUE, skip=skip)
+    return(as.vector(unlist(names[1,])))
+}
 #kr 30/12/2017
 #unexported
-getNamesFromFile <- function(file, file.reader, names){
-    names <- file.reader(file, header=FALSE, as.is=TRUE, nrow=names)
-    return(as.character(names[nrow(names),]))
-}
-getUnitsFromFile <- function(file, file.reader, units){
-    units <- file.reader(file, header=FALSE, as.is=TRUE, nrow=units)
-    as.character(units[nrow(units),])
+#   mod 18/12/2024
+#       just names above with different arg 
+#       not sure I am using this any more ???
+getUnitsFromFileRowNum <- function(file, file.reader, units){
+    skip <- if(names<2) { 1 } else { names - 1 }
+    units <- file.reader(file, header=FALSE, as.is=TRUE, skip=skip)
+    return(as.vector(unlist(names[1,])))
 }
 
+#kr 30/12/2017
+#unexported
 getUnitsFromNames <- function (names, prefix="(", suffix=")", ..., 
                                output = "all"){
 
@@ -772,29 +788,40 @@ getUnitsFromNames <- function (names, prefix="(", suffix=")", ...,
 	list(names = names, units = units)
 }
 
+#kr 30/12/2017
+#unexported
+#    why does this pass args ???
+#    (if goes, would need to change everywhere...) 
 getFormalNames <- function(..., args=NULL){
    temp <- lapply(list(...), function(x) names(formals(x)))
    temp <- unique(do.call(c, temp))
    temp[temp!="..."]
 } 
-
+#kr 30/12/2017
+#unexported
 stripFormals <- function(..., args=NULL){
   temp <- getFormalNames(...)
   args[!names(args) %in% temp]
 }
 
-
-renameData <- function(data, names){
+#kr 30/12/2017
+#unexported
+#   mod 18/12/2024 
+#       added option to change make.unique rather than make.name 
+#       maybe easier in main function??
+renameData <- function(data, names, as.names=TRUE){
   #to tidy names 
   #and handle mismatching data cols and names length  
   if(ncol(data)<length(names))
     data[(ncol(data)+1):length(names)]<-NA
-  names(data)[1:length(names)] <- make.names(names, unique=TRUE)
-  #might need to tidy further if data.cols>names.length
+  names(data)[1:length(names)] <- if(as.names) 
+    {make.names(names, unique=TRUE)} else {make.unique(names)}
+  #might need to tidy further if data.cols>names.length ???
   data
 }
 
-
+#kr 30/12/2017
+#unexported
 setDataTimeStamp <- function(data, time.format="%d/%m/%Y %H:%M:%OS", 
                              tz="UTC", output="time.stamp"){
   #issues
@@ -809,6 +836,8 @@ setDataTimeStamp <- function(data, time.format="%d/%m/%Y %H:%M:%OS",
   data$time.stamp
 }
 
+#kr 30/12/2017
+#unexported
 getTimeStampFromData <- function(time.stamp=NULL, date=NULL, 
                                      time=NULL, data){
   #allows
@@ -844,6 +873,8 @@ getTimeStampFromData <- function(time.stamp=NULL, date=NULL,
   paste(date, time, sep=" ")
 }
 
+#kr 30/12/2017
+#unexported
 getLocalTimeFromData <- function(local.time, data){
   
   local.time <- if(length(local.time)==1){
@@ -862,6 +893,8 @@ getLocalTimeFromData <- function(local.time, data){
   local.time
 }
 
+#kr 30/12/2017
+#unexported
 tidyPEMSList <- function(pems.ls){
   if("to.lower" %in% names(pems.ls))
     if(is.logical(pems.ls$to.lower) && pems.ls$to.lower)

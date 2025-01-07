@@ -93,7 +93,9 @@ importSEMTECH2PEMS <- function (file.name = file.choose(), history = NULL,
 
 
     #get headers and units from data source
-    extra.args <- listUpdate(list(header = FALSE, stringsAsFactors=FALSE, nrow=3), extra.args)
+    extra.args <- loa::listUpdate(list(header = FALSE, stringsAsFactors=FALSE, 
+                                       nrow=3), 
+                                  extra.args)
     extra.args$file <- file.name
     headers <- do.call(read.csv, extra.args)
 
@@ -103,7 +105,8 @@ importSEMTECH2PEMS <- function (file.name = file.choose(), history = NULL,
 
     #get data from data source
     extra.args <- extra.args[!names(extra.args) %in% "nrow"]
-    extra.args <- listUpdate(list(skip=3, na.strings=c("NA", "", "n/a")), extra.args)
+    extra.args <- loa::listUpdate(list(skip=3, na.strings=c("NA", "", "n/a")), 
+                                  extra.args)
     data <- do.call(read.csv, extra.args)
 
     #name data

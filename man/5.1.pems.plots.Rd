@@ -32,8 +32,7 @@
 pemsPlot(x, y = NULL, z = NULL, groups = NULL, 
          cond = NULL, ..., data = NULL, 
          units = TRUE, multi.y = "special", 
-         fun.name="pemsPlot",
-         panel = panel.pemsPlot, scheme = pems.scheme)
+         fun.name="pemsPlot")
 
 #associated functions
 
@@ -53,38 +52,35 @@ panel.routePath(..., loa.settings = FALSE)
 
 WatsonPlot(speed, accel = NULL, z = NULL, ..., 
          data = NULL, cond = NULL, units = TRUE, 
-         plot.type = 2, fun.name="WatsonPlot",
-         scheme = pems.scheme)
+         plot.type = 2, fun.name="WatsonPlot")
 
 #associated functions
 
 preprocess.WatsonPlot(lattice.like = lattice.like, ...)
 
 panel.WatsonBinPlot(..., ref.line = TRUE, 
-         process.panel = panel.binPlot, 
-         plot.panel = panel.binPlot, 
+         process.panel = NULL, plot.panel = NULL, 
          omit.stopped = FALSE, process = TRUE, 
          plot = TRUE, loa.settings = FALSE)
 
 panel.WatsonContourPlot(..., 
-         plot.panel=panel.kernelDensity, process = TRUE, 
+         plot.panel=NULL, process = TRUE, 
          plot = TRUE, loa.settings = FALSE)
 
 panel.WatsonSmoothContourPlot(..., 
-         plot.panel=panel.surfaceSmooth,           
-         process = TRUE, plot = TRUE, 
-         loa.settings = FALSE)
+         plot.panel=NULL, process = TRUE, 
+         plot = TRUE, loa.settings = FALSE)
  
 #old plots
 
-latticePlot(x = NULL, data = NULL, plot = xyplot, 
+latticePlot(x = NULL, data = NULL, plot = lattice::xyplot, 
          panel = NULL,  ..., greyscale = FALSE, 
          fun.name = "latticePlot")
 
 panel.PEMSXYPlot(..., grid=NULL)
 
 XYZPlot(x = NULL, ..., data = NULL, statistic = NULL, 
-         x.res = 10, y.res = 20, plot = levelplot,
+         x.res = 10, y.res = 20, plot = lattice::levelplot,
         fun.name = "XYZPlot")
 
 }
@@ -161,7 +157,10 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
 }
 
   \item{\dots}{
-  (Optional) Other arguments, typically passed on.
+  (Optional) Other arguments, typically passed on. This 
+  includes, \code{scheme} which sets the default 
+  coloring scheme for the plot. See Note 
+  below.
   }
 
   \item{fun.name}{
@@ -180,12 +179,6 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
   \code{plot.panel} and \code{process.panel}.  
   }
 
-  \item{scheme}{
-  (\code{character} or \code{list}) The default 
-  coloring scheme for the plot. See Note 
-  below.
-  }
-  
   \item{lattice.like, plot, process, loa.settings}{
   (Various) Plot management elements. These can 
   typically be ignored by most users, but 
@@ -209,7 +202,7 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
   }
 
   \item{omit.stopped}{
-  (Logical or character) For {WatsonPlot}, how to 
+  (Logical or character) For \code{WatsonPlot}, how to 
   handle idling data: \code{FALSE} include 
   in plot; \code{TRUE} or \code{'points'} removes 
   idle points before plotting; \code{'cell'} or 
@@ -218,7 +211,7 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
   } 
 
   \item{plot.type}{
-  (numeric) For {WatsonPlot}, pre-set plot types: 
+  (numeric) For \code{WatsonPlot}, pre-set plot types: 
   \code{1} scatter plot; \code{2} bin plot; 
   \code{3} contour plot of binned data; \code{4} 
   smoothed surface of binned data. 
@@ -278,13 +271,13 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
 
   Early plots, e.g. \code{latticePlot}, only allowed 
   plot arguments using the 
-  \code{\link{lattice}} formula format. While this is 
+  \code{\link[lattice]{lattice}} formula format. While this is 
   flexible and very powerful system, some users 
   preferred the more conventional \code{plot(x,y,..)} 
   call format. 
   So, newer plots, e.g. \code{pemsPlot}, allow both 
   conventional plot and 
-  \code{\link{lattice}}-style formula calls. 
+  \code{\link[lattice]{lattice}}-style formula calls. 
 
   \code{pemsXYZCondUnitsHandler} handles the pems 
   information associated with the plots. This 
@@ -293,16 +286,16 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
   use elsewhere for similar purposes. 
   \code{edit(pemsPlot)} to see it.  
 
-  Newer plots use a combination of \code{\link{lattice}} 
-  and \code{\link{loa}} functions to provide a range of 
+  Newer plots use a combination of \code{\link[lattice]{lattice}} 
+  and \code{\link[loa]{loa}} functions to provide a range of 
   additional plotting options, such as integrated panel 
-  and key management. See \code{\link{loa}} 
+  and key management. See \code{\link[loa]{loa}} 
   documentation for further details.   
 
   \code{preprocess...} and \code{panel...} functions 
   handle pre-plot and in-plot elements 
-  of plot generation. These use the \code{\link{loa}} 
-  modification of the \code{\link{lattice}} 
+  of plot generation. These use the \code{\link[loa]{loa}} 
+  modification of the \code{\link[lattice]{lattice}} 
   plotting framework.    
 
   See Notes, Examples and extra documentation: 
@@ -347,11 +340,11 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
   Lattice. R package version 0.6-18. 
   http://CRAN.R-project.org/package=latticeExtra
 
-  \code{\link{lattice}} is one of number of really 
+  \code{\link[lattice]{lattice}} is one of number of really 
   nice graphical tools in \code{R}. Others, like 
   \code{ggplot2} and \code{iplot}, help you to very 
   quickly explore your data. But, for me the trellis 
-  framework of \code{\link{lattice}} 
+  framework of \code{\link[lattice]{lattice}} 
   has always felt the most flexible.
 }
 
@@ -364,7 +357,7 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
   General: 
 
   Like most other plot functions in \code{R}, 
-  \code{\link{lattice}} functions use a number 
+  \code{\link[lattice]{lattice}} functions use a number 
   of common parameter terms. For example, \code{xlab} 
   and \code{ylab} reset the x and y labels of a graph; 
   \code{xlim} and \code{ylim} to set the x- and 
@@ -405,7 +398,7 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
   This option allows the plot to pass on share the 
   results of in-panel calculations with other panels 
   and keys. The handling mechanism is part of the 
-  \code{\link{loa}} package. 
+  \code{\link[loa]{loa}} package. 
 
   The reason for \code{latticePlot}, etc: 
 
@@ -448,8 +441,8 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
 
 
 \seealso{
-  See \code{\link{lattice}}, \code{latticeExtra}, 
-  \code{\link{loa}}.
+  See \code{\link[lattice]{lattice}}, \code{latticeExtra}, 
+  \code{\link[loa]{loa}}.
 }
 \examples{
 
@@ -464,14 +457,11 @@ XYZPlot(x = NULL, ..., data = NULL, statistic = NULL,
 plot(pems.1)
 plot(pems.1$velocity)
 
-#lattice 
+#with lattice 
+require(lattice)
 xyplot(velocity~local.time, data = pems.1, type = "l")
 
-#in ggplot2
-
-#Note: Suggests only so you need to load this...
-#Note: this uses fortify.pems behind scenes...
-
+#with ggplot2
 require(ggplot2)
 qplot(time.stamp, velocity, data=pems.1)
 ggplot(pems.1, aes(x = time.stamp, y = velocity)) + geom_line() 
@@ -501,7 +491,7 @@ a <- calcAccel(velocity, local.time, data = pems.1, output="pems")
 
 XYZPlot(~accel*velocity, data=a)
 
-XYZPlot(~accel*velocity, data=a, plot = wireframe, shade=TRUE)
+XYZPlot(~accel*velocity, data=a, plot = lattice::wireframe, shade=TRUE)
 
 
 ###########

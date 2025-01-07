@@ -79,7 +79,7 @@
 calcPack2 <- function(input, ..., settings = NULL, data = NULL){
 
     #run checks
-    extra.args <- listUpdate(list(this.call=match.call(), fun.name = "calcPack2", 
+    extra.args <- loa::listUpdate(list(this.call=match.call(), fun.name = "calcPack2", 
                                   overwrite=TRUE), 
                              list(...))
     att <- attributes(input)
@@ -137,10 +137,10 @@ correctInput <- function(input = NULL, ..., data = NULL,
          correction = NULL){
 
     #run checks
-    extra.args <- listUpdate(list(this.call=match.call(), fun.name = "correctInput", 
+    extra.args <- loa::listUpdate(list(this.call=match.call(), fun.name = "correctInput", 
                                   overwrite=TRUE), 
                              list(...))
-    settings <- do.call(calcChecks, listUpdate(list(data=data), extra.args))
+    settings <- do.call(calcChecks, loa::listUpdate(list(data=data), extra.args))
 
 #need to look at what this does...
 
@@ -155,7 +155,9 @@ correctInput <- function(input = NULL, ..., data = NULL,
     temp2 <- list(input=input)
     if(!"input" %in% temp)
         names(temp2)[1] <- temp[1] 
-    ans <- try(do.call(correction, listUpdate(temp2, extra.args, ignore=ignore)), silent=TRUE)
+    ans <- try(do.call(correction, 
+                       loa::listUpdate(temp2, extra.args, ignore=ignore)), 
+               silent=TRUE)
     if(class(ans)[1]=="try-error")
         stop("In ", extra.args$fun.name, ": problem with correction", 
              call. = FALSE)
@@ -181,10 +183,10 @@ correctInput <- function(input = NULL, ..., data = NULL,
 zeroNegatives <- function(input = NULL, ..., data = NULL, screen = FALSE){
 
     #run checks
-    extra.args <- listUpdate(list(this.call=match.call(), fun.name = "zeroNegatives", 
+    extra.args <- loa::listUpdate(list(this.call=match.call(), fun.name = "zeroNegatives", 
                                   overwrite=TRUE), 
                              list(...))
-    settings <- do.call(calcChecks, listUpdate(list(data=data), extra.args))
+    settings <- do.call(calcChecks, loa::listUpdate(list(data=data), extra.args))
     input <- getPEMSElement(!!enquo(input), data, if.missing = "stop", 
                             fun.name = extra.args$fun.name)
 
@@ -207,14 +209,14 @@ zeroNegatives <- function(input = NULL, ..., data = NULL, screen = FALSE){
 
         index <- 1:length(input)
         temp.panel <- function(x=x, y=y, z=z,...){
-                            panel.xyplot(x=x, y=y, col="black", type="l", ...)
-                            panel.xyplot(x=x, y=z, col="red", type="l", ...)
-                            panel.xyplot(x=x, y=y, col=ifelse(y==z, NA, "red"),...)
+                            lattice::panel.xyplot(x=x, y=y, col="black", type="l", ...)
+                            lattice::panel.xyplot(x=x, y=z, col="red", type="l", ...)
+                            lattice::panel.xyplot(x=x, y=y, col=ifelse(y==z, NA, "red"),...)
                       }
         plot.list <- list(x=ans~index*input, grid=TRUE, key=FALSE,
                           panel=temp.panel)
-        plot.list <- listUpdate(plot.list, list(...))
-        print(do.call(loaPlot, plot.list))
+        plot.list <- loa::listUpdate(plot.list, list(...))
+        print(do.call(loa::loaPlot, plot.list))
 
         #accept, discard or rework plot option
         #accept send you on
@@ -357,23 +359,23 @@ correctBaseline <- function(x, ..., data = NULL, output = "ans"){
 
     #do baseline subtraction
 
-    bc <- do.call(baseline, listUpdate(list(spectra=as.matrix(t(as.vector(x)))), x.args))
+    bc <- do.call(baseline::baseline, loa::listUpdate(list(spectra=as.matrix(t(as.vector(x)))), x.args))
 
-    ans <- as.vector(getCorrected(bc))
+    ans <- as.vector(baseline::getCorrected(bc))
 
 #temp diagnostic
 #update for nicer plot
 #based on code from NIESL project
 
     if (any(output %in% c("diagnostic", "all", "baseline", "pems", "df"))) {
-         bl <- as.vector(getBaseline(bc))
+         bl <- as.vector(baseline::getBaseline(bc))
          index <- 1:length(ans)
          df <- data.frame(index = index, x, baseline = bl, case = "input")
          names(df)[2] <- "x"
          df <- rbind(df, data.frame(index = index, x = ans, baseline = NA, 
                      case = "output"))
-         cols <- colHandler(1:6, col.regions = "Greens")[c(6, 3)]
-         plt <- (xyplot(x + baseline ~ index | case, data = df, 
+         cols <- loa::colHandler(1:6, col.regions = "Greens")[c(6, 3)]
+         plt <- (lattice::xyplot(x + baseline ~ index | case, data = df, 
                  grid = TRUE, scales = list(y = list(relation = "free")), 
                  layout = c(1, 2), type = "l", key = list(text = list(c("x", 
                  "baseline")), lines = list(col = cols)), between = list(y = 0.5), 
@@ -383,21 +385,21 @@ correctBaseline <- function(x, ..., data = NULL, output = "ans"){
               plt$legend$top$args$key$text[[1]][1] <- attributes(x)$name
          }
     plt$legend$top$args$key$lines$lwd <- c(1,10)
-    plt$legend$top$args$key$lines$col <- colHandler(1:6, col.regions="Greens")[c(5,2)]
+    plt$legend$top$args$key$lines$col <- loa::colHandler(1:6, col.regions="Greens")[c(5,2)]
     plt$panel <- function(x=x, y=y, groups=groups, col=col, subscripts=subscripts, ...){
         groups <- groups[subscripts]
         #if(panel.number()==2) y[y< -0.005] <- -0.005
-        panel.grid(-1,-1)
+        lattice::panel.grid(-1,-1)
         xx <- x[groups==(levels(groups)[2])]
         yy <- y[groups==(levels(groups)[2])]
         ccol <- col[2]
         xx <- c(xx, rev(xx))
         yy <- c(yy, rep(min(yy), length.out=length(yy)))
-        panel.polygon(x=xx, y=yy, col=ccol, border=NA, alpha=0.5)
+        lattice::panel.polygon(x=xx, y=yy, col=ccol, border=NA, alpha=0.5)
         xx <- x[groups==(levels(groups)[1])]
         yy <- y[groups==(levels(groups)[1])]
         ccol <- col[1]
-        panel.xyplot(x=xx, y=yy, col=ccol, type="l")
+        lattice::panel.xyplot(x=xx, y=yy, col=ccol, type="l")
     }
     
 if(length(output)==1 && output=="diagnostic") return(plt) else 

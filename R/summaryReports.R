@@ -203,7 +203,7 @@ summaryReport <- function(speed = NULL, time = NULL, accel = NULL,
     #is this longwinded or safer than using time?
     
     if(is.null(time)){    
-        d.time <- (distance / speed) * 3660 #interval in seconds
+        d.time <- (distance / speed) * 3600 #interval in seconds
         temp <- mean(d.time, na.rm = TRUE)
         d.time <- ifelse(is.na(d.time), temp, d.time)
     } else {
