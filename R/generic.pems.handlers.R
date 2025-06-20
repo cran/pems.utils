@@ -87,6 +87,7 @@
 #####
 #
 
+
 print.pems <- function(x,..., rows=NULL, cols=NULL, width=NULL){
 
     ##################################
@@ -300,7 +301,6 @@ print.pems <- function(x,..., rows=NULL, cols=NULL, width=NULL){
 #
 
 
-##' @S3method print pems
 
 names.pems <- function(x, ...) {
 
@@ -318,6 +318,7 @@ names.pems <- function(x, ...) {
 
 
 ## @S3method names<-.pems
+
 
 `names<-.pems` <- function(x, ..., value) {
 
@@ -449,6 +450,7 @@ as.data.frame.pems <- function(x, ...){
 #############
 #
 
+
 dim.pems <- function(x, ...) dim(as.data.frame(x))
 
 
@@ -579,6 +581,7 @@ dim.pems <- function(x, ...) dim(as.data.frame(x))
 #########################
 #########################
 
+
 `[[<-.pems` <- function(x, k, ..., value){
 
     x <-rebuildPEMS(x, "old")
@@ -620,7 +623,6 @@ dim.pems <- function(x, ...) dim(as.data.frame(x))
 ##########################
 #tidy
 #think about force, simplify
-
 
 
 
@@ -900,6 +902,7 @@ dim.pems <- function(x, ...) dim(as.data.frame(x))
 #       elements and rows pems[i,j] and insert[i,j] dimension mismatch
 #       [check force setting if insertion required]
 #should you be able to change multiple rows at a go with a pems...
+
 
 `[<-.pems` <- function(x, i, j, ..., force = FALSE, value){
 
@@ -1429,6 +1432,7 @@ dim.pems <- function(x, ...) dim(as.data.frame(x))
 #########################
 #########################
 
+
 `$.pems` <- function(x, name, ...){
 
 
@@ -1492,6 +1496,7 @@ dim.pems <- function(x, ...) dim(as.data.frame(x))
 #########################
 #########################
 
+
 `$<-.pems`<- function(x, name, ..., value){
 
       x[name, force=c("na.pad.insert", "na.pad.target")] <- value
@@ -1516,6 +1521,7 @@ dim.pems <- function(x, ...) dim(as.data.frame(x))
 #note currently discards units
 #not sure there is a way around this...
 
+
 with.pems <- function(data, expr, ...) {
 
    eval(substitute(expr), pemsData(data), enclos = parent.frame())
@@ -1535,6 +1541,7 @@ with.pems <- function(data, expr, ...) {
 #version 0.1.0 kr 2015-09-07
 
 #test run parsync/ucr data analysis
+
 
 subset.pems <- function(x,...){
 
@@ -1571,7 +1578,7 @@ subset.pems <- function(x,...){
 #remove temp
 
 
-##' @S3method plot pems
+
 plot.pems <- function(x, id = NULL, ignore = "time.stamp", n = 3, ...) {
 
    temp <- rebuildPEMS(x, "old")
@@ -1630,7 +1637,7 @@ plot.pems <- function(x, id = NULL, ignore = "time.stamp", n = 3, ...) {
 #to tidy
 
 
-##' @S3method print pems
+
 summary.pems <- function(object, ...) {
 
    object <- rebuildPEMS(object, "old")
@@ -1681,7 +1688,7 @@ summary.pems <- function(object, ...) {
 
 #units and units<- both now use the new structure 
 
-##' @S3method units.pems
+
 units.pems <- function(x) {
 
     x <- attributes(rebuildPEMS(x))$units
@@ -1698,6 +1705,7 @@ units.pems <- function(x) {
 
 
 ## @S3method units<-.pems
+
 
 `units<-.pems` <- function(x, value) {
   
@@ -1787,6 +1795,7 @@ tail.pems <- function(x, n=6, ...) {
 #  might be down to pems[i,] dying on pems[FALSE,] etc... 
 
 #might be able to reduce code if I fix this...
+
 
 na.omit.pems <- function(object, ...) {
     object[["data"]] <- object[["data"]][complete.cases(object[["data"]]),]

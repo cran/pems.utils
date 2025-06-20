@@ -1,6 +1,7 @@
-Changes in pems.utils 0.3.0 [2024-12-28]
+Changes in pems.utils 0.3.0 [2025-06-20]
 ========================================
 
+*       baseline package issue, hopefully sorted
 *       restructured package for more stable pkg::function  
         use, reduced number of imports 
 *       better import handling of files with large headers  

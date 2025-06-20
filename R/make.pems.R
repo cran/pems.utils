@@ -299,6 +299,7 @@ as.pems <- function(x,...)
                   UseMethod("as.pems")
 
 ##as.pems @S3 default
+
 as.pems.default <- function(x,...){
 
 #might need to think about this
@@ -308,6 +309,7 @@ as.pems.default <- function(x,...){
         class(x), call. = FALSE)
 
 }
+
 
 as.pems.data.frame <- function(x,...) pems(x,...)
 

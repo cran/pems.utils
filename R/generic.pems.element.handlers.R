@@ -78,6 +78,7 @@ as.data.frame.pems.element <- function(x, ...){
 }
 
 
+
 as.pems.pems.element <- function(x, ...) pems(x, ...)
 
 
@@ -194,76 +195,13 @@ print.pems.element <- function (x, ..., n = NULL, rows = NULL, width = NULL){
 }
 
 
-print.pems.element.old <- function (x, ...){
-
-#to do
-###################
-#tidy code
-#
-
-#to think about
-###################
-#do print and cat statements need to be merged
-#as single output?
-###################
-#
-
-    #data 
-    #print with default method and attributes stripped
-    ans <- x
-
-#############
-#test
-#############
-#    class(ans) <- "default"
-#    attributes(ans) <- NULL
-#    print.default(ans, ...)
-
-####################
-#update to class handling for factors etc
-#might be able to replace with an inherits???
-#if I understood them
-#    class(ans) <- class(ans)[class(ans)!="pems.element"]
-####################
-    if(length(class(ans))>1) class(ans) <- class(ans)[-1] else
-         class(ans)[1] <- if("levels" %in% names(attributes(ans)))
-                                "factor" else mode(ans)
-    attributes(ans) <- attributes(ans)[!names(attributes(ans))%in% c("name", "units")]
-
-#allows element to print as prior class
-#############
-
-    print(ans, ...)
-
-
-#see note below in plot.pems.element about
-#units = "[]" plotting
-
-    #attr
-    #local report
-    temp2 <- if(is.null(attributes(x)$name))
-                 " [unnamed]" else paste(" ", attributes(x)$name, sep = "")
-    #old line
-    #         temp2 <- paste(temp2, " [", attributes(x)$units, "]", sep = "")
-    if(!is.null(attributes(x)$units)){
-         temp <- paste(" [", attributes(x)$units, "]", sep="")
-         if(temp != " []") temp2 <- paste(temp2, temp, sep = "")
-    }
-
-
-    temp2 <- paste(temp2, " [n = ", length(x), "]", sep = "")
-    
-    cat("pems.element;", temp2, "\n", sep="")
-
-}
-
-
 
 
 
 ##################
 #plot.pems.element
 ##################
+
 
 plot.pems.element <- function (x, y = NULL, xlab = NULL, ylab = NULL, ...){
 
@@ -345,6 +283,7 @@ plot.pems.element <- function (x, y = NULL, xlab = NULL, ylab = NULL, ...){
 ##################
 
 #need to think about this some more
+
 units.pems.element <- function(x) attr(x, "units")
 
 `units<-.pems.element` <- function(x, value) { 
@@ -363,7 +302,6 @@ units.pems.element <- function(x) attr(x, "units")
 
 #summary 
 
-
 summary.pems.element <- function(object, ...){
 
     attr(object, "class") <- attr(object, "class")[attr(object, "class") != "pems.element"]
@@ -378,6 +316,7 @@ summary.pems.element <- function(object, ...){
 
 #round 
 #needed because time.stamp rounding is specially handled
+
 
 round.pems.element <- function(x,...){
    att <- attributes(x)
@@ -407,6 +346,7 @@ round.pems.element <- function(x,...){
 ##########################
 #tidy
 #think about force, simplify
+
 
 `[.pems.element` <- function(x, i, ..., force=TRUE, wrap=FALSE){
 
@@ -483,6 +423,7 @@ round.pems.element <- function(x,...){
 ##########################
 #tidy
 #think about force, simplify
+
 
 `[<-.pems.element` <- function(x, i, ..., force=TRUE, wrap=FALSE, value){
 

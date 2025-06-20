@@ -91,6 +91,7 @@
 #would like to pass pems units to ggplot2 
 #via fortify
 
+
 fortify.pems <- function (model, data, ...) {
 
     #transistioning pems build.type
@@ -265,6 +266,7 @@ select.pems <- function (.data, ...){
 
 }
 
+
 select_.pems <- function (.data, ..., warn=TRUE){
 
    if(warn)
@@ -377,6 +379,8 @@ rename.pems <- function (.data, ...){
 }
 
 #as rename.pems with warning
+
+
 rename_.pems <- function (.data, ..., warn = TRUE){
 
    if(warn)
@@ -437,6 +441,7 @@ rename_.pems <- function (.data, ..., warn = TRUE){
 #filter and filter_
 #pems.utils
 
+
 filter.pems <- function(.data, ...){
 
 #filter can change dimensions (row number)
@@ -471,6 +476,7 @@ filter.pems <- function(.data, ...){
 }
 
 #as filter.pems with warning
+
 filter_.pems <- function(.data, ..., warn=TRUE){
 
     #testing something
@@ -513,6 +519,7 @@ filter_.pems <- function(.data, ..., warn=TRUE){
 #arrange and arrange_
 #pems.utils
 
+
 arrange.pems <- function(.data, ...){
 
 #arrange re orders but names, n.cols and n.rows
@@ -548,6 +555,7 @@ arrange.pems <- function(.data, ...){
 
 
 #like arrange.pem with warning
+
 arrange_.pems <- function(.data, ..., warn=TRUE){
 
     #like above
@@ -626,6 +634,7 @@ slice.pems <- function(.data, ...) {
 
 
 #like slice.pems with warning
+
 slice_.pems <- function(.data, ..., warn=TRUE) {
 
     #like above
@@ -668,6 +677,7 @@ slice_.pems <- function(.data, ..., warn=TRUE) {
 #pems.utils
 
 # export
+
 
 mutate.pems <- function(.data, ..., units=NULL, warn=TRUE) {
 
@@ -743,6 +753,7 @@ mutate.pems <- function(.data, ..., units=NULL, warn=TRUE) {
 
 
 #mutate.pems with extra warning
+
 mutate_.pems <- function(.data, ..., units=NULL, warn=TRUE) {
 
     #like above
@@ -857,6 +868,7 @@ summarise.pems <- function(.data, ...) {
 }
 
 #like above but warning
+
 summarise_.pems <- function(.data, ..., warn=TRUE) {
 
 #summarise changes everything
@@ -921,6 +933,7 @@ summarise_.pems <- function(.data, ..., warn=TRUE) {
 
 
 #pull.pems <- function (.data, var = -1) {
+
 pull.pems <- function (.data, ...) {
 
     #make sure we have latest version
@@ -1009,6 +1022,7 @@ group_by.pems <- function(.data, ..., .add = FALSE) {
 
 
 #as above plus warning
+
 group_by_.pems <- function(.data, ..., .add = FALSE, warn = TRUE) {
 
     #like above
@@ -1082,12 +1096,13 @@ ungroup.pems <- function(x, ...){
 #untested but famous last words...
 #    what the heck can it do...
 
+
 groups.pems <- function(x) NULL
 
-#' @export
+
 group_size.pems <- function(x) nrow(x)
 
-#' @export
+
 n_groups.pems <- function(x) 1L
 
 
@@ -1130,6 +1145,7 @@ joinPEMSPreOp <- function (x, y, by){
 #left_join.pems <- edit(dplyr:::left_join.data.frame)
 #as.data.frame(left_join(tbl_df(x), y, by = by, copy = copy, ...))
 
+
 left_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
     
     x <- rebuildPEMS(x)            #in case old
@@ -1153,6 +1169,7 @@ left_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
 #as.data.frame(inner_join(tbl_df(x), y, by = by, copy = copy, ...))
 #code as left_join.pems
 
+
 inner_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
     
     x <- rebuildPEMS(x)            #in case old
@@ -1172,6 +1189,7 @@ inner_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
 #as.data.frame(right_join(tbl_df(x), y, by = by, copy = copy, ...))
 #code as left_join.pems
 
+
 right_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
     
     x <- rebuildPEMS(x)            #in case old
@@ -1189,6 +1207,7 @@ right_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
 #full_join(x, y, by = NULL, copy = FALSE, ...) 
 #as.data.frame(full_join(tbl_df(x), y, by = by, copy = copy, ...))
 #code as left_join.pems
+
 
 full_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
     
@@ -1211,6 +1230,7 @@ full_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
 #code as left_join.pems
 #but units are just x units... because this only returns related bits of x
 
+
 semi_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
     
     x <- rebuildPEMS(x)            #in case old
@@ -1230,6 +1250,7 @@ semi_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
 #as.data.frame(anti_join(tbl_df(x), y, by = by, copy = copy, ...))
 #code as left_join.pems
 #but units are just x units... because this only returns related bits of x
+
 
 anti_join.pems<- function (x, y, by = NULL, copy = FALSE, ...){
     
